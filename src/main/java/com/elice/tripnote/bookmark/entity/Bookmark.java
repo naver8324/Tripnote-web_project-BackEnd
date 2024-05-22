@@ -3,13 +3,12 @@ package com.elice.tripnote.bookmark.entity;
 
 import com.elice.tripnote.post.entity.Post;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
-@Builder
+// PUBLIC, PROTECTED가 아니면 JPA를 사용시 에러 발생함.
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Bookmark{
 
     @Id
@@ -35,9 +34,10 @@ public class Bookmark{
     @JoinColumn(name = "post_id")
     private Post post;
 
-
-
-    private Bookmark(){}
+    @Builder
+    private Bookmark(Post post){
+        this.post = post;
+    }
 
 
 
