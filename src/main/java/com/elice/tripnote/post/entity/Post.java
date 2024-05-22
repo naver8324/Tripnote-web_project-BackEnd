@@ -2,14 +2,21 @@ package com.elice.tripnote.post.entity;
 
 
 import com.elice.tripnote.comment.entity.Comment;
+import com.elice.tripnote.comment.entity.CommentDTO;
 import com.elice.tripnote.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@Builder
 public class Post extends BaseTimeEntity {
 
     @Id
@@ -52,6 +59,10 @@ public class Post extends BaseTimeEntity {
     // 빈 객체로 초기화하는 것이 좋습니다. NullPointerException, LazyInitializationException 방지.
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "post")
     private List<Comment> Comments= new ArrayList<>();
+
+
+    private Post(){}
+
 
 
 }

@@ -3,8 +3,13 @@ package com.elice.tripnote.bookmark.entity;
 
 import com.elice.tripnote.post.entity.Post;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Entity
+@Getter
+@Builder
 public class Bookmark{
 
     @Id
@@ -29,6 +34,10 @@ public class Bookmark{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
+
+
+
+    private Bookmark(){}
 
 
 

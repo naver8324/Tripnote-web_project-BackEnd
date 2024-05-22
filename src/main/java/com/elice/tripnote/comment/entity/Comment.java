@@ -4,9 +4,14 @@ package com.elice.tripnote.comment.entity;
 import com.elice.tripnote.global.entity.BaseTimeEntity;
 import com.elice.tripnote.post.entity.Post;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
+@Getter
+@Builder
 public class Comment extends BaseTimeEntity {
 
     @Id
@@ -35,5 +40,11 @@ public class Comment extends BaseTimeEntity {
     private Post post;
 
 
+    private Comment(){}
 
+    public CommentDTO toDTO() {
+
+        return CommentDTO.builder().id(id).content(content).report(report).build();
+
+    }
 }
