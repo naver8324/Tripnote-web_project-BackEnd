@@ -2,7 +2,7 @@ package com.elice.tripnote.comment.entity;
 
 
 import com.elice.tripnote.global.entity.BaseTimeEntity;
-import com.elice.tripnote.user.entity.User;
+import com.elice.tripnote.member.entity.Member;
 import com.elice.tripnote.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,8 +34,8 @@ public class Comment extends BaseTimeEntity {
     private int report;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -68,7 +68,7 @@ public class Comment extends BaseTimeEntity {
 
     public CommentResponseDTO toDTO() {
 
-        return CommentResponseDTO.builder().id(id).content(content).report(report).build();
+        return CommentResponseDTO.builder().id(id).content(content).report(report).isDeleted(isDeleted).build();
 
     }
 }

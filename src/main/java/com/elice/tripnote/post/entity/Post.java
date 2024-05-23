@@ -2,8 +2,9 @@ package com.elice.tripnote.post.entity;
 
 
 import com.elice.tripnote.comment.entity.Comment;
-import com.elice.tripnote.comment.entity.CommentDTO;
+import com.elice.tripnote.comment.entity.CommentResponseDTO;
 import com.elice.tripnote.global.entity.BaseTimeEntity;
+import com.elice.tripnote.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -13,7 +14,9 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Post extends BaseTimeEntity {
 
     @Id
@@ -43,10 +46,9 @@ public class Post extends BaseTimeEntity {
     private boolean isDeleted;
 
 
-    // USER, ROUTE 객체가 생성 되면 주석을 풀 예정입니다.
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 //
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "route_id", nullable = false)
@@ -58,15 +60,13 @@ public class Post extends BaseTimeEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "post")
     private List<Comment> Comments = new ArrayList<>();
 
-    @Builder
-    private Post(String title, String content, int likes, int report, boolean isDeleted, List<Comment> comments) {
-        this.title = title;
-        this.content = content;
-        this.likes = likes;
-        this.report = report;
-        this.isDeleted = isDeleted;
-        Comments = comments;
-    }
 
+
+
+    public PostResponseDTO toDTO() {
+
+        return PostResponseDTO.builder().id(id).title(title).content(content).likes(likes).report(report).isDeleted(isDeleted).build();
+
+    }
 
 }
