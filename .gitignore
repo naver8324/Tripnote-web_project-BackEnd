@@ -311,6 +311,8 @@ gradle-app.setting
 ### application.yml ###
 *.yml
 *.yaml
-src/main/resources/application.properties
+
+application.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,java,gradle,intellij+iml,intellij+all,windows
+
