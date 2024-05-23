@@ -2,6 +2,7 @@ package com.elice.tripnote.comment.entity;
 
 
 import com.elice.tripnote.global.entity.BaseTimeEntity;
+import com.elice.tripnote.user.entity.User;
 import com.elice.tripnote.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +10,9 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Comment extends BaseTimeEntity {
 
     @Id
@@ -23,14 +26,16 @@ public class Comment extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @ColumnDefault("false")
+    private boolean isDeleted;
+
     @Column(nullable = false)
     @ColumnDefault("0")
     private int report;
 
-    // USER 객체가 생성 되면 주석을 풀 예정입니다.
-    //    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,16 +43,32 @@ public class Comment extends BaseTimeEntity {
     private Post post;
 
 
-    @Builder
-    private Comment(String content, int report, Post post) {
-        this.content = content;
-        this.report = report;
-        this.post = post;
+//    @Builder
+//    private Comment(String content, int report, Post post) {
+//        this.content = content;
+//        this.report = report;
+//        this.post = post;
+//    }
+
+
+    public void updateContent(CommentRequestDTO commentDTO){
+        this.content = commentDTO.getContent();
     }
 
-    public CommentDTO toDTO() {
+    public void addReport(){
+        report++;
+    }
+    public void removeReport(){
+        report--;
+    }
 
-        return CommentDTO.builder().id(id).content(content).report(report).build();
+    public void delete(){
+        isDeleted = true;
+    }
+
+    public CommentResponseDTO toDTO() {
+
+        return CommentResponseDTO.builder().id(id).content(content).report(report).build();
 
     }
 }
