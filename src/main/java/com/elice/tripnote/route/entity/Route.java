@@ -1,7 +1,8 @@
 package com.elice.tripnote.route.entity;
 
+import com.elice.tripnote.integrated_route.entity.IntegratedRoute;
+import com.elice.tripnote.member.entity.Member;
 import com.elice.tripnote.route.status.RouteStatus;
-import com.elice.tripnote.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,12 +19,12 @@ public class Route {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "uuid_id", nullable = false)
-    private IntergratedRoute intergratedRoute;
+    @JoinColumn(name = "integrated_route_id", nullable = false)
+    private IntegratedRoute integratedRoute;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
