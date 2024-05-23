@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -97,12 +96,16 @@ public class CommentService {
     }
 
 
-    // 댓글을 수정하는 메서드입니다.
-    public CommentResponseDTO updateComment(CommentRequestDTO commentDTO, Long postId){
+    // 댓글을 수정하는 메서드입니다. DTO에 id가 있는지 여부는 controller단에서 검증합니다.
+    public CommentResponseDTO updateComment(CommentRequestDTO commentDTO, Long memberId){
 
         Comment comment = commentOrElseThrowsException(commentDTO.getId());
 
-        comment.updateContent(commentDTO);
+        if(!comment.getMember().getId().equals(memberId)){
+            handleNoAuthorization();
+        }
+
+        comment.update(commentDTO);
 
         return comment.toDTO();
 
@@ -110,21 +113,19 @@ public class CommentService {
     }
 
     // 댓글의 신고수를 늘리는 메서드입니다. 유저가 신고 버튼을 누를 때 사용합니다.
-    public CommentResponseDTO addReportCount(Long commentId){
+    public void addReportCount(Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
         comment.addReport();
 
-        return comment.toDTO();
     }
 
     // 댓글의 신고수를 줄이는 메서드입니다. 유저가 신고를 취소할 때 사용합니다.
-    public CommentResponseDTO removeReportCount(Long commentId){
+    public void removeReportCount(Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
         comment.removeReport();
 
-        return comment.toDTO();
     }
 
 
@@ -133,10 +134,8 @@ public class CommentService {
 
         Comment comment = commentOrElseThrowsException(commentId);
 
-        if(comment.getMember().getId() == memberId){
-            NoSuchAuthorizationException ex = new NoSuchAuthorizationException();
-            log.error("에러 발생: {}", ex.getMessage(), ex);
-            throw ex;
+        if(!comment.getMember().getId().equals(memberId)){
+            handleNoAuthorization();
         }
 
         comment.delete();
@@ -151,7 +150,13 @@ public class CommentService {
         comment.delete();
 
     }
+    public void deleteCommentsByPostId(Long postId) {
 
+        List<Comment> comments = commentRepository.findByPost_IdAndIsDeletedIsFalse(postId);
+        for (Comment comment : comments) {
+            comment.delete();
+        }
+    }
 
 
 
@@ -171,7 +176,7 @@ public class CommentService {
                 .orElseThrow(() -> {
                     NoSuchPostException ex = new NoSuchPostException();
                     log.error("에러 발생: {}", ex.getMessage(), ex);
-                    throw ex;
+                    return ex;
                 });
     }
 
@@ -182,7 +187,7 @@ public class CommentService {
                 .orElseThrow(() -> {
                     NoSuchCommentException ex = new NoSuchCommentException();
                     log.error("에러 발생: {}", ex.getMessage(), ex);
-                    throw ex;
+                    return ex;
                 });
     }
 
@@ -193,8 +198,16 @@ public class CommentService {
                 .orElseThrow(() -> {
                     NoSuchUserException ex = new NoSuchUserException();
                     log.error("에러 발생: {}", ex.getMessage(), ex);
-                    throw ex;
+                    return ex;
                 });
     }
+
+    //권한이 없는 경우 NoAuthorizationException을 반환하는 메서드입니다.
+    private void handleNoAuthorization(){
+        NoSuchAuthorizationException ex = new NoSuchAuthorizationException();
+        log.error("에러 발생: {}", ex.getMessage(), ex);
+        throw ex;
+    }
+
 
 }
