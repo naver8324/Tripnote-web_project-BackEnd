@@ -2,20 +2,22 @@ package com.elice.tripnote.member.entity;
 
 import com.elice.tripnote.bookmark.entity.Bookmark;
 import com.elice.tripnote.comment.entity.Comment;
+import com.elice.tripnote.likePost.entity.LikePost;
 import com.elice.tripnote.post.entity.Post;
+import com.elice.tripnote.route.entity.Route;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "user")
+@Table(name = "member")
 @Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Member {
 
     @Id
@@ -41,7 +43,6 @@ public class Member {
     @Column(nullable = false, length = 20)
     private String state;
 
-//    해당 엔티티 pull 받으면 주석 해제 예정
     @OneToMany(mappedBy = "member")
     private List<Bookmark> bookmarks = new ArrayList<>();
 
@@ -51,10 +52,14 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<Post> posts = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "member")
-//    private List<LikePost> likePosts = new ArrayList<>();
+    @OneToMany(mappedBy = "member")
+    private List<LikePost> likePosts = new ArrayList<>();
 
 //    @OneToMany(mappedBy = "member")
 //    private List<Route> routes = new ArrayList<>();
 
+    @PrePersist
+    private void prePersist() {
+        this.state = this.state == null ? "NO" : this.state;
+    }
 }
