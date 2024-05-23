@@ -28,7 +28,8 @@ public class LikePost{
 
 
     @Column
-    private LocalDateTime created_at;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,6 +39,17 @@ public class LikePost{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
+
+
+
+    public void like(){
+        if(createdAt == null){
+            createdAt = LocalDateTime.now();
+            return;
+        }
+        createdAt = null;
+
+    }
 
 
 

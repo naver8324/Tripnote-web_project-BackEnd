@@ -4,7 +4,9 @@ package com.elice.tripnote.post.entity;
 import com.elice.tripnote.comment.entity.Comment;
 import com.elice.tripnote.comment.entity.CommentResponseDTO;
 import com.elice.tripnote.global.entity.BaseTimeEntity;
+import com.elice.tripnote.likePost.entity.LikePost;
 import com.elice.tripnote.member.entity.Member;
+import com.elice.tripnote.route.entity.Route;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -49,10 +51,10 @@ public class Post extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "route_id", nullable = false)
-//    private Route route;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "route_id", nullable = false)
+    private Route route;
 
 
     // 빈 객체로 초기화하는 것이 좋습니다. NullPointerException, LazyInitializationException 방지.
@@ -60,6 +62,9 @@ public class Post extends BaseTimeEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "post")
     private List<Comment> Comments = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "post")
+    private List<LikePost> likePosts = new ArrayList<>();
 
 
 
@@ -67,6 +72,23 @@ public class Post extends BaseTimeEntity {
 
         return PostResponseDTO.builder().id(id).title(title).content(content).likes(likes).report(report).isDeleted(isDeleted).build();
 
+    }
+
+    public void update(PostRequestDTO postDTO) {
+        title = postDTO.getTitle();
+        content = postDTO.getContent();
+    }
+
+
+    public void addReport(){
+        report++;
+    }
+    public void removeReport(){
+        report--;
+    }
+
+    public void delete(){
+        isDeleted = true;
     }
 
 }
