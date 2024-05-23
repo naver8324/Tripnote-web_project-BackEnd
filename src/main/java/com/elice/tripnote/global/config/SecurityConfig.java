@@ -31,9 +31,9 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/api/member/join").permitAll()  // 인가가 필요없는 페이지 경로 추가하기
+                        .requestMatchers("/login", "/", "/api/member/join").hasRole("Member")
                         .requestMatchers("/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated());  // 그 외 경로에 대해서는 사용자만 접근가능
+                        .anyRequest().permitAll());  // 그 외 경로에 대해서는 모두 접근가능
 
         //세션 설정
         http
