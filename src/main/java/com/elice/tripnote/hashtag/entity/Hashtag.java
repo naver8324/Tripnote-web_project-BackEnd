@@ -22,26 +22,47 @@ public class Hashtag {
     @Column(name = "id")
     Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     String name;
 
     @Column(name = "is_city", nullable = false)
     @ColumnDefault("N")
-    String is_city;
+    String isCity;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "hashtag")
-    @JsonIgnore
-    List<UUID_Hashtag> uuid_hashtags = new ArrayList<>();
+//    @OneToMany(fetch = FetchType.LAZY, mappedBy = "hashtag")
+//    @JsonIgnore
+//    List<UUID_Hashtag> uuidHashtags = new ArrayList<>();
+
     @Builder
-    public Hashtag(String name,List<UUID_Hashtag> uuid_hashtags){
+    public Hashtag(String name, String isCity){
         this.name = name;
-        this.uuid_hashtags=uuid_hashtags;
+        this.isCity = isCity;
     }
-    @Builder
-    public Hashtag(String name, String is_city,List<UUID_Hashtag> uuid_hashtags){
-        this.name = name;
-        this.is_city=is_city;
-        this.uuid_hashtags=uuid_hashtags;
+
+//    @Builder
+//    public Hashtag(String name,List<UUID_Hashtag> uuidHashtags){
+//        this.name = name;
+//        this.uuidHashtags = uuidHashtags;
+//    }
+
+//    @Builder
+//    public Hashtag(String name, String isCity,List<UUID_Hashtag> uuidHashtags){
+//        this.name = name;
+//        this.isCity = isCity;
+//        this.uuidHashtags = uuidHashtags;
+//    }
+
+    public void update(HashtagRequestDTO hashtagRequestDTO){
+        this.name = hashtagRequestDTO.getName();
+        this.isCity = hashtagRequestDTO.getIsCity();
+    }
+
+    public HashtagResponseDTO toResponseDTO() {
+        return HashtagResponseDTO.builder()
+                .id(id)
+                .name(name)
+                .isCity(isCity)
+                .build();
     }
 
 }
