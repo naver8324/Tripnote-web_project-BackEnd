@@ -1,4 +1,4 @@
-package com.elice.tripnote.comment.entity;
+package com.elice.tripnote.post.entity;
 
 
 import lombok.AccessLevel;
@@ -9,10 +9,12 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class CommentResponseDTO {
+public class PostRequestDTO {
 
     private Long id;
+
+    private String title;
+
     private String content;
-    private int report;
-    private boolean isDeleted;
+
 }
