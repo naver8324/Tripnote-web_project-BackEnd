@@ -1,4 +1,4 @@
-package com.elice.tripnote.routeSpot.entity;
+package com.elice.tripnote.routespot.entity;
 
 import com.elice.tripnote.route.entity.Route;
 import com.elice.tripnote.spot.entity.Spot;
