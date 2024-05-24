@@ -23,20 +23,32 @@ public class RouteController implements SwaggerRouteController{
         return ResponseEntity.ok(routeService.save(requestDto));
     }
 
+    /**
+     * 경로 비공개
+     * @return 비공개 처리된 경로 id
+     */
     @Override
     @PatchMapping("/private/{routeId}")
     public ResponseEntity<Long> setRouteToPrivate(@PathVariable("routeId") Long routeId) {
         return ResponseEntity.ok(routeService.setRouteToPrivate(routeId));
     }
 
+    /**
+     * 경로 공개
+     * @return 공개 처리된 경로 id
+     */
     @Override
     @PatchMapping("/public/{routeId}")
     public ResponseEntity<Long> setRouteToPublic(@PathVariable("routeId") Long routeId) {
         return ResponseEntity.ok(routeService.setRouteToPublic(routeId));
     }
 
+    /**
+     * 경로 삭제
+     * @return '삭제 상태'로 변경된 경로 id
+     */
     @Override
-    @DeleteMapping("/{routeId}") //실제로는 삭제하지 않고 '삭제 상태'로 변경하는 건데 delete?? patch...??
+    @DeleteMapping("/{routeId}")
     public ResponseEntity<Long> deleteRoute(@PathVariable("routeId") Long routeId) {
         return ResponseEntity.ok(routeService.deleteRoute(routeId));
     }
