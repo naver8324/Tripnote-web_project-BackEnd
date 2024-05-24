@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 public interface SwaggerRouteController {
     @Operation(summary = "경로 생성", description = "경로를 추가합니다.")
     @Parameters({
-            @Parameter(name = "requestDto", description = "경로를 만드는 유저 id, 여행지 id 리스트, 여행지별 경비 리스트, 해시태그 id 리스트")
+            @Parameter(name = "requestDto", description = "경로를 만드는 유저 id, 총 경비, 여행지 id 리스트, 해시태그 id 리스트")
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",

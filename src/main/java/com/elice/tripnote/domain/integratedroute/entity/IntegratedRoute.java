@@ -1,6 +1,7 @@
 package com.elice.tripnote.domain.integratedroute.entity;
 
-import com.elice.tripnote.domain.post.likebookmarkperiod.entity.LikeBookmarkPeriod;
+import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
+import com.elice.tripnote.domain.likebookmarkperiod.entity.LikeBookmarkPeriod;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -26,7 +27,7 @@ public class IntegratedRoute {
     String integratedRoutes;
 
     @Column(name = "region", nullable = true)
-    String region;
+    IntegratedRouteStatus region;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "integratedRoute")
     @JsonIgnore
@@ -36,7 +37,7 @@ public class IntegratedRoute {
     @JsonIgnore
     List<LikeBookmarkPeriod> likeBookmarkPeriods = new ArrayList<>();
     @Builder
-    public IntegratedRoute(String integratedRoutes, String region, List<UUIDHashtag> uuidHashtags, List<LikeBookmarkPeriod> likeBookmarkPeriods){
+    public IntegratedRoute(String integratedRoutes, IntegratedRouteStatus region, List<UUIDHashtag> uuidHashtags, List<LikeBookmarkPeriod> likeBookmarkPeriods){
         this.integratedRoutes=integratedRoutes;
         this.region=region;
         this.uuidHashtags=uuidHashtags;
@@ -44,7 +45,7 @@ public class IntegratedRoute {
     }
 
     @Builder
-    public IntegratedRoute(String integratedRoutes, String region){
+    public IntegratedRoute(String integratedRoutes, IntegratedRouteStatus region){
         this.integratedRoutes=integratedRoutes;
         this.region=region;
     }

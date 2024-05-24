@@ -1,4 +1,4 @@
-package com.elice.tripnote.domain.post.likebookmarkperiod.entity;
+package com.elice.tripnote.domain.likebookmarkperiod.entity;
 
 import com.elice.tripnote.domain.integratedroute.entity.IntegratedRoute;
 import jakarta.persistence.*;
