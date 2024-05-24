@@ -20,10 +20,40 @@ public interface SwaggerRouteController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",
                     content = {@Content(schema = @Schema(implementation = Long.class))}),
+            @ApiResponse(responseCode = "404", description = "해당 유저 ID 또는 Order Id가 존재하지 않습니다."),
     })
     ResponseEntity<Long> save(SaveRequestDto requestDto);
 
+    @Operation(summary = "경로 비공개", description = "경로를 비공개 상태로 변경합니다.")
+    @Parameters({
+            @Parameter(name = "routeId", description = "비공개하려는 경로의 id")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    content = {@Content(schema = @Schema(implementation = Long.class))}),
+            @ApiResponse(responseCode = "404", description = "해당 Route Id가 존재하지 않습니다."),
+    })
     ResponseEntity<Long> setRouteToPrivate(Long routeId);
+
+    @Operation(summary = "경로 공개", description = "경로를 공개 상태로 변경합니다.")
+    @Parameters({
+            @Parameter(name = "routeId", description = "공개하려는 경로의 id")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    content = {@Content(schema = @Schema(implementation = Long.class))}),
+            @ApiResponse(responseCode = "404", description = "해당 Route Id가 존재하지 않습니다."),
+    })
     ResponseEntity<Long> setRouteToPublic(Long routeId);
+
+    @Operation(summary = "경로 삭제", description = "경로를 삭제합니다.")
+    @Parameters({
+            @Parameter(name = "routeId", description = "삭제하려는 경로의 id")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    content = {@Content(schema = @Schema(implementation = Long.class))}),
+            @ApiResponse(responseCode = "404", description = "해당 Route Id가 존재하지 않습니다."),
+    })
     ResponseEntity<Long> deleteRoute(Long routeId);
 }
