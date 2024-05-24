@@ -1,4 +1,4 @@
-package com.elice.tripnote.domain.post.likebookmarkperiod.service;
+package com.elice.tripnote.domain.likebookmarkperiod.service;
 
 import org.springframework.stereotype.Service;
 

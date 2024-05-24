@@ -7,7 +7,7 @@ import java.util.List;
 @Getter
 public class SaveRequestDto {
     private Long memberId;
+    private int expense;
     private List<Long> spotIds;
-    private List<Integer> costs;
     private List<Long> hashtagIds;
 }

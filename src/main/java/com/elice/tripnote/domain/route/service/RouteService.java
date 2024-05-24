@@ -4,7 +4,8 @@ import com.elice.tripnote.domain.hashtag.entity.Hashtag;
 import com.elice.tripnote.domain.hashtag.repository.HashtagRepository;
 import com.elice.tripnote.domain.integratedroute.entity.IntegratedRoute;
 import com.elice.tripnote.domain.integratedroute.repository.IntegratedRouteRepository;
-import com.elice.tripnote.domain.post.likebookmarkperiod.repository.LikeBookPeriodRepository;
+import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
+import com.elice.tripnote.domain.likebookmarkperiod.repository.LikeBookPeriodRepository;
 import com.elice.tripnote.domain.route.dto.SaveRequestDto;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.link.routespot.repository.RouteSpotRepository;
@@ -43,8 +44,7 @@ public class RouteService {
         IntegratedRoute integratedRoute = getIntegratedRoute(requestDto.getSpotIds());
         saveUUIDHashtag(requestDto.getHashtagIds(), integratedRoute);
 
-
-        // 위에서 구한 통합 경로 id를 이용해서 (먼저 동일한 통합 경로 id가 있는지 탐색, 없다면) 기간별 좋아요 북마크 객체 생성
+        //TODO: 위에서 구한 통합 경로 id를 이용해서 (먼저 동일한 통합 경로 id가 있는지 탐색, 없다면) 기간별 좋아요 북마크 객체 생성
 
         // 위에서 구한 통합 경로 id를 이용해서 경로 객체 저장
         // 유저 번호, 통합 경로 번호, 기본적으로 공개 상태
@@ -64,7 +64,8 @@ public class RouteService {
                 .orElseGet(() -> {
                     IntegratedRoute newRoute = IntegratedRoute.builder()
                             .integratedRoutes(uuid)
-                            .region("") //정확히 무슨 지역을 저장하는 건지 모르겠음
+                            //TODO: 나중에 여행지 주소가 어떻게 전달되는지 확인 후, 수정하기
+                            .region(IntegratedRouteStatus.MULTI_REGION)
                             .build();
                     return integratedRouteRepository.save(newRoute);
                 });
@@ -104,20 +105,30 @@ public class RouteService {
     }
 
     private void saveUUIDHashtag(List<Long> hashtagIds, IntegratedRoute integratedRoute){
-        // 위에서 구한 통합 경로 id를 이용해서 (먼저 동일한 통합 경로 id가 있는지 탐색)해시태그 uuid 연결 객체 생성
-        // 없다면 그냥 새로 생성하고, 있다면 값으로 들어온 해시태그가 테이블에 추가되어 있는지 확인, 추가x라면 추가하기
-        List<Hashtag> hashtags = hashtagIds.stream()
+        // 현재 db에서 integratedRoute와 연관된 해시태그 찾기(이미 저장돼있는 해시태그)
+        List<Long> dbHashtagIds = uuidHashtagRepository.findHashtagIdsByIntegratedRouteId(integratedRoute.getId());
+
+        // 저장되어 있지 않아 새롭게 추가해야하는 해시태그 추출
+        List<Long> newHashtagIds = hashtagIds.stream()
+                .filter(id -> !dbHashtagIds.contains(id))
+                .collect(Collectors.toList());
+
+        // 추가해야하는 해시태그 아이디들의 객체 찾기
+        List<Hashtag> hashtags = newHashtagIds.stream()
                 .map(hashtagRepository::findById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
 
+
         for(Hashtag hashtag : hashtags){
-            //해당 uuid가 붙어있는 객체에 해당 해시태그가 있는지 확인하기
             UUIDHashtag uuidHashtag = UUIDHashtag.builder()
                     .hashtag(hashtag)
                     .integratedRoute(integratedRoute)
                     .build();
+            uuidHashtagRepository.save(uuidHashtag);
         }
     }
+
+
 }
