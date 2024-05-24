@@ -53,21 +53,9 @@ public class RouteService {
     @Transactional
     public Long save(SaveRequestDto requestDto) {
         //여행지 id 리스트 기반으로 uuid 만들기
-        IntegratedRoute integratedRoute = getIntegratedRoute(requestDto.getSpotIds());
-        saveUUIDHashtag(requestDto.getHashtagIds(), integratedRoute);
+        String uuid = generateUUID(requestDto.getSpotIds());
 
-        // 해당 통합경로 아이디 값을 가진 객체가 있는지 확인.
-        if (likeBookPeriodRepository.existsByIntegratedRoute(integratedRoute))
-            saveLikeBookmarkPeriod(integratedRoute);
-
-        Route route = saveRoute(integratedRoute, requestDto.getMemberId(), requestDto.getExpense());
-        saveRouteSpot(route, requestDto.getSpotIds());
-        return route.getId();
-    }
-
-    private IntegratedRoute getIntegratedRoute(List<Long> spotIds) {
-        String uuid = generateUUID(spotIds);
-
+        // 만들어진 uuid 이용해서 integrated_route 객체 생성
         IntegratedRoute integratedRoute = integratedRouteRepository.findByIntegratedRoutes(uuid)
                 .orElseGet(() -> {
                     IntegratedRoute newRoute = IntegratedRoute.builder()
@@ -78,7 +66,68 @@ public class RouteService {
                     return integratedRouteRepository.save(newRoute);
                 });
 
-        return integratedRoute;
+
+        // 통합 경로 객체(IntegratedRoute) 이용해서 uuid_hashtag 객체 생성
+        // 현재 db에서 integratedRoute와 연관된 해시태그 찾기(이미 저장돼있는 해시태그)
+        List<Long> dbHashtagIds = uuidHashtagRepository.findHashtagIdsByIntegratedRouteId(integratedRoute.getId());
+
+        // 저장되어 있지 않아 새롭게 추가해야하는 해시태그 추출
+        List<Long> newHashtagIds = requestDto.getHashtagIds().stream()
+                .filter(id -> !dbHashtagIds.contains(id))
+                .collect(Collectors.toList());
+
+        // 추가해야하는 해시태그 아이디들의 객체 찾기
+        List<Hashtag> hashtags = newHashtagIds.stream()
+                .map(hashtagRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+
+        for (Hashtag hashtag : hashtags) {
+            UUIDHashtag uuidHashtag = UUIDHashtag.builder()
+                    .hashtag(hashtag)
+                    .integratedRoute(integratedRoute)
+                    .build();
+            uuidHashtagRepository.save(uuidHashtag);
+        }
+
+        // 해당 통합경로 아이디 값을 가진 객체가 있는지 확인.
+        if (likeBookPeriodRepository.existsByIntegratedRoute(integratedRoute)) {
+            LikeBookmarkPeriod likeBookmarkPeriod = LikeBookmarkPeriod.builder()
+                    .integratedRoute(integratedRoute)
+                    .likes(0)
+                    .bookmark(0)
+                    .build();
+            likeBookPeriodRepository.save(likeBookmarkPeriod);
+        }
+
+        // route 객체 생성 -> 경로 저장
+        Route route = Route.builder()
+                .member(memberRepository.findById(requestDto.getMemberId())
+                        .orElseThrow(() -> new EntityNotFoundException("해당하는 member id를 찾을 수 없습니다.")))
+                .integratedRoute(integratedRoute)
+                .routeStatus(RouteStatus.PUBLIC)
+                .expense(requestDto.getExpense())
+                .build();
+        route = routeRepository.save(route);
+
+        // route_spot 객체 생성
+        List<Long> spotIds = requestDto.getSpotIds();
+        for (int i = 0; i < spotIds.size(); i++) {
+            Spot spot = spotRepository.findById(spotIds.get(i))
+                    .orElseThrow(() -> new EntityNotFoundException("해당하는 spot id를 찾을 수 없습니다."));
+            Long nextSpotId = (i + 1 < spotIds.size()) ? spotIds.get(i + 1) : null;
+            RouteSpot routeSpot = RouteSpot.builder()
+                    .route(route)
+                    .spot(spot)
+                    .sequence(i + 1)
+                    .nextSpotId(nextSpotId)
+                    .build();
+            routeSpotRepository.save(routeSpot);
+        }
+
+        return route.getId();
     }
 
 
@@ -108,71 +157,6 @@ public class RouteService {
             return new UUID(msb, lsb).toString();
         } catch (NoSuchAlgorithmException e) {
             throw new AlgorithmNotFoundException();
-        }
-    }
-
-    @Transactional
-    public void saveUUIDHashtag(List<Long> hashtagIds, IntegratedRoute integratedRoute) {
-        // 현재 db에서 integratedRoute와 연관된 해시태그 찾기(이미 저장돼있는 해시태그)
-        List<Long> dbHashtagIds = uuidHashtagRepository.findHashtagIdsByIntegratedRouteId(integratedRoute.getId());
-
-        // 저장되어 있지 않아 새롭게 추가해야하는 해시태그 추출
-        List<Long> newHashtagIds = hashtagIds.stream()
-                .filter(id -> !dbHashtagIds.contains(id))
-                .collect(Collectors.toList());
-
-        // 추가해야하는 해시태그 아이디들의 객체 찾기
-        List<Hashtag> hashtags = newHashtagIds.stream()
-                .map(hashtagRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-
-
-        for (Hashtag hashtag : hashtags) {
-            UUIDHashtag uuidHashtag = UUIDHashtag.builder()
-                    .hashtag(hashtag)
-                    .integratedRoute(integratedRoute)
-                    .build();
-            uuidHashtagRepository.save(uuidHashtag);
-        }
-    }
-
-    @Transactional
-    public void saveLikeBookmarkPeriod(IntegratedRoute integratedRoute) {
-        LikeBookmarkPeriod likeBookmarkPeriod = LikeBookmarkPeriod.builder()
-                .integratedRoute(integratedRoute)
-                .likes(0)
-                .bookmark(0)
-                .build();
-        likeBookPeriodRepository.save(likeBookmarkPeriod);
-    }
-
-    @Transactional
-    public Route saveRoute(IntegratedRoute integratedRoute, Long memberId, int expense) {
-        Route route = Route.builder()
-                .member(memberRepository.findById(memberId)
-                        .orElseThrow(() -> new EntityNotFoundException("해당하는 member id를 찾을 수 없습니다.")))
-                .integratedRoute(integratedRoute)
-                .routeStatus(RouteStatus.PUBLIC)
-                .expense(expense)
-                .build();
-        return routeRepository.save(route);
-    }
-
-    @Transactional
-    public void saveRouteSpot(Route route, List<Long> spotIds) {
-        for (int i = 0; i < spotIds.size(); i++) {
-            Spot spot = spotRepository.findById(spotIds.get(i))
-                    .orElseThrow(() -> new EntityNotFoundException("해당하는 spot id를 찾을 수 없습니다."));
-            Long nextSpotId = (i + 1 < spotIds.size()) ? spotIds.get(i + 1) : null;
-            RouteSpot routeSpot = RouteSpot.builder()
-                    .route(route)
-                    .spot(spot)
-                    .sequence(i + 1)
-                    .nextSpotId(nextSpotId)
-                    .build();
-            routeSpotRepository.save(routeSpot);
         }
     }
 
