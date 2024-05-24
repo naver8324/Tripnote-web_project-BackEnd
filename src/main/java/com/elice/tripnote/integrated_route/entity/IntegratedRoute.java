@@ -42,4 +42,10 @@ public class IntegratedRoute {
         this.uuid_hashtags=uuid_hashtags;
         this.like_bookmark_periods=like_bookmark_periods;
     }
+
+    @Builder
+    public IntegratedRoute(String integrated_route, String region){
+        this.integrated_route=integrated_route;
+        this.region=region;
+    }
 }
