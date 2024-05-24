@@ -171,5 +171,32 @@ public class RouteService {
         }
     }
 
+    @Transactional
+    public Long setRouteToPrivate(Long routeId) {
+        //TODO: 해당 경로가 없으면 에러 처리
+        Route route = routeRepository.findById(routeId).orElseThrow();
+        route.setRouteStatus(RouteStatus.PRIVATE);
+        route = routeRepository.save(route);
+        return route.getId();
+    }
+
+    @Transactional
+    public Long setRouteToPublic(Long routeId) {
+        //TODO: 해당 경로가 없으면 에러 처리
+        Route route = routeRepository.findById(routeId).orElseThrow();
+        route.setRouteStatus(RouteStatus.PUBLIC);
+        route = routeRepository.save(route);
+        return route.getId();
+    }
+
+    @Transactional
+    public Long deleteRoute(Long routeId) {
+        //TODO: 해당 경로가 없으면 에러 처리
+        Route route = routeRepository.findById(routeId).orElseThrow();
+        route.setRouteStatus(RouteStatus.DELETE);
+        route = routeRepository.save(route);
+        return route.getId();
+    }
+
 
 }

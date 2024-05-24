@@ -23,4 +23,7 @@ public interface SwaggerRouteController {
     })
     ResponseEntity<Long> save(SaveRequestDto requestDto);
 
+    ResponseEntity<Long> setRouteToPrivate(Long routeId);
+    ResponseEntity<Long> setRouteToPublic(Long routeId);
+    ResponseEntity<Long> deleteRoute(Long routeId);
 }

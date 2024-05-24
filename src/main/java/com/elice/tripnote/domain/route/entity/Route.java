@@ -4,10 +4,7 @@ import com.elice.tripnote.domain.integratedroute.entity.IntegratedRoute;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.route.status.RouteStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +26,7 @@ public class Route {
     @JoinColumn(name = "integrated_route_id", nullable = false)
     private IntegratedRoute integratedRoute;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RouteStatus routeStatus;
