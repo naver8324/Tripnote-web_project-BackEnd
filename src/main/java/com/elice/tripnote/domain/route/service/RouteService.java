@@ -11,6 +11,8 @@ import com.elice.tripnote.domain.link.routespot.entity.RouteSpot;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.domain.route.dto.SaveRequestDto;
 import com.elice.tripnote.domain.route.entity.Route;
+import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
+import com.elice.tripnote.domain.route.exception.EntityNotFoundException;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.link.routespot.repository.RouteSpotRepository;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
@@ -105,12 +107,12 @@ public class RouteService {
 
             return new UUID(msb, lsb).toString();
         } catch (NoSuchAlgorithmException e) {
-            //TODO: 나중에 커스텀 exception으로 바꾸기
-            throw new RuntimeException("SHA-1 algorithm not found", e);
+            throw new AlgorithmNotFoundException();
         }
     }
 
-    private void saveUUIDHashtag(List<Long> hashtagIds, IntegratedRoute integratedRoute) {
+    @Transactional
+    public void saveUUIDHashtag(List<Long> hashtagIds, IntegratedRoute integratedRoute) {
         // 현재 db에서 integratedRoute와 연관된 해시태그 찾기(이미 저장돼있는 해시태그)
         List<Long> dbHashtagIds = uuidHashtagRepository.findHashtagIdsByIntegratedRouteId(integratedRoute.getId());
 
@@ -136,7 +138,8 @@ public class RouteService {
         }
     }
 
-    private void saveLikeBookmarkPeriod(IntegratedRoute integratedRoute) {
+    @Transactional
+    public void saveLikeBookmarkPeriod(IntegratedRoute integratedRoute) {
         LikeBookmarkPeriod likeBookmarkPeriod = LikeBookmarkPeriod.builder()
                 .integratedRoute(integratedRoute)
                 .likes(0)
@@ -145,10 +148,11 @@ public class RouteService {
         likeBookPeriodRepository.save(likeBookmarkPeriod);
     }
 
-    private Route saveRoute(IntegratedRoute integratedRoute, Long memberId, int expense) {
+    @Transactional
+    public Route saveRoute(IntegratedRoute integratedRoute, Long memberId, int expense) {
         Route route = Route.builder()
-                //TODO: 해당 사용자가 없으면 에러 처리
-                .member(memberRepository.findById(memberId).orElseThrow())
+                .member(memberRepository.findById(memberId)
+                        .orElseThrow(() -> new EntityNotFoundException("해당하는 member id를 찾을 수 없습니다.")))
                 .integratedRoute(integratedRoute)
                 .routeStatus(RouteStatus.PUBLIC)
                 .expense(expense)
@@ -156,10 +160,11 @@ public class RouteService {
         return routeRepository.save(route);
     }
 
-    private void saveRouteSpot(Route route, List<Long> spotIds) {
+    @Transactional
+    public void saveRouteSpot(Route route, List<Long> spotIds) {
         for (int i = 0; i < spotIds.size(); i++) {
-            //TODO: 해당 여행지가 없으면 에러 처리
-            Spot spot = spotRepository.findById(spotIds.get(i)).orElseThrow();
+            Spot spot = spotRepository.findById(spotIds.get(i))
+                    .orElseThrow(() -> new EntityNotFoundException("해당하는 spot id를 찾을 수 없습니다."));
             Long nextSpotId = (i + 1 < spotIds.size()) ? spotIds.get(i + 1) : null;
             RouteSpot routeSpot = RouteSpot.builder()
                     .route(route)
@@ -173,8 +178,8 @@ public class RouteService {
 
     @Transactional
     public Long setRouteToPrivate(Long routeId) {
-        //TODO: 해당 경로가 없으면 에러 처리
-        Route route = routeRepository.findById(routeId).orElseThrow();
+        Route route = routeRepository.findById(routeId)
+                .orElseThrow(() -> new EntityNotFoundException("해당하는 route id를 찾을 수 없습니다."));
         route.setRouteStatus(RouteStatus.PRIVATE);
         route = routeRepository.save(route);
         return route.getId();
@@ -182,8 +187,8 @@ public class RouteService {
 
     @Transactional
     public Long setRouteToPublic(Long routeId) {
-        //TODO: 해당 경로가 없으면 에러 처리
-        Route route = routeRepository.findById(routeId).orElseThrow();
+        Route route = routeRepository.findById(routeId)
+                .orElseThrow(() -> new EntityNotFoundException("해당하는 route id를 찾을 수 없습니다."));
         route.setRouteStatus(RouteStatus.PUBLIC);
         route = routeRepository.save(route);
         return route.getId();
@@ -191,8 +196,8 @@ public class RouteService {
 
     @Transactional
     public Long deleteRoute(Long routeId) {
-        //TODO: 해당 경로가 없으면 에러 처리
-        Route route = routeRepository.findById(routeId).orElseThrow();
+        Route route = routeRepository.findById(routeId)
+                .orElseThrow(() -> new EntityNotFoundException("해당하는 route id를 찾을 수 없습니다."));
         route.setRouteStatus(RouteStatus.DELETE);
         route = routeRepository.save(route);
         return route.getId();
