@@ -5,8 +5,11 @@ import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.route.status.RouteStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -32,4 +35,12 @@ public class Route {
 
     @Column(nullable = true)
     private int expense;
+
+    @Builder
+    public Route(Member member, IntegratedRoute integratedRoute, RouteStatus routeStatus, int expense){
+        this.integratedRoute=integratedRoute;
+        this.member=member;
+        this.routeStatus=routeStatus;
+        this.expense = expense;
+    }
 }

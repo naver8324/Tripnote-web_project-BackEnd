@@ -22,4 +22,5 @@ public interface SwaggerRouteController {
                     content = {@Content(schema = @Schema(implementation = Long.class))}),
     })
     ResponseEntity<Long> save(SaveRequestDto requestDto);
+
 }

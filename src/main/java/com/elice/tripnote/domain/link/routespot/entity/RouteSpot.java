@@ -1,9 +1,13 @@
 package com.elice.tripnote.domain.link.routespot.entity;
 
+import com.elice.tripnote.domain.integratedroute.entity.IntegratedRoute;
+import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.route.entity.Route;
+import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,4 +34,12 @@ public class RouteSpot {
 
     @Column(nullable = true)
     private Long nextSpotId;
+
+    @Builder
+    public RouteSpot(Route route, Spot spot, int sequence, Long nextSpotId){
+        this.route=route;
+        this.spot=spot;
+        this.sequence=sequence;
+        this.nextSpotId = nextSpotId;
+    }
 }

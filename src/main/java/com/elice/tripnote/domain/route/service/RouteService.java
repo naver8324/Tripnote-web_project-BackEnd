@@ -5,13 +5,21 @@ import com.elice.tripnote.domain.hashtag.repository.HashtagRepository;
 import com.elice.tripnote.domain.integratedroute.entity.IntegratedRoute;
 import com.elice.tripnote.domain.integratedroute.repository.IntegratedRouteRepository;
 import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
+import com.elice.tripnote.domain.likebookmarkperiod.entity.LikeBookmarkPeriod;
 import com.elice.tripnote.domain.likebookmarkperiod.repository.LikeBookPeriodRepository;
+import com.elice.tripnote.domain.link.routespot.entity.RouteSpot;
+import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.domain.route.dto.SaveRequestDto;
+import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.link.routespot.repository.RouteSpotRepository;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagRepository;
+import com.elice.tripnote.domain.route.status.RouteStatus;
+import com.elice.tripnote.domain.spot.entity.Spot;
+import com.elice.tripnote.domain.spot.repository.SpotRepository;
 import jakarta.transaction.Transactional;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,28 +45,25 @@ public class RouteService {
     private final RouteSpotRepository routeSpotRepository;
 
     private final HashtagRepository hashtagRepository;
+    private final MemberRepository memberRepository;
+    private final SpotRepository spotRepository;
 
     @Transactional
     public Long save(SaveRequestDto requestDto) {
         //여행지 id 리스트 기반으로 uuid 만들기
-        //통합 경로 객체 저장하기 -> 지역내여부 컬럼...? 그냥 지역 이름 저장하는건가?
         IntegratedRoute integratedRoute = getIntegratedRoute(requestDto.getSpotIds());
         saveUUIDHashtag(requestDto.getHashtagIds(), integratedRoute);
 
-        //TODO: 위에서 구한 통합 경로 id를 이용해서 (먼저 동일한 통합 경로 id가 있는지 탐색, 없다면) 기간별 좋아요 북마크 객체 생성
+        // 해당 통합경로 아이디 값을 가진 객체가 있는지 확인.
+        if (likeBookPeriodRepository.existsByIntegratedRoute(integratedRoute))
+            saveLikeBookmarkPeriod(integratedRoute);
 
-        // 위에서 구한 통합 경로 id를 이용해서 경로 객체 저장
-        // 유저 번호, 통합 경로 번호, 기본적으로 공개 상태
-        // 비용은 여행지별 경비 리스트의 총합
-
-        // 경로 여행지 연결 객체 생성하기
-        // 위에서 구한 경로 id를 이용
-
-        //경로 id 리턴
-        return  null;
+        Route route = saveRoute(integratedRoute, requestDto.getMemberId(), requestDto.getExpense());
+        saveRouteSpot(route, requestDto.getSpotIds());
+        return route.getId();
     }
 
-    private IntegratedRoute getIntegratedRoute(List<Long> spotIds){
+    private IntegratedRoute getIntegratedRoute(List<Long> spotIds) {
         String uuid = generateUUID(spotIds);
 
         IntegratedRoute integratedRoute = integratedRouteRepository.findByIntegratedRoutes(uuid)
@@ -104,7 +110,7 @@ public class RouteService {
         }
     }
 
-    private void saveUUIDHashtag(List<Long> hashtagIds, IntegratedRoute integratedRoute){
+    private void saveUUIDHashtag(List<Long> hashtagIds, IntegratedRoute integratedRoute) {
         // 현재 db에서 integratedRoute와 연관된 해시태그 찾기(이미 저장돼있는 해시태그)
         List<Long> dbHashtagIds = uuidHashtagRepository.findHashtagIdsByIntegratedRouteId(integratedRoute.getId());
 
@@ -121,12 +127,47 @@ public class RouteService {
                 .collect(Collectors.toList());
 
 
-        for(Hashtag hashtag : hashtags){
+        for (Hashtag hashtag : hashtags) {
             UUIDHashtag uuidHashtag = UUIDHashtag.builder()
                     .hashtag(hashtag)
                     .integratedRoute(integratedRoute)
                     .build();
             uuidHashtagRepository.save(uuidHashtag);
+        }
+    }
+
+    private void saveLikeBookmarkPeriod(IntegratedRoute integratedRoute) {
+        LikeBookmarkPeriod likeBookmarkPeriod = LikeBookmarkPeriod.builder()
+                .integratedRoute(integratedRoute)
+                .likes(0)
+                .bookmark(0)
+                .build();
+        likeBookPeriodRepository.save(likeBookmarkPeriod);
+    }
+
+    private Route saveRoute(IntegratedRoute integratedRoute, Long memberId, int expense) {
+        Route route = Route.builder()
+                //TODO: 해당 사용자가 없으면 에러 처리
+                .member(memberRepository.findById(memberId).orElseThrow())
+                .integratedRoute(integratedRoute)
+                .routeStatus(RouteStatus.PUBLIC)
+                .expense(expense)
+                .build();
+        return routeRepository.save(route);
+    }
+
+    private void saveRouteSpot(Route route, List<Long> spotIds) {
+        for (int i = 0; i < spotIds.size(); i++) {
+            //TODO: 해당 여행지가 없으면 에러 처리
+            Spot spot = spotRepository.findById(spotIds.get(i)).orElseThrow();
+            Long nextSpotId = (i + 1 < spotIds.size()) ? spotIds.get(i + 1) : null;
+            RouteSpot routeSpot = RouteSpot.builder()
+                    .route(route)
+                    .spot(spot)
+                    .sequence(i + 1)
+                    .nextSpotId(nextSpotId)
+                    .build();
+            routeSpotRepository.save(routeSpot);
         }
     }
 
