@@ -14,7 +14,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByIsDeletedIsFalse(Pageable pageable);
     Page<Post> findByMemberIdAndIsDeletedIsFalse(Long memberId, Pageable pageable);
 
-    @Query("SELECT p FROM Post p JOIN p.likePosts lp JOIN lp.member m WHERE m.id = :memberId AND p.isDeleted = false AND lp.createdAt IS NOT NULL")
+    @Query("SELECT p FROM Post p JOIN p.likePosts lp JOIN lp.member m WHERE m.id = :memberId AND p.isDeleted = false AND lp.likedAt IS NOT NULL")
     Page<Post> findNotDeletedPostsByMemberIdWithLikes(Long memberId, Pageable pageable);
 
 
