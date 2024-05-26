@@ -3,6 +3,8 @@ package com.elice.tripnote.domain.post.entity;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -14,10 +16,7 @@ public class PostResponseDTO{
 
     private String content;
 
-    private int likes;
-
-    private int report;
-
     private boolean isDeleted;
+
 
 }

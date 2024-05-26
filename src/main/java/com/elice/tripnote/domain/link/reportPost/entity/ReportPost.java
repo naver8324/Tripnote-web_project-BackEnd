@@ -1,4 +1,4 @@
-package com.elice.tripnote.domain.link.likePost.entity;
+package com.elice.tripnote.domain.link.reportPost.entity;
 
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.post.entity.Post;
@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Table(name="like_post")
-public class LikePost{
+@Table(name="report_post")
+public class ReportPost {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +22,7 @@ public class LikePost{
 
     @Column
     @Builder.Default
-    private LocalDateTime likedAt = LocalDateTime.now();
+    private LocalDateTime reportedAt = LocalDateTime.now();
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,19 +35,16 @@ public class LikePost{
 
 
 
-    public void like(){
-        if(likedAt == null){
-            likedAt = LocalDateTime.now();
-            post.addLikes();
+    public void report(){
+        if(reportedAt == null){
+            reportedAt = LocalDateTime.now();
+            post.addReport();
             return;
         }
-        likedAt = null;
-        post.removeLikes();
-
+        reportedAt = null;
+        post.removeReport();
 
     }
-
-
 
 
 

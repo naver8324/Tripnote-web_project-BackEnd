@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class CommentService {
@@ -36,13 +35,12 @@ public class CommentService {
 
     // 게시글에서 게시글에 해당하는 댓글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 댓글만 불러옵니다.
 
-    @Transactional(readOnly = true)
     public Page<CommentResponseDTO> getCommentsByPostId(Long postId, int page, int size){
 
         Post post = postOrElseThrowsException(postId);
 
 
-        return commentRepository.findByPost_IdAndIsDeletedIsFalse(postId, PageRequest.of(page, size, Sort.by("id").descending())).map(Comment::toDTO);
+        return commentRepository.findByPostIdAndIsDeletedIsFalse(postId, PageRequest.of(page, size, Sort.by("id").descending())).map(Comment::toDTO);
 
 
     }
@@ -64,7 +62,7 @@ public class CommentService {
 
         Member member = memberOrElseThrowsException(memberId);
 
-        return commentRepository.findByMember_Id(memberId, PageRequest.of(page, size, Sort.by("id").descending())).map(Comment::toDTO);
+        return commentRepository.findByMemberId(memberId, PageRequest.of(page, size, Sort.by("id").descending())).map(Comment::toDTO);
 
 
 
@@ -152,7 +150,7 @@ public class CommentService {
     }
     public void deleteCommentsByPostId(Long postId) {
 
-        List<Comment> comments = commentRepository.findByPost_IdAndIsDeletedIsFalse(postId);
+        List<Comment> comments = commentRepository.findByPostIdAndIsDeletedIsFalse(postId);
         for (Comment comment : comments) {
             comment.delete();
         }

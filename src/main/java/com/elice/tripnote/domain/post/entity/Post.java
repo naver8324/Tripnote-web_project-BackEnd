@@ -69,15 +69,42 @@ public class Post extends BaseTimeEntity {
 
     public PostResponseDTO toDTO() {
 
-        return PostResponseDTO.builder().id(id).title(title).content(content).likes(likes).report(report).isDeleted(isDeleted).build();
+        return PostResponseDTO.builder()
+                .id(id)
+                .title(title)
+                .content(content)
+                .isDeleted(isDeleted)
+                .build();
 
     }
+
+    public PostDetailResponseDTO toDetailDTO() {
+
+        return PostDetailResponseDTO.builder()
+                .id(id)
+                .title(title)
+                .content(content)
+                .likes(likes)
+                .report(report)
+                .isDeleted(isDeleted)
+                .route(route)
+                .build();
+
+    }
+
 
     public void update(PostRequestDTO postDTO) {
         title = postDTO.getTitle();
         content = postDTO.getContent();
     }
 
+
+    public void addLikes(){
+        likes++;
+    }
+    public void removeLikes(){
+        likes--;
+    }
 
     public void addReport(){
         report++;
