@@ -39,8 +39,9 @@ public class Member {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String state;
+    private Status status;
 
     @OneToMany(mappedBy = "member")
     private List<Bookmark> bookmarks = new ArrayList<>();
@@ -59,6 +60,6 @@ public class Member {
 
     @PrePersist
     private void prePersist() {
-        this.state = this.state == null ? "NO" : this.state;
+        this.status = this.status == null ? Status.valueOf("ACTIVE") : this.status;
     }
 }

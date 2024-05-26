@@ -40,7 +40,7 @@ public class QMember extends EntityPathBase<Member> {
 
     public final ListPath<com.elice.tripnote.domain.post.entity.Post, com.elice.tripnote.domain.post.entity.QPost> posts = this.<com.elice.tripnote.domain.post.entity.Post, com.elice.tripnote.domain.post.entity.QPost>createList("posts", com.elice.tripnote.domain.post.entity.Post.class, com.elice.tripnote.domain.post.entity.QPost.class, PathInits.DIRECT2);
 
-    public final StringPath state = createString("state");
+    public final EnumPath<Status> status = createEnum("status", Status.class);
 
     public QMember(String variable) {
         super(Member.class, forVariable(variable));
