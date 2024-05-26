@@ -42,7 +42,7 @@ public class CommentService {
         Post post = postOrElseThrowsException(postId);
 
 
-        return commentRepository.findByPost_IdAndIsDeletedIsFalse(postId, PageRequest.of(page, size, Sort.by("id").descending())).map(Comment::toDTO);
+        return commentRepository.findByPostIdAndIsDeletedIsFalse(postId, PageRequest.of(page, size, Sort.by("id").descending())).map(Comment::toDTO);
 
 
     }
@@ -64,7 +64,7 @@ public class CommentService {
 
         Member member = memberOrElseThrowsException(memberId);
 
-        return commentRepository.findByMember_Id(memberId, PageRequest.of(page, size, Sort.by("id").descending())).map(Comment::toDTO);
+        return commentRepository.findByMemberId(memberId, PageRequest.of(page, size, Sort.by("id").descending())).map(Comment::toDTO);
 
 
 
@@ -152,7 +152,7 @@ public class CommentService {
     }
     public void deleteCommentsByPostId(Long postId) {
 
-        List<Comment> comments = commentRepository.findByPost_IdAndIsDeletedIsFalse(postId);
+        List<Comment> comments = commentRepository.findByPostIdAndIsDeletedIsFalse(postId);
         for (Comment comment : comments) {
             comment.delete();
         }
