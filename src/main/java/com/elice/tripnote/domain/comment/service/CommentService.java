@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class CommentService {
@@ -36,7 +35,6 @@ public class CommentService {
 
     // 게시글에서 게시글에 해당하는 댓글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 댓글만 불러옵니다.
 
-    @Transactional(readOnly = true)
     public Page<CommentResponseDTO> getCommentsByPostId(Long postId, int page, int size){
 
         Post post = postOrElseThrowsException(postId);
