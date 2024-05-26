@@ -5,9 +5,12 @@ import com.elice.tripnote.domain.comment.repository.CommentRepository;
 import com.elice.tripnote.domain.comment.service.CommentService;
 import com.elice.tripnote.domain.link.likePost.entity.LikePost;
 import com.elice.tripnote.domain.link.likePost.repository.LikePostRepository;
+import com.elice.tripnote.domain.link.reportPost.entity.ReportPost;
+import com.elice.tripnote.domain.link.reportPost.repository.ReportPostRepository;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.domain.post.entity.Post;
+import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.exception.*;
@@ -34,6 +37,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final LikePostRepository likePostRepository;
+    private final ReportPostRepository reportPostRepository;
     private final MemberRepository memberRepository;
     private final RouteRepository routeRepository;
 
@@ -55,7 +59,7 @@ public class PostService {
     public Page<PostResponseDTO> getPostsByMemberId(Long memberId, int page, int size){
         memberOrElseThrowsException(memberId);
 
-        return postRepository.findByMember_IdAndIsDeletedIsFalse(memberId, PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
+        return postRepository.findByMemberIdAndIsDeletedIsFalse(memberId, PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
 
 
     }
@@ -77,6 +81,18 @@ public class PostService {
     public Page<PostResponseDTO> getPostsAll(int page, int size){
 
         return postRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
+
+
+    }
+
+
+
+    // 게시글을 상세 조회하는 메서드입니다. 삭제되지 않은 게시글만 볼 수 있습니다.
+    // TO DO: QueryDSL로 바꾼 이후에 크게 변경 예정
+    public PostDetailResponseDTO getPost(Long postId, Long memberId){
+
+        Post post = postOrElseThrowsException(postId);
+        return post.toDetailDTO();
 
 
     }
@@ -125,12 +141,12 @@ public class PostService {
 
 
     // 게시글에 좋아요를 누를 때 사용하는 메서드입니다. 이미 좋아요를 눌렀으면 좋아요를 해제합니다.
-    public void createLikePost(Long postId, Long memberId){
+    public void LikePost(Long postId, Long memberId){
 
         Post post = postOrElseThrowsException(postId);
         Member member = memberOrElseThrowsException(memberId);
 
-        LikePost likePost = likePostRepository.findByPost_IdAndMember_Id(postId, memberId);
+        LikePost likePost = likePostRepository.findByPostIdAndMemberId(postId, memberId);
 
         if(likePost == null){
             likePost = LikePost.builder()
@@ -146,19 +162,23 @@ public class PostService {
 
 
 
-    // 게시글의 신고수를 늘리는 메서드입니다. 유저가 신고 버튼을 누를 때 사용합니다.
-    public void addReportCount(Long postId){
+    // 게시글에 신고를 누를 때 사용하는 메서드입니다. 이미 신고를 눌렀으면 좋아요를 해제합니다.
+    public void reportPost(Long postId, Long memberId){
 
         Post post = postOrElseThrowsException(postId);
-        post.addReport();
+        Member member = memberOrElseThrowsException(memberId);
 
-    }
+        ReportPost reportPost = reportPostRepository.findByPostIdAndMemberId(postId, memberId);
 
-    // 게시글의 신고수를 줄이는 메서드입니다. 유저가 신고를 취소할 때 사용합니다.
-    public void removeReportCount(Long postId){
+        if(reportPost == null){
+            reportPost = ReportPost.builder()
+                    .member(member)
+                    .post(post)
+                    .build();
+        }
 
-        Post post = postOrElseThrowsException(postId);
-        post.removeReport();
+
+        reportPost.report();
 
     }
 
@@ -178,7 +198,7 @@ public class PostService {
     }
 
     // 게시글을 삭제하는 메서드입니다. 관리자만 사용할 수 있습니다.
-    public void deleteComment(Long postId){
+    public void deletePost(Long postId){
 
 
         Post post = postOrElseThrowsException(postId);
