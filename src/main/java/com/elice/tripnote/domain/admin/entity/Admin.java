@@ -2,8 +2,14 @@ package com.elice.tripnote.domain.admin.entity;
 
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "admin")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Admin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
