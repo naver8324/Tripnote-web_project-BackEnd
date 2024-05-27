@@ -95,9 +95,9 @@ public class CommentService {
 
 
     // 댓글을 수정하는 메서드입니다. DTO에 id가 있는지 여부는 controller단에서 검증합니다.
-    public CommentResponseDTO updateComment(CommentRequestDTO commentDTO, Long memberId){
+    public CommentResponseDTO updateComment(CommentRequestDTO commentDTO, Long commentId, Long memberId){
 
-        Comment comment = commentOrElseThrowsException(commentDTO.getId());
+        Comment comment = commentOrElseThrowsException(commentId);
 
         if(!comment.getMember().getId().equals(memberId)){
             handleNoAuthorization();
@@ -107,14 +107,6 @@ public class CommentService {
 
         return comment.toDTO();
 
-
-    }
-
-    // 댓글의 신고수를 늘리는 메서드입니다. 유저가 신고 버튼을 누를 때 사용합니다.
-    public void addReportCount(Long commentId){
-
-        Comment comment = commentOrElseThrowsException(commentId);
-        comment.addReport();
 
     }
 
