@@ -19,23 +19,16 @@ public class HashtagController implements SwaggerHashtagController{
     private final HashtagService hashtagService;
     private final HashtagRepository hashtagRepository;
 
-    //지역 해시태그 조회 is_city = true ,  isDelete = false
+    //지역 해시태그 조회 isCity의 = true ,  isDelete = false
+    //지역 아닌 해시태그 조회 isCity의 = false, isDelete = false
+    //프론트에서 isCity의 값을 받아온다
     @Override
     @GetMapping("/isCity")
-    public ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityTrue(){
+    public ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityTrue(@RequestParam(name = "isCity") boolean isCity){
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(hashtagRepository.findByIsCityAndIsDelete(true, false));
-    }
-
-    //지역 아닌 해시태그 조회 is_city = false, isDelete = false
-    @Override
-    @GetMapping("/isNotCity")
-    public ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityFalse(){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(hashtagRepository.findByIsCityAndIsDelete(false, false));
+                .body(hashtagRepository.findByIsCityAndIsDelete(isCity, false));
     }
 
     //해시태그 생성

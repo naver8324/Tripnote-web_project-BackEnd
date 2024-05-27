@@ -9,26 +9,24 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
 @Tag(name = "Hashtag API", description = "해시태그 관련 api입니다.")
 public interface SwaggerHashtagController {
 
-    @Operation(summary = "도시 해시태그 조회", description = "도시 해시태그를 조회합니다.")
+    @Operation(summary = "해시태그 조회", description = "도시 또는 도시가 아닌 해시태그를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공")
-    ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityTrue();
-
-    @Operation(summary = "도시가 아닌 해시태그 조회", description = "도시가 아닌 해시태그를 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "성공")
-    ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityFalse();
+    ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityTrue(@RequestParam(name = "isCity") boolean isCity);
 
     @Operation(summary = "해시태그 생성", description = "해시태그를 생성합니다.")
     @Parameters({
             @Parameter(name = "HashtagRequestDTO", description = "해시태그 내용, 도시유무")
     })
     @ApiResponse(responseCode = "200", description = "성공")
-    ResponseEntity<HashtagResponseDTO> createHashtag(HashtagRequestDTO hashtagRequestDTO);
+    ResponseEntity<HashtagResponseDTO> createHashtag(@RequestBody HashtagRequestDTO hashtagRequestDTO);
 
     @Operation(summary = "해시태그 수정", description = "해시태그를 수정합니다.")
     @Parameters({
@@ -36,7 +34,7 @@ public interface SwaggerHashtagController {
             @Parameter(name = "HashtagRequestDTO", description = "해시태그 내용, 도시유무")
     })
     @ApiResponse(responseCode = "200", description = "성공")
-    ResponseEntity<HashtagResponseDTO> updateHashtag(@PathVariable Long id, HashtagRequestDTO hashtagRequestDTO);
+    ResponseEntity<HashtagResponseDTO> updateHashtag(@PathVariable Long id, @RequestBody HashtagRequestDTO hashtagRequestDTO);
 
     @Operation(summary = "해시태그 삭제", description = "해시태그를 삭제합니다.")
     @Parameters({
