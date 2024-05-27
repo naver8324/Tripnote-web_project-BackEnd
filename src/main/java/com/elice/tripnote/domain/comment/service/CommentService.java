@@ -168,7 +168,7 @@ public class CommentService {
 
     // 게시글을 삭제할 때 게시글에 달린 댓글들을 삭제하는 메서드입니다.
     public void deleteCommentsByPostId(Long postId) {
-        Post post = postOrElseThrowsException(postId);
+//        Post post = postOrElseThrowsException(postId);
 
         commentRepository.customDeleteCommentsByPostId(postId);
     }

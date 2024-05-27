@@ -32,11 +32,11 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         page = page > 0 ? page - 1 : 0;
 
-        Long totalCount = query
+        Long totalCount =(long) query
                 .from(comment)
                 .where(comment.post.id.eq(postId)
                         .and(comment.isDeleted.isFalse()))
-                .fetchCount();
+                .fetch().size();
 
 
         List<CommentResponseDTO> commentResponseDTOs = query
@@ -64,9 +64,9 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         page = page > 0 ? page - 1 : 0;
 
-        Long totalCount = query
+        Long totalCount =(long) query
                 .from(comment)
-                .fetchCount();
+                .fetch().size();
 
 
         List<CommentResponseDTO> commentResponseDTOs = query
@@ -92,10 +92,10 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         page = page > 0 ? page - 1 : 0;
 
-        Long totalCount = query
+        Long totalCount = (long) query
                 .from(comment)
                 .where(comment.member.id.eq(memberId))
-                .fetchCount();
+                .fetch().size();
 
 
         List<CommentResponseDTO> commentResponseDTOs = query
