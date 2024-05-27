@@ -7,10 +7,13 @@ import com.elice.tripnote.domain.route.entity.Route;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
+@Builder
 @Getter
-// PUBLIC, PROTECTED가 아니면 JPA를 사용시 에러 발생함.
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Bookmark{
 
     @Id
@@ -18,6 +21,9 @@ public class Bookmark{
     private Long id;
 
 
+    @Column
+    @Builder.Default
+    private LocalDateTime markedAt = LocalDateTime.now();
 
 
 
@@ -35,10 +41,31 @@ public class Bookmark{
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @Builder
-    private Bookmark(Post post){
-        this.post = post;
+
+    public void mark(Route route, Post post){
+        if(route !=null){
+            if(markedAt == null){
+                markedAt = LocalDateTime.now();
+                return;
+            }
+            markedAt = null;
+            return;
+        }
+
+        if(post != null){
+            if(markedAt == null){
+                markedAt = LocalDateTime.now();
+                return;
+            }
+            markedAt = null;
+        }
+
+
+
     }
+
+
+
 
 
 

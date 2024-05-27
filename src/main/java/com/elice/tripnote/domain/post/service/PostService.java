@@ -2,6 +2,8 @@ package com.elice.tripnote.domain.post.service;
 
 
 import com.elice.tripnote.domain.comment.service.CommentService;
+import com.elice.tripnote.domain.link.bookmark.entity.Bookmark;
+import com.elice.tripnote.domain.link.bookmark.repository.BookmarkRepository;
 import com.elice.tripnote.domain.link.likePost.entity.LikePost;
 import com.elice.tripnote.domain.link.likePost.repository.LikePostRepository;
 import com.elice.tripnote.domain.link.reportPost.entity.ReportPost;
@@ -33,6 +35,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final LikePostRepository likePostRepository;
     private final ReportPostRepository reportPostRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final MemberRepository memberRepository;
     private final RouteRepository routeRepository;
 
@@ -160,6 +163,24 @@ public class PostService {
 
     }
 
+    // 게시글에 북마크를 누를 때 사용하는 메서드입니다. 이미 눌렀으면 신고를 해제합니다.
+    @Transactional
+    public void markPost(Long postId, Long memberId){
+
+        Post post = postOrElseThrowsException(postId);
+        Member member = memberOrElseThrowsException(memberId);
+
+        Bookmark bookmark = bookmarkRepository.findByPostIdAndMemberId(postId, memberId);
+
+        if(bookmark == null){
+            bookmark = Bookmark.builder()
+                    .member(member)
+                    .post(post)
+                    .build();
+        }
+        bookmark.mark(null, post);
+
+    }
 
 
     // 게시글에 신고를 누를 때 사용하는 메서드입니다. 이미 신고를 눌렀으면 신고를 해제합니다.

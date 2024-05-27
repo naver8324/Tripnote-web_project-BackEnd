@@ -9,7 +9,7 @@ public class NoSuchUserException extends RuntimeException{
     private final ErrorCode errorCode;
 
     public NoSuchUserException(){
-        super(ErrorCode.NO_COMMENT.getMessage());
-        errorCode = ErrorCode.NO_POST;
+        super(ErrorCode.NO_USER.getMessage());
+        errorCode = ErrorCode.NO_USER;
     }
 }
