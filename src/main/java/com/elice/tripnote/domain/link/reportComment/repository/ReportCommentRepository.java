@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface ReportCommentRepository extends JpaRepository<ReportComment, Long> {
 
 
-    ReportComment findByPostIdAndMemberId(Long commentId, Long memberId);
+    ReportComment findByCommentIdAndMemberId(Long commentId, Long memberId);
 }

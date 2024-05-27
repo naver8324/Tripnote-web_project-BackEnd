@@ -125,7 +125,7 @@ public class CommentService {
         Comment comment = commentOrElseThrowsException(commentId);
         Member member = memberOrElseThrowsException(memberId);
 
-        ReportComment reportComment = reportCommentRepository.findByPostIdAndMemberId(commentId, memberId);
+        ReportComment reportComment = reportCommentRepository.findByCommentIdAndMemberId(commentId, memberId);
 
         if(reportComment == null){
             reportComment = ReportComment.builder()
