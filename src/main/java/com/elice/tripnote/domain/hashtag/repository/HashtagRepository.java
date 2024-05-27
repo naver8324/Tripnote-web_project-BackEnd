@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface HashtagRepository extends JpaRepository<Hashtag, Long> {
+public interface HashtagRepository extends JpaRepository<Hashtag, Long>, HashtagCustomRepository {
 
     List<HashtagResponseDTO> findByIsCityAndIsDelete(boolean isCity, boolean isDelete);
 
