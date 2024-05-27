@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ReportPostRepository extends JpaRepository<ReportComment, Long> {
+public interface ReportCommentRepository extends JpaRepository<ReportComment, Long> {
 
 
-
+    ReportComment findByPostIdAndMemberId(Long commentId, Long memberId);
 }

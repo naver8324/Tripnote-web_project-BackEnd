@@ -1,7 +1,7 @@
 package com.elice.tripnote.domain.link.reportComment.entity;
 
+import com.elice.tripnote.domain.comment.entity.Comment;
 import com.elice.tripnote.domain.member.entity.Member;
-import com.elice.tripnote.domain.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,19 +30,19 @@ public class ReportComment {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
+    @JoinColumn(name = "comment_id", nullable = false)
+    private Comment comment;
 
 
 
     public void report(){
         if(reportedAt == null){
             reportedAt = LocalDateTime.now();
-            post.addReport();
+            comment.addReport();
             return;
         }
         reportedAt = null;
-        post.removeReport();
+        comment.removeReport();
 
 
     }
