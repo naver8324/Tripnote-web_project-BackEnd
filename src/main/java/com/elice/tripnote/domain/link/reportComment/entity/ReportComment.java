@@ -1,4 +1,4 @@
-package com.elice.tripnote.domain.link.reportPost.entity;
+package com.elice.tripnote.domain.link.reportComment.entity;
 
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.post.entity.Post;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name="report_post")
-public class ReportPost {
+public class ReportComment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
