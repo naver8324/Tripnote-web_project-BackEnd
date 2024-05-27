@@ -24,11 +24,12 @@ public class HashtagController implements SwaggerHashtagController{
     //프론트에서 isCity의 값을 받아온다
     @Override
     @GetMapping("/isCity")
-    public ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityTrue(@RequestParam(name = "isCity") boolean isCity){
+    public ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityTrue(@RequestParam(name = "isCity") boolean isCity,
+                                                                            @RequestParam(name = "isDelete") boolean isDelete){
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(hashtagRepository.findByIsCityAndIsDelete(isCity, false));
+                .body(hashtagRepository.findByIsCityAndIsDelete(isCity, isDelete));
     }
 
     //해시태그 생성

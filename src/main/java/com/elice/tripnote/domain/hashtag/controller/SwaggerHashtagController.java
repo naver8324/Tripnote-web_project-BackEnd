@@ -19,7 +19,8 @@ public interface SwaggerHashtagController {
 
     @Operation(summary = "해시태그 조회", description = "도시 또는 도시가 아닌 해시태그를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공")
-    ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityTrue(@RequestParam(name = "isCity") boolean isCity);
+    ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityTrue(@RequestParam(name = "isCity") boolean isCity,
+                                                                     @RequestParam(name = "isDelete") boolean isDelete);
 
     @Operation(summary = "해시태그 생성", description = "해시태그를 생성합니다.")
     @Parameters({
