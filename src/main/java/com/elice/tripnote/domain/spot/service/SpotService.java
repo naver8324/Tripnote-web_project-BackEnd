@@ -6,7 +6,7 @@ import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.naver.NaverClient;
 import com.elice.tripnote.domain.spot.naver.dto.SearchImageReq;
 import com.elice.tripnote.domain.spot.naver.dto.SearchLocalReq;
-import com.elice.tripnote.domain.spot.respository.SpotRepository;
+import com.elice.tripnote.domain.spot.repository.SpotRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

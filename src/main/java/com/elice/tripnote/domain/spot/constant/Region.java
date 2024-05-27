@@ -1,5 +1,7 @@
 package com.elice.tripnote.domain.spot.constant;
 
+import com.elice.tripnote.domain.spot.exception.RegionNotFoundException;
+
 public enum Region {
     SEOUL("서울"),INCHEON("인천"),BUSAN("부산"), DAEGU("대구"),ULSAN("울산"),
     GWANGJU("광주"), DAEJEON("대전"),
@@ -11,5 +13,17 @@ public enum Region {
 
     Region(String name){
         this.name =name;
+    }
+    public String getName() {
+        return name;
+    }
+
+    public static Region fromString(String name) {
+        for (Region region : Region.values()) {
+            if (region.name.equals(name)) {
+                return region;
+            }
+        }
+        throw new RegionNotFoundException();
     }
 }
