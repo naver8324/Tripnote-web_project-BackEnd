@@ -15,45 +15,34 @@ public class Hashtag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    Long id;
+    private Long id;
 
     @Column(name = "name", nullable = false, unique = true)
-    String name;
+    private String name;
 
-    @Column(name = "is_city")
-    String isCity;
+    //0 - false
+    //1 - true
+    @Column(name = "is_city", columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
+    private boolean isCity;
 
-    @PrePersist
-    private void prePersist() {
-        this.isCity = this.isCity == null ? "N" : this.isCity;
-    }
-
-//    @OneToMany(fetch = FetchType.LAZY, mappedBy = "hashtag")
-//    @JsonIgnore
-//    List<UUID_Hashtag> uuidHashtags = new ArrayList<>();
+    @Column(name = "is_delete", columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
+    private boolean isDelete;
 
     @Builder
-    public Hashtag(String name, String isCity){
+    public Hashtag(String name, boolean isCity){
         this.name = name;
         this.isCity = isCity;
     }
 
-//    @Builder
-//    public Hashtag(String name,List<UUID_Hashtag> uuidHashtags){
-//        this.name = name;
-//        this.uuidHashtags = uuidHashtags;
-//    }
-
-//    @Builder
-//    public Hashtag(String name, String isCity,List<UUID_Hashtag> uuidHashtags){
-//        this.name = name;
-//        this.isCity = isCity;
-//        this.uuidHashtags = uuidHashtags;
-//    }
-
     public void update(HashtagRequestDTO hashtagRequestDTO){
         this.name = hashtagRequestDTO.getName();
-        this.isCity = hashtagRequestDTO.getIsCity();
+        this.isCity = hashtagRequestDTO.isCity();
+    }
+
+    public void delete(){
+        this.isDelete = true;
     }
 
     public HashtagResponseDTO toResponseDTO() {

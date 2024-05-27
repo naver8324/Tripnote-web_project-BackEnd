@@ -12,6 +12,6 @@ public class HashtagResponseDTO {
 
     private Long id;
     private String name;
-    private String isCity;
+    private boolean isCity;
 
 }
