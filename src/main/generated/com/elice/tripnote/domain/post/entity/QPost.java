@@ -38,6 +38,8 @@ public class QPost extends EntityPathBase<Post> {
 
     public final NumberPath<Integer> report = createNumber("report", Integer.class);
 
+    public final ListPath<com.elice.tripnote.domain.link.reportPost.entity.ReportPost, com.elice.tripnote.domain.link.reportPost.entity.QReportPost> reportPosts = this.<com.elice.tripnote.domain.link.reportPost.entity.ReportPost, com.elice.tripnote.domain.link.reportPost.entity.QReportPost>createList("reportPosts", com.elice.tripnote.domain.link.reportPost.entity.ReportPost.class, com.elice.tripnote.domain.link.reportPost.entity.QReportPost.class, PathInits.DIRECT2);
+
     public final com.elice.tripnote.domain.route.entity.QRoute route;
 
     public final StringPath title = createString("title");
