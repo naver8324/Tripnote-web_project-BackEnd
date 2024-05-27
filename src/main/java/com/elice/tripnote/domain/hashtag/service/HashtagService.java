@@ -17,34 +17,13 @@ public class HashtagService {
 
     private final HashtagRepository hashtagRepository;
 
-    //해시태그 조회
-    //지역과 지역이 아닌 해시태그 분리해서 조회
-    //지역 해시태그 조회 is_city = "Y"
-    @Transactional(readOnly = true)
-    public List<HashtagResponseDTO> getHashtagsByIsCity() {
-
-        return hashtagRepository.findHashtagsByIsCity()
-                .stream()
-                .map(Hashtag::toResponseDTO)
-                .collect(Collectors.toList());
-    }
-
-    //지역 아닌 해시태그 조회 is_city = "N"
-    @Transactional(readOnly = true)
-    public List<HashtagResponseDTO> getHashtagsByIsNotCity() {
-
-        return hashtagRepository.findHashtagsByIsNotCity()
-                .stream()
-                .map(Hashtag::toResponseDTO)
-                .collect(Collectors.toList());
-    }
-
     //해시태그 저장
+    @Transactional
     public HashtagResponseDTO saveHashtag(HashtagRequestDTO hashtagRequestDTO){
 
         Hashtag hashtag = Hashtag.builder()
                 .name(hashtagRequestDTO.getName())
-                .isCity(hashtagRequestDTO.getIsCity())
+                .isCity(hashtagRequestDTO.isCity())
                 .build();
 
         hashtagRepository.save(hashtag);
@@ -52,7 +31,29 @@ public class HashtagService {
         return hashtag.toResponseDTO();
     }
 
+    //해시태그 조회
+    //지역과 지역이 아닌 해시태그 분리해서 조회
+    //지역 해시태그 조회 is_city = true ,  isDelete = false
+    public List<HashtagResponseDTO> getHashtagsByIsCityTrue() {
+
+        return hashtagRepository.findByIsCityAndIsDelete(true, false)
+                .stream()
+                .map(Hashtag::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    //지역 아닌 해시태그 조회 is_city = false, isDelete = false
+    public List<HashtagResponseDTO> getHashtagsByIsCityFalse() {
+
+        return hashtagRepository.findByIsCityAndIsDelete(false, false)
+                .stream()
+                .map(Hashtag::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+
     //해시태그 수정
+    @Transactional
     public HashtagResponseDTO updateHashtag(Long id, HashtagRequestDTO hashtagRequestDTO){
 
         //해시태그 목록에서 선택하는 것이므로 null이 반환되지 않을 것으로 판단되어 get을 사용
@@ -63,9 +64,12 @@ public class HashtagService {
         return hashtag.toResponseDTO();
     }
 
-    //해시태그 삭제
+    //해시태그 삭제 ( isDelete = true 로 변경 )
     public void deleteHashtag(Long id){
 
-        hashtagRepository.deleteById(id);
+        Hashtag hashtag = hashtagRepository.getById(id);
+
+        hashtag.delete();
+
     }
 }

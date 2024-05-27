@@ -11,6 +11,6 @@ import lombok.Getter;
 public class HashtagRequestDTO {
 
     private String name;
-    private String isCity;
+    private boolean isCity;
 
 }
