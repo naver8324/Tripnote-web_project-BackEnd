@@ -54,7 +54,7 @@ public class MemberService implements UserDetailsService {
     // 이메일로 회원 조회 서비스
     @Transactional(readOnly = true)
     public Member getMemberByEmail(String email) {
-        return memberRepository.findByEmail(email).orElse(null);
+        return memberRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email));
     }
 
 
@@ -65,11 +65,20 @@ public class MemberService implements UserDetailsService {
     }
 
 
+    // 이메일로 멤버 ID 조회 서비스
+    @Transactional(readOnly = true)
+    public Long getMemberIdByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .map(Member::getId)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email));
+    }
+
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<Member> memberData = memberRepository.findByEmail(email);
 
         return memberData.map(MemberDetailsDTO::new)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email));
     }
 }
