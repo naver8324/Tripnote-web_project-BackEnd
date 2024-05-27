@@ -1,14 +1,12 @@
 package com.elice.tripnote.domain.comment.entity;
 
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class CommentResponseDTO {
 
     private Long id;
