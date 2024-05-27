@@ -1,7 +1,6 @@
 package com.elice.tripnote.domain.post.service;
 
-import com.elice.tripnote.domain.comment.entity.Comment;
-import com.elice.tripnote.domain.comment.repository.CommentRepository;
+
 import com.elice.tripnote.domain.comment.service.CommentService;
 import com.elice.tripnote.domain.link.likePost.entity.LikePost;
 import com.elice.tripnote.domain.link.likePost.repository.LikePostRepository;
@@ -20,8 +19,6 @@ import com.elice.tripnote.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +30,6 @@ public class PostService {
     private final CommentService commentService;
 
 
-    private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final LikePostRepository likePostRepository;
     private final ReportPostRepository reportPostRepository;
@@ -46,17 +42,15 @@ public class PostService {
 
     public Page<PostResponseDTO> getPosts(int page, int size){
 
-        return postRepository.findByIsDeletedIsFalse(PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
-
-
+        return postRepository.customFindNotDeletedPosts(page, size);
     }
 
     // 한 유저가 쓴 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
     public Page<PostResponseDTO> getPostsByMemberId(Long memberId, int page, int size){
-        memberOrElseThrowsException(memberId);
 
-        return postRepository.findByMemberIdAndIsDeletedIsFalse(memberId, PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
+        memberOrElseThrowsException(memberId);
+        return postRepository.customFindNotDeletedPostsByMemberId(memberId, page, size);
 
 
     }
@@ -66,7 +60,7 @@ public class PostService {
     public Page<PostResponseDTO> getLikePostsByMemberId(Long memberId, int page, int size){
         memberOrElseThrowsException(memberId);
 
-        return postRepository.findNotDeletedPostsByMemberIdWithLikes(memberId, PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
+        return postRepository.customFindNotDeletedPostsWithLikesByMemberId(memberId, page, size);
 
 
     }
@@ -75,7 +69,7 @@ public class PostService {
 
     public Page<PostResponseDTO> getPostsAll(int page, int size){
 
-        return postRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
+        return postRepository.customFindPosts(page, size);
 
 
     }
@@ -83,13 +77,19 @@ public class PostService {
 
 
     // 게시글을 상세 조회하는 메서드입니다. 삭제되지 않은 게시글만 볼 수 있습니다.
-    // TO DO: QueryDSL로 바꾼 이후에 크게 변경 예정
 
-    @Transactional(readOnly = true)
     public PostDetailResponseDTO getPost(Long postId, Long memberId){
 
-        Post post = postOrElseThrowsException(postId);
-        return post.toDetailDTO();
+        memberOrElseThrowsException(memberId);
+
+        PostDetailResponseDTO postDTO = postRepository.customFindPost(postId);
+        if(postDTO == null){
+            NoSuchPostException ex = new NoSuchPostException();
+            log.error("에러 발생: {}", ex.getMessage(), ex);
+            throw ex;
+        }
+
+        return postDTO;
 
 
     }
@@ -162,7 +162,7 @@ public class PostService {
 
 
 
-    // 게시글에 신고를 누를 때 사용하는 메서드입니다. 이미 신고를 눌렀으면 좋아요를 해제합니다.
+    // 게시글에 신고를 누를 때 사용하는 메서드입니다. 이미 신고를 눌렀으면 신고를 해제합니다.
     @Transactional
     public void reportPost(Long postId, Long memberId){
 
@@ -231,16 +231,6 @@ public class PostService {
                 });
     }
 
-    // comment id로 comment를 불러 올 때 존재하면 comment 객체를 반환하고 없으면 에러를 반환하는 메서드입니다.
-    private Comment commentOrElseThrowsException(Long commentId) {
-
-        return commentRepository.findById(commentId)
-                .orElseThrow(() -> {
-                    NoSuchCommentException ex = new NoSuchCommentException();
-                    log.error("에러 발생: {}", ex.getMessage(), ex);
-                    return ex;
-                });
-    }
 
     // member id로 member를 불러 올 때 존재하면 member 객체를 반환하고 없으면 에러를 반환하는 메서드입니다.
     private Member memberOrElseThrowsException(Long memberId) {
