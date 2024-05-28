@@ -24,7 +24,8 @@ public class SpotController {
     public ResponseEntity<SpotDTO> getSpotsByRegion(@RequestParam(name = "region",required = false) String region) {
         SpotDTO result = spotService.search(region);
         if (result != null) {
-            return new ResponseEntity<>(result, HttpStatus.OK);
+            //return new ResponseEntity<>(result, HttpStatus.OK);
+            return ResponseEntity.ok().body(result);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -44,9 +45,9 @@ public class SpotController {
     }
 
     @PostMapping("")
-    public Spot add(@RequestBody SpotDTO spotDTO) {
+    public ResponseEntity<Spot> add(@RequestBody SpotDTO spotDTO) {
         log.info("{}", spotDTO);
-
-        return spotService.add(spotDTO);
+        Spot createdSpot = spotService.add(spotDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdSpot);
     }
 }

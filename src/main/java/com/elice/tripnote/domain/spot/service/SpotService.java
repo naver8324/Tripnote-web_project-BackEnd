@@ -73,11 +73,12 @@ public class SpotService {
         return entity;
     }
     private Spot dtoToEntity(SpotDTO spotDTO){
+        String address = spotDTO.getAddress().split(" ")[0];
         return Spot.builder()
-                .location(spotDTO.getAddress())
+                .location(spotDTO.getTitle())
                 .likes(spotDTO.getVisitCount())
                 .imageUrl(spotDTO.getImageLink())
-                .region(spotDTO.getAddress()).build();
+                .region(address).build();
         //return entity;
     }
 }
