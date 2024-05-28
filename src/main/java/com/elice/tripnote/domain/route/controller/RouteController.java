@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/routes")
+@RequestMapping("/api/member/routes")
 public class RouteController implements SwaggerRouteController{
     private final RouteService routeService;
 
