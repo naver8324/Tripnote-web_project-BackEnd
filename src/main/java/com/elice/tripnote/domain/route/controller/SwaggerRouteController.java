@@ -1,7 +1,7 @@
 package com.elice.tripnote.domain.route.controller;
 
-import com.elice.tripnote.domain.route.entity.GetRegionResponseDTO;
 import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
+import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 @Tag(name = "route API", description = "경로 관련 api입니다.")
 public interface SwaggerRouteController {
@@ -58,5 +60,6 @@ public interface SwaggerRouteController {
     })
     ResponseEntity<Long> deleteRoute(Long routeId);
 
-    ResponseEntity<GetRegionResponseDTO> getRegion(String region);
+//    ResponseEntity<List<Long>> getRegion(String region, List<Long> hashtags);
+//    ResponseEntity<List<SpotResponseDTO>> getSpots();
 }

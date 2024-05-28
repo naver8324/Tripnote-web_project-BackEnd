@@ -1,21 +1,25 @@
 package com.elice.tripnote.domain.route.controller;
 
 import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
-import com.elice.tripnote.domain.route.entity.GetRegionResponseDTO;
 import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
+import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
 import com.elice.tripnote.domain.route.service.RouteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/member/routes")
-public class RouteController implements SwaggerRouteController{
+public class RouteController implements SwaggerRouteController {
     private final RouteService routeService;
 
     /**
      * 경로 생성
+     *
      * @param requestDto 경로를 만드는 유저 id, 총 경비, 여행지 id 리스트, 해시태그 id 리스트
      * @return 생성된 경로 id
      */
@@ -27,6 +31,7 @@ public class RouteController implements SwaggerRouteController{
 
     /**
      * 경로 비공개
+     *
      * @return 비공개 처리된 경로 id
      */
     @Override
@@ -37,6 +42,7 @@ public class RouteController implements SwaggerRouteController{
 
     /**
      * 경로 공개
+     *
      * @return 공개 처리된 경로 id
      */
     @Override
@@ -47,6 +53,7 @@ public class RouteController implements SwaggerRouteController{
 
     /**
      * 경로 삭제
+     *
      * @return '삭제 상태'로 변경된 경로 id
      */
     @Override
@@ -56,14 +63,29 @@ public class RouteController implements SwaggerRouteController{
     }
 
     /**
-     * 지역 선택 후 경로 추천하는 페이지 불러오기
-     * @return
+     * 지역 선택 후 경로 추천하는 페이지
+     * 지역에 맡는 경로 알아내기
+     * @param region
+     * @param hashtags 설정한 해시태그의 id
+     * @return 해당하는 경로들의 id 리스트
      */
-    @Override
+//    @Override
     @GetMapping("/region")
-    //TODO: 추후 해시태그를 어떻게 관리할지 결정되면 해시 태그 입력 받는 것도 추가
-    public ResponseEntity<GetRegionResponseDTO> getRegion(@RequestParam("region") String region) {
+    public ResponseEntity<List<Long>> getRegion(@RequestParam("region") String region,
+                                                          @RequestParam(value = "hashtags", required = false) List<Long> hashtags) {
+        if (hashtags == null) hashtags = Collections.emptyList();
         IntegratedRouteStatus status = IntegratedRouteStatus.fromName(region);
-        return ResponseEntity.ok(routeService.getRegion(status));
+        return ResponseEntity.ok(routeService.getRegion(status, hashtags));
     }
+
+    // 경로 id 리스트 보내면
+    // 각 경로에 맡는 여행지 리스트 리턴
+//    @Override
+//    @GetMapping
+//    public ResponseEntity<List<SpotResponseDTO>> getSpots(){
+//        return ResponseEntity.ok();
+//    }
+
+
+    // 경로 id 리스트 보내면 각 경로의 하트 수, 북마크 수 리턴
 }

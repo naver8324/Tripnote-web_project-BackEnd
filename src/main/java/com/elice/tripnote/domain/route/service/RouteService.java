@@ -8,16 +8,16 @@ import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
 import com.elice.tripnote.domain.likebookmarkperiod.entity.LikeBookmarkPeriod;
 import com.elice.tripnote.domain.likebookmarkperiod.repository.LikeBookPeriodRepository;
 import com.elice.tripnote.domain.link.routespot.entity.RouteSpot;
-import com.elice.tripnote.domain.member.repository.MemberRepository;
-import com.elice.tripnote.domain.route.entity.GetRegionResponseDTO;
-import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
-import com.elice.tripnote.domain.route.entity.Route;
-import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
-import com.elice.tripnote.domain.route.exception.EntityNotFoundException;
-import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.link.routespot.repository.RouteSpotRepository;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagRepository;
+import com.elice.tripnote.domain.member.repository.MemberRepository;
+import com.elice.tripnote.domain.route.entity.Route;
+import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
+import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
+import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
+import com.elice.tripnote.domain.route.exception.EntityNotFoundException;
+import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.repository.SpotRepository;
@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -186,17 +187,44 @@ public class RouteService {
         return route.getId();
     }
 
-    public GetRegionResponseDTO getRegion(IntegratedRouteStatus region){
+    public List<Long> getRegion(IntegratedRouteStatus region, List<Long> hashtags){
         // 통합 경로 중, 해당 지역을 지나는 통합 경로 필터링하고
+        // 통합 경로의 지역이 region인 경로들 필터링
 
         //TODO: 추후 해시태그에 대해 결졍되면 코드 추가
         // 해시태그 있으면 해시태그도 필터링
 
-        // 그 중에서 최근 좋아요(like bookmark period 이용) 많은 수 top 5 경로만 리턴
-        // 각 경로에 해당하는 여행지들도 함께 리턴하기
+        /*
+        SELECT ih.integerated_route_id
+        FROM
+            uuid_hashtag ih
+        WHERE
+            ih.integerated_route_id IN (
+                SELECT id
+                FROM integrated_route
+                WHERE IntegratedRouteStatus = :region
+            )
+        GROUP BY
+            ih.integerated_route_id
+        HAVING
+            COUNT(DISTINCT CASE WHEN ih.hashtag_id IN :hashtag_ids THEN ih.hashtag_id END) = :hashtag_ids_size;
+         */
 
-        // top 5 각 경로의 하트 수, 북마크 수도 함께 리턴
+        // 그 중에서 최근 좋아요(like bookmark period 이용) 많은 수 top 5 경로 id를 리턴
 
+        return null;
+    }
+
+    public List<SpotResponseDTO> getSpots(List<Long> routeIds){
+        List<SpotResponseDTO> responseDTOs = new ArrayList<>();
+        for(Long routeId : routeIds){
+            /*
+            select spot.id, spot.location, spot.region from spot
+            join route_spot
+            on route_spot.spot_id = spot.id
+            where route_spot.route_id=:routeId
+             */
+        }
         return null;
     }
 
