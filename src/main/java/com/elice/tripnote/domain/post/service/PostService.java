@@ -19,9 +19,11 @@ import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.post.repository.PostRepository;
 import com.elice.tripnote.jwt.JWTUtil;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +42,6 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final RouteRepository routeRepository;
 
-    private final JWTUtil jwtUtil;
 
 
 
@@ -55,7 +56,7 @@ public class PostService {
 
     public Page<PostResponseDTO> getPostsByMemberId(String jwt, int page, int size){
 
-        String email = jwtUtil.getEmail(jwt);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
         return postRepository.customFindNotDeletedPostsByMemberId(member.getId(), page, size);
 
@@ -66,10 +67,22 @@ public class PostService {
 
     public Page<PostResponseDTO> getCommentsByMemberWithLikes(String jwt, int page, int size){
 
-        String email = jwtUtil.getEmail(jwt);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
 
         return postRepository.customFindNotDeletedPostsWithLikesByMemberId(member.getId(), page, size);
+
+
+    }
+
+    // 한 유저가 북마크 한 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
+
+    public Page<PostResponseDTO> getCommentsByMemberWithMark(String jwt, int page, int size){
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberOrElseThrowsException(email);
+
+        return postRepository.customFindNotDeletedPostsWithMarkByMemberId(member.getId(), page, size);
 
 
     }
@@ -89,7 +102,7 @@ public class PostService {
 
     public PostDetailResponseDTO getPost(String jwt, Long postId){
 
-        String email = jwtUtil.getEmail(jwt);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
 
         PostDetailResponseDTO postDTO = postRepository.customFindPost(postId);
@@ -106,13 +119,12 @@ public class PostService {
 
 
     // 게시글을 저장하는 메서드입니다.
+    // TO DO: presigned URL 사용 예정.
     @Transactional
     public PostResponseDTO savePost(String jwt, PostRequestDTO postDTO, Long routeId){
 
-
-        String email = jwtUtil.getEmail(jwt);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
-
         Route route = routeOrElseThrowsException(routeId);
 
 
@@ -136,12 +148,14 @@ public class PostService {
 
 
 
-    // 게시글을 수정하는 메서드입니다.  DTO에 id가 있는지 여부는 controller단에서 검증합니다.
+    // 게시글을 수정하는 메서드입니다.
     @Transactional
-    public PostResponseDTO updatePost(PostRequestDTO postDTO, Long memberId){
+    public PostResponseDTO updatePost(String jwt, PostRequestDTO postDTO, Long postId){
 
-        Post post = postOrElseThrowsException(postDTO.getId());
-        if(!post.getMember().getId().equals(memberId)){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Post post = postOrElseThrowsException(postId);
+        if(!post.getMember().getEmail().equals(email)){
             handleNoAuthorization();
         }
 
@@ -154,18 +168,22 @@ public class PostService {
 
     // 게시글에 좋아요를 누를 때 사용하는 메서드입니다. 이미 좋아요를 눌렀으면 좋아요를 해제합니다.
     @Transactional
-    public void LikePost(Long postId, Long memberId){
+    public void likePost(String jwt, Long postId){
 
         Post post = postOrElseThrowsException(postId);
-        Member member = memberOrElseThrowsException(memberId);
 
-        LikePost likePost = likePostRepository.findByPostIdAndMemberId(postId, memberId);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Member member = memberOrElseThrowsException(email);
+
+        LikePost likePost = likePostRepository.findByPostIdAndMemberId(postId, member.getId());
 
         if(likePost == null){
             likePost = LikePost.builder()
                     .member(member)
                     .post(post)
                     .build();
+            likePostRepository.save(likePost);
         }
 
 
@@ -173,20 +191,23 @@ public class PostService {
 
     }
 
-    // 게시글에 북마크를 누를 때 사용하는 메서드입니다. 이미 눌렀으면 신고를 해제합니다.
+    // 게시글에 북마크를 누를 때 사용하는 메서드입니다. 이미 눌렀으면 북마크를 해제합니다.
     @Transactional
-    public void markPost(Long postId, Long memberId){
+    public void markPost(String jwt, Long postId){
 
         Post post = postOrElseThrowsException(postId);
-        Member member = memberOrElseThrowsException(memberId);
 
-        Bookmark bookmark = bookmarkRepository.findByPostIdAndMemberId(postId, memberId);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberOrElseThrowsException(email);
+
+        Bookmark bookmark = bookmarkRepository.findByPostIdAndMemberId(postId, member.getId());
 
         if(bookmark == null){
             bookmark = Bookmark.builder()
                     .member(member)
                     .post(post)
                     .build();
+            bookmarkRepository.save(bookmark);
         }
         bookmark.mark(null, post);
 
@@ -195,18 +216,20 @@ public class PostService {
 
     // 게시글에 신고를 누를 때 사용하는 메서드입니다. 이미 신고를 눌렀으면 신고를 해제합니다.
     @Transactional
-    public void reportPost(Long postId, Long memberId){
+    public void reportPost(String jwt, Long postId){
 
         Post post = postOrElseThrowsException(postId);
-        Member member = memberOrElseThrowsException(memberId);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberOrElseThrowsException(email);
 
-        ReportPost reportPost = reportPostRepository.findByPostIdAndMemberId(postId, memberId);
+        ReportPost reportPost = reportPostRepository.findByPostIdAndMemberId(postId, member.getId());
 
         if(reportPost == null){
             reportPost = ReportPost.builder()
                     .member(member)
                     .post(post)
                     .build();
+            reportPostRepository.save(reportPost);
         }
 
 
@@ -217,28 +240,34 @@ public class PostService {
 
     // 게시글을 삭제하는 메서드입니다. 게시글을 쓴 유저가 사용합니다.
     @Transactional
-    public void deletePost(Long postId, Long memberId){
+    public void deletePost(String jwt, Long postId){
 
         Post post = postOrElseThrowsException(postId);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        if(!post.getMember().getId().equals(memberId)){
+        if(!post.getMember().getEmail().equals(email)){
             handleNoAuthorization();
         }
         commentService.deleteCommentsByPostId(postId);
 
         post.delete();
 
+        postRepository.save(post);
+
     }
 
     // 게시글을 삭제하는 메서드입니다. 관리자만 사용할 수 있습니다.
     @Transactional
-    public void deletePost(Long postId){
+    public void deletePostAdmin(String jwt, Long postId){
 
 
         Post post = postOrElseThrowsException(postId);
 
         commentService.deleteCommentsByPostId(postId);
+
         post.delete();
+
+        postRepository.save(post);
 
     }
 
@@ -252,6 +281,8 @@ public class PostService {
 
 
     // post id로 post를 불러 올 때 존재하면 post 객체를 반환하고 없으면 에러를 반환하는 메서드입니다.
+
+    @Transactional
     private Post postOrElseThrowsException(Long postId) {
 
         return postRepository.findById(postId)
