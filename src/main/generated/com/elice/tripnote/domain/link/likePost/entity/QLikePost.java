@@ -22,9 +22,9 @@ public class QLikePost extends EntityPathBase<LikePost> {
 
     public static final QLikePost likePost = new QLikePost("likePost");
 
-    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
-
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    public final DateTimePath<java.time.LocalDateTime> likedAt = createDateTime("likedAt", java.time.LocalDateTime.class);
 
     public final com.elice.tripnote.domain.member.entity.QMember member;
 

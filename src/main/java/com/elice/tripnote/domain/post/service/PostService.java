@@ -1,13 +1,17 @@
 package com.elice.tripnote.domain.post.service;
 
-import com.elice.tripnote.domain.comment.entity.Comment;
-import com.elice.tripnote.domain.comment.repository.CommentRepository;
+
 import com.elice.tripnote.domain.comment.service.CommentService;
+import com.elice.tripnote.domain.link.bookmark.entity.Bookmark;
+import com.elice.tripnote.domain.link.bookmark.repository.BookmarkRepository;
 import com.elice.tripnote.domain.link.likePost.entity.LikePost;
 import com.elice.tripnote.domain.link.likePost.repository.LikePostRepository;
+import com.elice.tripnote.domain.link.reportPost.entity.ReportPost;
+import com.elice.tripnote.domain.link.reportPost.repository.ReportPostRepository;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.domain.post.entity.Post;
+import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.exception.*;
@@ -17,23 +21,21 @@ import com.elice.tripnote.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class PostService {
 
     private final CommentService commentService;
 
 
-    private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final LikePostRepository likePostRepository;
+    private final ReportPostRepository reportPostRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final MemberRepository memberRepository;
     private final RouteRepository routeRepository;
 
@@ -41,48 +43,63 @@ public class PostService {
 
     // 전체 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    @Transactional(readOnly = true)
     public Page<PostResponseDTO> getPosts(int page, int size){
 
-        return postRepository.findByIsDeletedIsFalse(PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
-
-
+        return postRepository.customFindNotDeletedPosts(page, size);
     }
 
     // 한 유저가 쓴 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    @Transactional(readOnly = true)
     public Page<PostResponseDTO> getPostsByMemberId(Long memberId, int page, int size){
-        memberOrElseThrowsException(memberId);
 
-        return postRepository.findByMember_IdAndIsDeletedIsFalse(memberId, PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
+        memberOrElseThrowsException(memberId);
+        return postRepository.customFindNotDeletedPostsByMemberId(memberId, page, size);
 
 
     }
 
     // 한 유저가 좋아요 한 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    @Transactional(readOnly = true)
     public Page<PostResponseDTO> getLikePostsByMemberId(Long memberId, int page, int size){
         memberOrElseThrowsException(memberId);
 
-        return postRepository.findNotDeletedPostsByMemberIdWithLikes(memberId, PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
+        return postRepository.customFindNotDeletedPostsWithLikesByMemberId(memberId, page, size);
 
 
     }
 
     //  전체 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제된 게시글도 불러오며 관리자만 사용할 수 있습니다.
 
-    @Transactional(readOnly = true)
     public Page<PostResponseDTO> getPostsAll(int page, int size){
 
-        return postRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending())).map(Post::toDTO);
+        return postRepository.customFindPosts(page, size);
+
+
+    }
+
+
+
+    // 게시글을 상세 조회하는 메서드입니다. 삭제되지 않은 게시글만 볼 수 있습니다.
+
+    public PostDetailResponseDTO getPost(Long postId, Long memberId){
+
+        memberOrElseThrowsException(memberId);
+
+        PostDetailResponseDTO postDTO = postRepository.customFindPost(postId);
+        if(postDTO == null){
+            NoSuchPostException ex = new NoSuchPostException();
+            log.error("에러 발생: {}", ex.getMessage(), ex);
+            throw ex;
+        }
+
+        return postDTO;
 
 
     }
 
 
     // 게시글을 저장하는 메서드입니다.
+    @Transactional
     public PostResponseDTO savePost(PostRequestDTO postDTO, Long memberId, Long routeId){
 
         Member member = memberOrElseThrowsException(memberId);
@@ -110,6 +127,7 @@ public class PostService {
 
 
     // 게시글을 수정하는 메서드입니다.  DTO에 id가 있는지 여부는 controller단에서 검증합니다.
+    @Transactional
     public PostResponseDTO updatePost(PostRequestDTO postDTO, Long memberId){
 
         Post post = postOrElseThrowsException(postDTO.getId());
@@ -125,12 +143,13 @@ public class PostService {
 
 
     // 게시글에 좋아요를 누를 때 사용하는 메서드입니다. 이미 좋아요를 눌렀으면 좋아요를 해제합니다.
-    public void createLikePost(Long postId, Long memberId){
+    @Transactional
+    public void LikePost(Long postId, Long memberId){
 
         Post post = postOrElseThrowsException(postId);
         Member member = memberOrElseThrowsException(memberId);
 
-        LikePost likePost = likePostRepository.findByPost_IdAndMember_Id(postId, memberId);
+        LikePost likePost = likePostRepository.findByPostIdAndMemberId(postId, memberId);
 
         if(likePost == null){
             likePost = LikePost.builder()
@@ -144,26 +163,50 @@ public class PostService {
 
     }
 
-
-
-    // 게시글의 신고수를 늘리는 메서드입니다. 유저가 신고 버튼을 누를 때 사용합니다.
-    public void addReportCount(Long postId){
+    // 게시글에 북마크를 누를 때 사용하는 메서드입니다. 이미 눌렀으면 신고를 해제합니다.
+    @Transactional
+    public void markPost(Long postId, Long memberId){
 
         Post post = postOrElseThrowsException(postId);
-        post.addReport();
+        Member member = memberOrElseThrowsException(memberId);
+
+        Bookmark bookmark = bookmarkRepository.findByPostIdAndMemberId(postId, memberId);
+
+        if(bookmark == null){
+            bookmark = Bookmark.builder()
+                    .member(member)
+                    .post(post)
+                    .build();
+        }
+        bookmark.mark(null, post);
 
     }
 
-    // 게시글의 신고수를 줄이는 메서드입니다. 유저가 신고를 취소할 때 사용합니다.
-    public void removeReportCount(Long postId){
+
+    // 게시글에 신고를 누를 때 사용하는 메서드입니다. 이미 신고를 눌렀으면 신고를 해제합니다.
+    @Transactional
+    public void reportPost(Long postId, Long memberId){
 
         Post post = postOrElseThrowsException(postId);
-        post.removeReport();
+        Member member = memberOrElseThrowsException(memberId);
+
+        ReportPost reportPost = reportPostRepository.findByPostIdAndMemberId(postId, memberId);
+
+        if(reportPost == null){
+            reportPost = ReportPost.builder()
+                    .member(member)
+                    .post(post)
+                    .build();
+        }
+
+
+        reportPost.report();
 
     }
 
 
     // 게시글을 삭제하는 메서드입니다. 게시글을 쓴 유저가 사용합니다.
+    @Transactional
     public void deletePost(Long postId, Long memberId){
 
         Post post = postOrElseThrowsException(postId);
@@ -178,7 +221,8 @@ public class PostService {
     }
 
     // 게시글을 삭제하는 메서드입니다. 관리자만 사용할 수 있습니다.
-    public void deleteComment(Long postId){
+    @Transactional
+    public void deletePost(Long postId){
 
 
         Post post = postOrElseThrowsException(postId);
@@ -208,16 +252,6 @@ public class PostService {
                 });
     }
 
-    // comment id로 comment를 불러 올 때 존재하면 comment 객체를 반환하고 없으면 에러를 반환하는 메서드입니다.
-    private Comment commentOrElseThrowsException(Long commentId) {
-
-        return commentRepository.findById(commentId)
-                .orElseThrow(() -> {
-                    NoSuchCommentException ex = new NoSuchCommentException();
-                    log.error("에러 발생: {}", ex.getMessage(), ex);
-                    return ex;
-                });
-    }
 
     // member id로 member를 불러 올 때 존재하면 member 객체를 반환하고 없으면 에러를 반환하는 메서드입니다.
     private Member memberOrElseThrowsException(Long memberId) {
