@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/admin/hashtags")
+@RequestMapping("/api/admin/hashtags")
 public class HashtagController implements SwaggerHashtagController{
 
     private final HashtagService hashtagService;

@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,6 +22,12 @@ public class MemberController implements SwaggerMemberController {
     @GetMapping("/test")
     public String test(){
         return "completed test.";
+    }
+
+    @GetMapping("/test1")
+    public String test2(){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return email + " | completed test1.";
     }
 
     // 회원가입 테스트중
