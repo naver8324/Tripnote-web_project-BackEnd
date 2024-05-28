@@ -55,7 +55,7 @@ public class PostService {
 
     public Page<PostResponseDTO> getPostsByMemberId(String jwt, int page, int size){
 
-        String email = jwtUtil.getUsername(jwt);
+        String email = jwtUtil.getEmail(jwt);
         Member member = memberOrElseThrowsException(email);
         return postRepository.customFindNotDeletedPostsByMemberId(member.getId(), page, size);
 
@@ -66,7 +66,7 @@ public class PostService {
 
     public Page<PostResponseDTO> getCommentsByMemberWithLikes(String jwt, int page, int size){
 
-        String email = jwtUtil.getUsername(jwt);
+        String email = jwtUtil.getEmail(jwt);
         Member member = memberOrElseThrowsException(email);
 
         return postRepository.customFindNotDeletedPostsWithLikesByMemberId(member.getId(), page, size);
@@ -89,7 +89,7 @@ public class PostService {
 
     public PostDetailResponseDTO getPost(String jwt, Long postId){
 
-        String email = jwtUtil.getUsername(jwt);
+        String email = jwtUtil.getEmail(jwt);
         Member member = memberOrElseThrowsException(email);
 
         PostDetailResponseDTO postDTO = postRepository.customFindPost(postId);
@@ -110,7 +110,7 @@ public class PostService {
     public PostResponseDTO savePost(String jwt, PostRequestDTO postDTO, Long routeId){
 
 
-        String email = jwtUtil.getUsername(jwt);
+        String email = jwtUtil.getEmail(jwt);
         Member member = memberOrElseThrowsException(email);
 
         Route route = routeOrElseThrowsException(routeId);
