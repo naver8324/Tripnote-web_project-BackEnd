@@ -18,6 +18,7 @@ import com.elice.tripnote.jwt.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,10 +78,12 @@ public class CommentService {
 
 
     // 댓글을 저장하는 메서드입니다.
+
+    @Transactional
     public CommentResponseDTO saveComment(String jwt, CommentRequestDTO commentDTO, Long postId){
 
         Post post = postOrElseThrowsException(postId);
-        String email = jwtUtil.getEmail(jwt);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
 
 
@@ -103,11 +106,13 @@ public class CommentService {
 
 
     // 댓글을 수정하는 메서드입니다.
+
+    @Transactional
     public CommentResponseDTO updateComment(String jwt, CommentRequestDTO commentDTO, Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
 
-        String email = jwtUtil.getEmail(jwt);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if(!comment.getMember().getEmail().equals(email)){
             handleNoAuthorization();
@@ -125,7 +130,7 @@ public class CommentService {
     public void reportComment(String jwt, Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
-        String email = jwtUtil.getEmail(jwt);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Member member = memberOrElseThrowsException(email);
 
@@ -136,7 +141,10 @@ public class CommentService {
                     .member(member)
                     .comment(comment)
                     .build();
+            reportComment = reportCommentRepository.save(reportComment);
+
         }
+
 
 
         reportComment.report();
@@ -151,7 +159,7 @@ public class CommentService {
 
         Comment comment = commentOrElseThrowsException(commentId);
 
-        String email = jwtUtil.getEmail(jwt);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if(!comment.getMember().getEmail().equals(email)){
             handleNoAuthorization();
@@ -173,6 +181,8 @@ public class CommentService {
     }
 
     // 게시글을 삭제할 때 게시글에 달린 댓글들을 삭제하는 메서드입니다.
+
+    @Transactional
     public void deleteCommentsByPostId(Long postId) {
 //        Post post = postOrElseThrowsException(postId);
 

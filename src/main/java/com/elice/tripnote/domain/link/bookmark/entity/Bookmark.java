@@ -22,8 +22,7 @@ public class Bookmark{
 
 
     @Column
-    @Builder.Default
-    private LocalDateTime markedAt = LocalDateTime.now();
+    private LocalDateTime markedAt;
 
 
 

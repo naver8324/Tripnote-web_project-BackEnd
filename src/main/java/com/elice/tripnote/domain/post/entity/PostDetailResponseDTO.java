@@ -28,6 +28,6 @@ public class PostDetailResponseDTO {
 
     private LocalDateTime reportedAt;
 
-    private Route route;
+    private Long routeId;
 
 }

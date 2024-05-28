@@ -10,6 +10,6 @@ public class NoSuchAuthorizationException extends RuntimeException{
 
     public NoSuchAuthorizationException(){
         super(ErrorCode.UNAUTHORIZED.getMessage());
-        errorCode = ErrorCode.NO_POST;
+        errorCode = ErrorCode.UNAUTHORIZED;
     }
 }

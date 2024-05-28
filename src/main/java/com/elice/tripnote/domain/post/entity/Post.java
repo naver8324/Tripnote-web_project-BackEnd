@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.post.entity;
 
 
 import com.elice.tripnote.domain.comment.entity.Comment;
+import com.elice.tripnote.domain.link.bookmark.entity.Bookmark;
 import com.elice.tripnote.domain.link.reportPost.entity.ReportPost;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.route.entity.Route;
@@ -70,6 +71,9 @@ public class Post extends BaseTimeEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "post")
     private List<ReportPost> reportPosts = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "post")
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
 
     public PostResponseDTO toDTO() {
