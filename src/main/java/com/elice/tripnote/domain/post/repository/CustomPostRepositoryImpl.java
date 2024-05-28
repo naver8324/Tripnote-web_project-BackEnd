@@ -162,8 +162,8 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         reportPost.reportedAt
                 ))
                 .from(post)
-                .join(post.likePosts, likePost)
-                .join(post.reportPosts, reportPost)
+                .leftJoin(post.likePosts, likePost)
+                .leftJoin(post.reportPosts, reportPost)
                 .where(post.id.eq(postId)
                         .and(post.isDeleted.isFalse()))
                 .fetchOne();
