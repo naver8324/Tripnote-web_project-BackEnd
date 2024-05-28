@@ -74,9 +74,16 @@ public class JWTFilter extends OncePerRequestFilter {
 
             // 세션에 사용자 등록
             SecurityContextHolder.getContext().setAuthentication(authToken);
-        }else if(Objects.equals(role, "ROLE_ADMIN")){ // 관리자일 때
-            // 아직 미구현
+        }else if(Objects.equals(role, "ROLE_ADMIN")){
+            // 관리자일 때
             log.info("admin - in");
+            // 아직 미구현
+
+        }else{
+            // 유효하지 않은 역할 처리
+            log.error("Invalid role: " + role);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid role");
+            return; // 조건이 해당되면 메소드 종료 (필수)
         }
 
 
