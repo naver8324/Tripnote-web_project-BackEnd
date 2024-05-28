@@ -44,6 +44,11 @@ public class SpotController {
 //        }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Spot> getSpotById(@PathVariable("id") Long id){
+        Spot spot = spotService.searchById(id);
+        return ResponseEntity.ok().body(spot);
+    }
     @PostMapping("")
     public ResponseEntity<Spot> add(@RequestBody SpotDTO spotDTO) {
         log.info("{}", spotDTO);

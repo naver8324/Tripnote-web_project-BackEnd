@@ -3,6 +3,7 @@ package com.elice.tripnote.domain.spot.service;
 import com.elice.tripnote.domain.spot.dto.SpotDTO;
 import com.elice.tripnote.domain.spot.dto.SpotResponseDTO;
 import com.elice.tripnote.domain.spot.entity.Spot;
+import com.elice.tripnote.domain.spot.exception.RegionNotFoundException;
 import com.elice.tripnote.domain.spot.naver.NaverClient;
 import com.elice.tripnote.domain.spot.naver.dto.SearchImageReq;
 import com.elice.tripnote.domain.spot.naver.dto.SearchLocalReq;
@@ -38,6 +39,14 @@ public class SpotService {
                 .collect(Collectors.toList());
     }
 
+    public Spot searchById(Long id){
+        Spot spot = spotRepository.findById(id).orElse(null);
+        if (spot==null) {
+            throw new RegionNotFoundException();
+        }
+        // Assuming you want to return the first spot found
+        return spot;
+    }
     public SpotDTO search(String query) {
         var searchLocalReq = new SearchLocalReq();
         searchLocalReq.setQuery(query);
@@ -52,13 +61,13 @@ public class SpotService {
 
             if (searchImageRes.getTotal() > 0) {
                 var imageItem = searchImageRes.getItems().stream().findFirst().get();
-                // 결과를 리턴
+
                 var result = new SpotDTO();
                 result.setTitle(localItem.getTitle());
                 result.setCategory(localItem.getCategory());
                 result.setAddress(localItem.getAddress());
                 result.setRoadAddress(localItem.getRoadAddress());
-                result.setHomePageLink(localItem.getLink());
+              //  result.setHomePageLink(localItem.getLink());
                 result.setImageLink(imageItem.getLink());
 
                 return result;
