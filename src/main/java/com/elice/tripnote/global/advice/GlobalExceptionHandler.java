@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(HashtagNameDuplicateException.class)
-    public ResponseEntity<ErrorResponse> HashtagNameDuplicateExceptionHandler(HashtagNameDuplicateException ex){
+    public ResponseEntity<ErrorResponse> handelHashtagNameDuplicateException(HashtagNameDuplicateException ex){
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
