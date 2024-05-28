@@ -1,8 +1,10 @@
 package com.elice.tripnote.domain.post.repository;
 
 
+import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
 import com.elice.tripnote.domain.link.reportPost.entity.QReportPost;
+import com.elice.tripnote.domain.member.entity.QMember;
 import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.entity.QPost;
@@ -24,11 +26,16 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     private final JPAQueryFactory query;
 
 
+    private final QMember member = QMember.member;
+
+
     private final QPost post = QPost.post;
     private final QRoute route = QRoute.route;
 
     private final QLikePost likePost = QLikePost.likePost;
     private final QReportPost reportPost = QReportPost.reportPost;
+
+    private final QBookmark bookmark = QBookmark.bookmark;
 
 
     public Page<PostResponseDTO> customFindNotDeletedPosts(int page, int size){
@@ -121,12 +128,15 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
     public Page<PostResponseDTO> customFindNotDeletedPostsWithLikesByMemberId(Long memberId, int page, int size){
 
+        page = page > 0 ? page - 1 : 0;
+
         long totalCount = query
                 .from(post)
                 .join(post.likePosts, likePost)
-                .where(post.member.id.eq(memberId)
-                        .and(likePost.likedAt.isNotNull())
-                        .and(post.isDeleted.isFalse()))
+                .on(likePost.likedAt.isNotNull())
+                .join(likePost.member, member)
+                .on(member.id.eq(memberId))
+                .where(post.isDeleted.isFalse())
                 .fetch().size();
 
         List<PostResponseDTO> postResponseDTOs = query
@@ -137,9 +147,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         post.isDeleted
                 ))
                 .from(post)
-                .where(post.member.id.eq(memberId)
-                        .and(likePost.likedAt.isNotNull())
-                        .and(post.isDeleted.isFalse()))
+                .join(post.likePosts, likePost)
+                .on(likePost.likedAt.isNotNull())
+                .join(likePost.member, member)
+                .on(member.id.eq(memberId))
+                .where(post.isDeleted.isFalse())
                 .orderBy(post.id.desc())
                 .offset(page * size)
                 .limit(size)
@@ -150,6 +162,45 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
 
     }
+
+
+    public Page<PostResponseDTO> customFindNotDeletedPostsWithMarkByMemberId(Long memberId, int page, int size){
+
+        page = page > 0 ? page - 1 : 0;
+
+        long totalCount = query
+                .from(post)
+                .join(post.bookmarks, bookmark)
+                .on(bookmark.markedAt.isNotNull())
+                .join(bookmark.member, member)
+                .on(member.id.eq(memberId))
+                .where(post.isDeleted.isFalse())
+                .fetch().size();
+
+        List<PostResponseDTO> postResponseDTOs = query
+                .select(Projections.constructor(PostResponseDTO.class,
+                        post.id,
+                        post.title,
+                        post.content,
+                        post.isDeleted
+                ))
+                .from(post)
+                .join(post.bookmarks, bookmark)
+                .on(bookmark.markedAt.isNotNull())
+                .join(bookmark.member, member)
+                .on(member.id.eq(memberId))
+                .where(post.isDeleted.isFalse())
+                .orderBy(post.id.desc())
+                .offset(page * size)
+                .limit(size)
+                .fetch();
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
+
+    }
+
 
     public PostDetailResponseDTO customFindPost(Long postId){
 
