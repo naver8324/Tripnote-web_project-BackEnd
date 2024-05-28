@@ -20,43 +20,44 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class CommentController implements SwaggerCommentController {
 
     private final CommentService commentService;
 
     @Override
-    @GetMapping("/api/user/comments")
+    @GetMapping("/member/comments")
     public ResponseEntity<Page<CommentResponseDTO>> getCommentsByPostId(@RequestParam(name="postId") Long postId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(commentService.getCommentsByPostId(postId, page, size));
     }
 
     @Override
-    @GetMapping("/api/admin/comments")
+    @GetMapping("/admin/comments")
     public ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(@RequestHeader("Authorization") String jwt, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(commentService.getCommentsAll(jwt, page, size));
     }
 
 
     @Override
-    @GetMapping("/api/admin/comments/users/{userId}")
+    @GetMapping("/admin/comments/users/{userId}")
     public ResponseEntity<Page<CommentResponseDTO>> getCommentsByMemberId(@RequestHeader("Authorization") String jwt, @PathVariable(name = "userId") Long memberId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(commentService.getCommentsByMemberId(jwt, memberId, page, size));
     }
 
     @Override
-    @PostMapping("/api/user/comments")
+    @PostMapping("/member/comments")
     public ResponseEntity<CommentResponseDTO> saveComment(@RequestHeader("Authorization") String jwt, @RequestBody CommentRequestDTO commentDTO, @RequestParam(name="postId") Long postId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(commentService.saveComment(jwt, commentDTO, postId));
     }
 
     @Override
-    @PatchMapping("/api/user/comments/{commentId}")
+    @PatchMapping("/member/comments/{commentId}")
     public ResponseEntity<CommentResponseDTO> updateComment(@RequestHeader("Authorization") String jwt, @RequestBody CommentRequestDTO commentDTO, @PathVariable(name="commentId") Long commentId) {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.updateComment(jwt, commentDTO, commentId));
     }
 
     @Override
-    @GetMapping("/api/user/comments/{commentId}/report")
+    @GetMapping("/member/comments/{commentId}/report")
     public ResponseEntity reportComment(@RequestHeader("Authorization") String jwt, @PathVariable(name="commentId") Long commentId) {
 
         commentService.reportComment(jwt, commentId);
@@ -64,14 +65,14 @@ public class CommentController implements SwaggerCommentController {
     }
 
     @Override
-    @DeleteMapping("/api/user/comments/{commentId}")
+    @DeleteMapping("/member/comments/{commentId}")
     public ResponseEntity deleteComment(@RequestHeader("Authorization") String jwt, @PathVariable(name="commentId") Long commentId) {
         commentService.deleteComment(jwt, commentId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override
-    @DeleteMapping("/api/admin/comments/{commentId}")
+    @DeleteMapping("/admin/comments/{commentId}")
     public ResponseEntity deleteCommentAdmin(@RequestHeader("Authorization") String jwt, @PathVariable(name="commentId") Long commentId) {
         commentService.deleteCommentAdmin(jwt, commentId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
