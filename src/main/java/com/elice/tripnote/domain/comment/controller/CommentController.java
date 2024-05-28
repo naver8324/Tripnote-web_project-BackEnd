@@ -126,7 +126,7 @@ public class CommentController implements SwaggerCommentController {
                 .message(ex.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
 
