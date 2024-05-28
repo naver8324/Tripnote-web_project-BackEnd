@@ -2,16 +2,14 @@ package com.elice.tripnote.domain.post.entity;
 
 
 import com.elice.tripnote.domain.route.entity.Route;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
 public class PostDetailResponseDTO {
 
     private Long id;

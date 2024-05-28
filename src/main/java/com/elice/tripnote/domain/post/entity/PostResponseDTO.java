@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
 public class PostResponseDTO{
 
     private Long id;
