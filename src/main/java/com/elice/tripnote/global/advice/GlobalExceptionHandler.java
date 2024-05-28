@@ -2,12 +2,11 @@ package com.elice.tripnote.global.advice;
 
 
 import com.elice.tripnote.domain.hashtag.exception.HashtagNameDuplicateException;
-import com.elice.tripnote.domain.post.exception.NoSuchAuthorizationException;
-import com.elice.tripnote.domain.post.exception.NoSuchCommentException;
-import com.elice.tripnote.domain.post.exception.NoSuchPostException;
-import com.elice.tripnote.domain.post.exception.NoSuchUserException;
+import com.elice.tripnote.domain.post.exception.*;
 import com.elice.tripnote.global.entity.ErrorResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -57,6 +56,24 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoSuchAuthorizationException.class)
     public ResponseEntity<ErrorResponse> handleNoSuchAuthorizationException(NoSuchAuthorizationException ex){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ErrorResponse> handleMissingRequestHeaderException(MissingRequestHeaderException ex){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+        @ExceptionHandler(NoSuchRouteException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchRouteException(NoSuchRouteException ex){
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
                 .timestamp(LocalDateTime.now())

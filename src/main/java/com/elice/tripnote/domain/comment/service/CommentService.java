@@ -80,7 +80,7 @@ public class CommentService {
     public CommentResponseDTO saveComment(String jwt, CommentRequestDTO commentDTO, Long postId){
 
         Post post = postOrElseThrowsException(postId);
-        String email = jwtUtil.getUsername(jwt);
+        String email = jwtUtil.getEmail(jwt);
         Member member = memberOrElseThrowsException(email);
 
 
@@ -107,7 +107,7 @@ public class CommentService {
 
         Comment comment = commentOrElseThrowsException(commentId);
 
-        String email = jwtUtil.getUsername(jwt);
+        String email = jwtUtil.getEmail(jwt);
 
         if(!comment.getMember().getEmail().equals(email)){
             handleNoAuthorization();
@@ -125,7 +125,7 @@ public class CommentService {
     public void reportComment(String jwt, Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
-        String email = jwtUtil.getUsername(jwt);
+        String email = jwtUtil.getEmail(jwt);
 
         Member member = memberOrElseThrowsException(email);
 
@@ -151,7 +151,7 @@ public class CommentService {
 
         Comment comment = commentOrElseThrowsException(commentId);
 
-        String email = jwtUtil.getUsername(jwt);
+        String email = jwtUtil.getEmail(jwt);
 
         if(!comment.getMember().getEmail().equals(email)){
             handleNoAuthorization();
