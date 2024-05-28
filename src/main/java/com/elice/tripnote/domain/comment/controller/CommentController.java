@@ -79,6 +79,56 @@ public class CommentController implements SwaggerCommentController {
     }
 
 
+    @ExceptionHandler(NoSuchPostException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchPostException(NoSuchPostException ex){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(404)
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(NoSuchUserException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchUserException(NoSuchUserException ex){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(404)
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(NoSuchCommentException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchCommentException(NoSuchCommentException ex){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(404)
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(NoSuchAuthorizationException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchAuthorizationException(NoSuchAuthorizationException ex){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(401)
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ErrorResponse> handleMissingRequestHeaderException(MissingRequestHeaderException ex){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(403)
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
 
 
 }
