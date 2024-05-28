@@ -22,7 +22,7 @@ public class LikePost{
 
     @Column
     @Builder.Default
-    private LocalDateTime likedAt = LocalDateTime.now();
+    private LocalDateTime likedAt;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

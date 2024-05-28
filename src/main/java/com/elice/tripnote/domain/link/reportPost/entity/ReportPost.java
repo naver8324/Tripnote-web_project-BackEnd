@@ -22,7 +22,7 @@ public class ReportPost {
 
     @Column
     @Builder.Default
-    private LocalDateTime reportedAt = LocalDateTime.now();
+    private LocalDateTime reportedAt;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
