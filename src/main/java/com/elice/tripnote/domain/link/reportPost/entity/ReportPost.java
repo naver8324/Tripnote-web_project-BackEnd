@@ -21,7 +21,6 @@ public class ReportPost {
 
 
     @Column
-    @Builder.Default
     private LocalDateTime reportedAt;
 
 

@@ -21,7 +21,6 @@ public class LikePost{
 
 
     @Column
-    @Builder.Default
     private LocalDateTime likedAt;
 
 
