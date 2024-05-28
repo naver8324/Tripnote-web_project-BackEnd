@@ -82,4 +82,5 @@ public class MemberService implements UserDetailsService {
         return memberData.map(MemberDetailsDTO::new)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email));
     }
+    
 }
