@@ -14,6 +14,7 @@ import com.elice.tripnote.domain.post.exception.NoSuchPostException;
 import com.elice.tripnote.domain.post.entity.Post;
 import com.elice.tripnote.domain.post.exception.NoSuchUserException;
 import com.elice.tripnote.domain.post.repository.PostRepository;
+import com.elice.tripnote.jwt.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,11 +33,14 @@ public class CommentService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
 
+    private final JWTUtil jwtUtil;
+
 
 
     // 게시글에서 게시글에 해당하는 댓글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 댓글만 불러옵니다.
 
     public Page<CommentResponseDTO> getCommentsByPostId(Long postId, int page, int size){
+
 
         Post post = postOrElseThrowsException(postId);
 
@@ -50,7 +54,9 @@ public class CommentService {
 
 
     // 관리자가 모든 댓글을 불러올 때 사용하는 메서드. 삭제된 댓글도 불러옵니다.
-    public Page<CommentResponseDTO> getCommentsAll(int page, int size){
+    public Page<CommentResponseDTO> getCommentsAll(String jwt, int page, int size){
+
+
 
         return commentRepository.customFindComments(page, size);
 
@@ -58,7 +64,8 @@ public class CommentService {
     }
 
     // 관리자가 한 유저의 전체 댓글을 불러올 때 사용하는 메서드. 삭제된 댓글도 불러옵니다.
-    public Page<CommentResponseDTO> getCommentsByMemberId(Long memberId, int page, int size){
+    public Page<CommentResponseDTO> getCommentsByMemberId(String jwt, Long memberId, int page, int size){
+
 
         Member member = memberOrElseThrowsException(memberId);
 
@@ -70,10 +77,11 @@ public class CommentService {
 
 
     // 댓글을 저장하는 메서드입니다.
-    public CommentResponseDTO saveComment(CommentRequestDTO commentDTO, Long postId, Long memberId){
+    public CommentResponseDTO saveComment(String jwt, CommentRequestDTO commentDTO, Long postId){
 
         Post post = postOrElseThrowsException(postId);
-        Member member = memberOrElseThrowsException(memberId);
+        String email = jwtUtil.getUsername(jwt);
+        Member member = memberOrElseThrowsException(email);
 
 
         Comment comment = Comment.builder()
@@ -94,12 +102,14 @@ public class CommentService {
     }
 
 
-    // 댓글을 수정하는 메서드입니다. DTO에 id가 있는지 여부는 controller단에서 검증합니다.
-    public CommentResponseDTO updateComment(CommentRequestDTO commentDTO, Long commentId, Long memberId){
+    // 댓글을 수정하는 메서드입니다.
+    public CommentResponseDTO updateComment(String jwt, CommentRequestDTO commentDTO, Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
 
-        if(!comment.getMember().getId().equals(memberId)){
+        String email = jwtUtil.getUsername(jwt);
+
+        if(!comment.getMember().getEmail().equals(email)){
             handleNoAuthorization();
         }
 
@@ -112,12 +122,14 @@ public class CommentService {
 
     // 댓글에 신고를 누를 때 사용하는 메서드입니다. 이미 신고를 눌렀으면 신고를 해제합니다.
     @Transactional
-    public void reportComment(Long commentId, Long memberId){
+    public void reportComment(String jwt, Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
-        Member member = memberOrElseThrowsException(memberId);
+        String email = jwtUtil.getUsername(jwt);
 
-        ReportComment reportComment = reportCommentRepository.findByCommentIdAndMemberId(commentId, memberId);
+        Member member = memberOrElseThrowsException(email);
+
+        ReportComment reportComment = reportCommentRepository.findByCommentIdAndMemberId(commentId, member.getId());
 
         if(reportComment == null){
             reportComment = ReportComment.builder()
@@ -135,11 +147,13 @@ public class CommentService {
 
     // 댓글을 삭제하는 메서드입니다. 댓글을 쓴 유저가 사용합니다.
     @Transactional
-    public void deleteComment(Long commentId, Long memberId){
+    public void deleteComment(String jwt, Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
 
-        if(!comment.getMember().getId().equals(memberId)){
+        String email = jwtUtil.getUsername(jwt);
+
+        if(!comment.getMember().getEmail().equals(email)){
             handleNoAuthorization();
         }
 
@@ -150,7 +164,7 @@ public class CommentService {
     // 댓글을 삭제하는 메서드입니다. 관리자만 사용할 수 있습니다.
 
     @Transactional
-    public void deleteComment(Long commentId){
+    public void deleteCommentAdmin(String jwt, Long commentId){
 
 
         Comment comment = commentOrElseThrowsException(commentId);
@@ -202,6 +216,17 @@ public class CommentService {
     private Member memberOrElseThrowsException(Long memberId) {
 
         return memberRepository.findById(memberId)
+                .orElseThrow(() -> {
+                    NoSuchUserException ex = new NoSuchUserException();
+                    log.error("에러 발생: {}", ex.getMessage(), ex);
+                    return ex;
+                });
+    }
+
+    // member email로 member를 불러 올 때 존재하면 member 객체를 반환하고 없으면 에러를 반환하는 메서드입니다.
+    private Member memberOrElseThrowsException(String email) {
+
+        return memberRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     NoSuchUserException ex = new NoSuchUserException();
                     log.error("에러 발생: {}", ex.getMessage(), ex);

@@ -1,7 +1,6 @@
 package com.elice.tripnote.domain.post.repository;
 
 
-import com.elice.tripnote.domain.comment.entity.QComment;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
 import com.elice.tripnote.domain.link.reportPost.entity.QReportPost;
 import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
@@ -24,7 +23,6 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     private final JPAQueryFactory query;
 
 
-    private final QComment comment = QComment.comment;
     private final QPost post = QPost.post;
     private final QLikePost likePost = QLikePost.likePost;
     private final QReportPost reportPost = QReportPost.reportPost;
@@ -48,7 +46,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         post.isDeleted
                 ))
                 .from(post)
-                .where(comment.isDeleted.isFalse())
+                .where(post.isDeleted.isFalse())
                 .orderBy(post.id.desc())
                 .offset(page * size)
                 .limit(size)
@@ -164,8 +162,8 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         reportPost.reportedAt
                 ))
                 .from(post)
-                .join(post.likePosts, likePost)
-                .join(post.reportPosts, reportPost)
+                .leftJoin(post.likePosts, likePost)
+                .leftJoin(post.reportPosts, reportPost)
                 .where(post.id.eq(postId)
                         .and(post.isDeleted.isFalse()))
                 .fetchOne();
