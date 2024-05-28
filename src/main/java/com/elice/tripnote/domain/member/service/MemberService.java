@@ -3,6 +3,7 @@ package com.elice.tripnote.domain.member.service;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberDetailsDTO;
 import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
+import com.elice.tripnote.domain.member.entity.Status;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,7 @@ public class MemberService implements UserDetailsService {
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
                 .nickname(nickname)
+                .status(Status.ACTIVE) // 회원가입시 활동 상태로
                 .build();
 
         memberRepository.save(member);
