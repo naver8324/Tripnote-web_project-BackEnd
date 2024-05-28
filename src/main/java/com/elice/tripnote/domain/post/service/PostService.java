@@ -18,6 +18,7 @@ import com.elice.tripnote.domain.post.exception.*;
 import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.post.repository.PostRepository;
+import com.elice.tripnote.jwt.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,6 +40,8 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final RouteRepository routeRepository;
 
+    private final JWTUtil jwtUtil;
+
 
 
     // 전체 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
@@ -50,27 +53,30 @@ public class PostService {
 
     // 한 유저가 쓴 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getPostsByMemberId(Long memberId, int page, int size){
+    public Page<PostResponseDTO> getPostsByMemberId(String jwt, int page, int size){
 
-        memberOrElseThrowsException(memberId);
-        return postRepository.customFindNotDeletedPostsByMemberId(memberId, page, size);
+        String email = jwtUtil.getUsername(jwt);
+        Member member = memberOrElseThrowsException(email);
+        return postRepository.customFindNotDeletedPostsByMemberId(member.getId(), page, size);
 
 
     }
 
     // 한 유저가 좋아요 한 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getLikePostsByMemberId(Long memberId, int page, int size){
-        memberOrElseThrowsException(memberId);
+    public Page<PostResponseDTO> getCommentsByMemberWithLikes(String jwt, int page, int size){
 
-        return postRepository.customFindNotDeletedPostsWithLikesByMemberId(memberId, page, size);
+        String email = jwtUtil.getUsername(jwt);
+        Member member = memberOrElseThrowsException(email);
+
+        return postRepository.customFindNotDeletedPostsWithLikesByMemberId(member.getId(), page, size);
 
 
     }
 
     //  전체 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제된 게시글도 불러오며 관리자만 사용할 수 있습니다.
 
-    public Page<PostResponseDTO> getPostsAll(int page, int size){
+    public Page<PostResponseDTO> getPostsAll(String jwt, int page, int size){
 
         return postRepository.customFindPosts(page, size);
 
@@ -81,9 +87,10 @@ public class PostService {
 
     // 게시글을 상세 조회하는 메서드입니다. 삭제되지 않은 게시글만 볼 수 있습니다.
 
-    public PostDetailResponseDTO getPost(Long postId, Long memberId){
+    public PostDetailResponseDTO getPost(String jwt, Long postId){
 
-        memberOrElseThrowsException(memberId);
+        String email = jwtUtil.getUsername(jwt);
+        Member member = memberOrElseThrowsException(email);
 
         PostDetailResponseDTO postDTO = postRepository.customFindPost(postId);
         if(postDTO == null){
@@ -100,9 +107,12 @@ public class PostService {
 
     // 게시글을 저장하는 메서드입니다.
     @Transactional
-    public PostResponseDTO savePost(PostRequestDTO postDTO, Long memberId, Long routeId){
+    public PostResponseDTO savePost(String jwt, PostRequestDTO postDTO, Long routeId){
 
-        Member member = memberOrElseThrowsException(memberId);
+
+        String email = jwtUtil.getUsername(jwt);
+        Member member = memberOrElseThrowsException(email);
+
         Route route = routeOrElseThrowsException(routeId);
 
 
@@ -257,6 +267,17 @@ public class PostService {
     private Member memberOrElseThrowsException(Long memberId) {
 
         return memberRepository.findById(memberId)
+                .orElseThrow(() -> {
+                    NoSuchUserException ex = new NoSuchUserException();
+                    log.error("에러 발생: {}", ex.getMessage(), ex);
+                    return ex;
+                });
+    }
+
+    // member email로 member를 불러 올 때 존재하면 member 객체를 반환하고 없으면 에러를 반환하는 메서드입니다.
+    private Member memberOrElseThrowsException(String email) {
+
+        return memberRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     NoSuchUserException ex = new NoSuchUserException();
                     log.error("에러 발생: {}", ex.getMessage(), ex);
