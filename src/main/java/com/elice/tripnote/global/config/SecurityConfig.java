@@ -1,5 +1,6 @@
 package com.elice.tripnote.global.config;
 
+import com.elice.tripnote.jwt.JWTFilter;
 import com.elice.tripnote.jwt.JWTUtil;
 import com.elice.tripnote.jwt.LoginFilter;
 import lombok.RequiredArgsConstructor;
@@ -51,9 +52,13 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/member").hasRole("Member")
+                        .requestMatchers("/test").hasRole("MEMBER")
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().permitAll());  // 그 외 경로에 대해서는 모두 접근가능
+
+        //JWTFilter 등록
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
         //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요
         http

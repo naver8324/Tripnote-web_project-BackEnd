@@ -3,6 +3,7 @@ package com.elice.tripnote.domain.member.service;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberDetailsDTO;
 import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
+import com.elice.tripnote.domain.member.entity.Status;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,13 +46,14 @@ public class MemberService implements UserDetailsService {
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
                 .nickname(nickname)
+                .status(Status.ACTIVE) // 회원가입시 활동 상태로
                 .build();
 
         memberRepository.save(member);
     }
 
 
-    // 이메일로 회원 조회 서비스
+    // 이메일로 멤버 조회 서비스
     @Transactional(readOnly = true)
     public Member getMemberByEmail(String email) {
         return memberRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email));
@@ -68,9 +70,8 @@ public class MemberService implements UserDetailsService {
     // 이메일로 멤버 ID 조회 서비스
     @Transactional(readOnly = true)
     public Long getMemberIdByEmail(String email) {
-        return memberRepository.findByEmail(email)
-                .map(Member::getId)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email));
+        return memberRepository.findIdByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일로 유저 ID를 찾을 수 없습니다. 이메일: " + email));
     }
 
 
