@@ -39,7 +39,7 @@ public class CommentController implements SwaggerCommentController {
 
 
     @Override
-    @GetMapping("/admin/comments/users/{memberId}")
+    @GetMapping("/admin/comments/members/{memberId}")
     public ResponseEntity<Page<CommentResponseDTO>> getCommentsByMemberId(@RequestHeader("Authorization") String jwt, @PathVariable(name = "memberId") Long memberId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(commentService.getCommentsByMemberId(jwt, memberId, page, size));
     }
