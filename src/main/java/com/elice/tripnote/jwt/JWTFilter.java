@@ -32,21 +32,20 @@ public class JWTFilter extends OncePerRequestFilter {
         //Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {
 
-            System.out.println("token null");
+            log.error("Token is null or does not start with 'Bearer '");
             filterChain.doFilter(request, response);
 
             //조건이 해당되면 메소드 종료 (필수)
             return;
         }
 
-        System.out.println("authorization now");
         //Bearer 부분 제거 후 순수 토큰만 획득
         String token = authorization.split(" ")[1];
+        log.info("Token: " + token);
 
         //토큰 소멸 시간 검증
         if (jwtUtil.isExpired(token)) {
-
-            System.out.println("token expired");
+            log.error("Token is expired");
             filterChain.doFilter(request, response);
 
             //조건이 해당되면 메소드 종료 (필수)
@@ -58,7 +57,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String role = jwtUtil.getRole(token);
         log.info("jwtUtil.getRole : "+ role);
 
-        if(Objects.equals(role, "MEMBER")){
+        if(Objects.equals(role, "ROLE_MEMBER")){
             log.info("member - in");
             // Member 객체 생성 및 값 설정
             Member member = Member.builder()
@@ -75,8 +74,9 @@ public class JWTFilter extends OncePerRequestFilter {
 
             // 세션에 사용자 등록
             SecurityContextHolder.getContext().setAuthentication(authToken);
-        }else { // 관리자일 때
+        }else if(Objects.equals(role, "ROLE_ADMIN")){ // 관리자일 때
             // 아직 미구현
+            log.info("admin - in");
         }
 
 
