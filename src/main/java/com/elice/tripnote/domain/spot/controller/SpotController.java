@@ -21,22 +21,20 @@ public class SpotController {
 
     private final SpotService spotService;
     @GetMapping
-    public ResponseEntity<Spot> getSpotsByRegion(@RequestParam(name = "region",required = false) String region) {
-        SpotDTO result = spotService.search(region);
-        String address = result.getAddress().split(" ")[0];
-        Spot spot = Spot.builder()
-                .location(result.getTitle())
-                .likes(result.getVisitCount())
-                .imageUrl(result.getImageLink())
-                .region(address).build();
-        if (spot != null) {
-            //return new ResponseEntity<>(result, HttpStatus.OK);
-            return ResponseEntity.ok().body(spot);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> getSpots(@RequestParam(required = false, name="region") String region,
+                                      @RequestParam(required = false, name = "landmark") String landmark) {
+        if (region != null && landmark != null) {
+            return new ResponseEntity<>("Both region and landmark cannot be specified", HttpStatus.BAD_REQUEST);
         }
-
-        //return spotService.getSpotsByRegion(region);
+        if (region != null) {
+            return getSpotsByRegion(region);
+        } else if (landmark != null) {
+            return getSpotsByLandmark(landmark);
+        } else {
+            return new ResponseEntity<>("Either region or landmark must be specified", HttpStatus.BAD_REQUEST);
+        }
+    }
+//    private ResponseEntity<SpotDTO> getSpotsByRegion(String region) {
 //        try {
 //            Region validRegion = Region.fromString(region);
 //            SpotDTO result = spotService.search(validRegion.getName());
@@ -48,17 +46,50 @@ public class SpotController {
 //        } catch (IllegalArgumentException e) {
 //            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 //        }
+//    }
+//    private ResponseEntity<List<Spot>> getSpotsByRegion(String region) {
+//        try {
+//            Region validRegion = Region.fromString(region);
+//            List<Spot> list = spotService.getSpotsByRegion(validRegion.getName());
+//            if (!list.isEmpty()) {
+//                return new ResponseEntity<>(list, HttpStatus.OK);
+//            } else {
+//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//            }
+//        } catch (IllegalArgumentException e) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//    }
+    private ResponseEntity<List<Spot>> getSpotsByRegion(String region) {
+        try {
+            Region validRegion = Region.fromString(region);
+            List<Spot> list = spotService.getSpotsByRegion(validRegion.getName(), 0, 5);
+            if (!list.isEmpty()) {
+                return new ResponseEntity<>(list, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
-
+    private ResponseEntity<Spot> getSpotsByLandmark(String landmark) {
+        SpotDTO result = spotService.search(landmark);
+        if (result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Spot spot = spotService.dtoToEntity(result);
+        return ResponseEntity.ok().body(spot);
+    }
     @GetMapping("/{id}")
     public ResponseEntity<Spot> getSpotById(@PathVariable("id") Long id){
         Spot spot = spotService.searchById(id);
         return ResponseEntity.ok().body(spot);
     }
     @PostMapping("")
-    public ResponseEntity<Spot> add(@RequestBody SpotDTO spotDTO) {
-        log.info("{}", spotDTO);
-        Spot createdSpot = spotService.add(spotDTO);
+    public ResponseEntity<Spot> add(@RequestBody Spot spot) {
+        log.info("{}", spot);
+        Spot createdSpot = spotService.add(spot);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSpot);
     }
 }

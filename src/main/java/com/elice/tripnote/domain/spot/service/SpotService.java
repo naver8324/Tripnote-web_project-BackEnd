@@ -9,6 +9,9 @@ import com.elice.tripnote.domain.spot.naver.dto.SearchImageReq;
 import com.elice.tripnote.domain.spot.naver.dto.SearchLocalReq;
 import com.elice.tripnote.domain.spot.repository.SpotRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,22 +24,42 @@ public class SpotService {
     private final SpotRepository spotRepository;
     private final NaverClient naverClient;
 
-    public List<SpotResponseDTO> getSpotsByRegion(String region) {
-        List<Spot> spots;
-        if (region == null || region.isEmpty()) {
-            spots = spotRepository.findAll();
-        } else {
-            spots = spotRepository.findByRegion(region);
-        }
+//    public List<Spot> getSpotsByRegion(String region) {
+//        if (region == null || region.isEmpty()) {
+//            return spotRepository.findAll();
+//        } else {
+//            var searchLocalReq = new SearchLocalReq();
+//            searchLocalReq.setQuery(region);
+//            var searchLocalRes = naverClient.searchLocal(searchLocalReq);
+//
+//            return searchLocalRes.getItems().stream().map(localItem -> {
+//                var imageQuery = localItem.getTitle().replaceAll("<[^>]*>", "");
+//                var searchImageReq = new SearchImageReq();
+//                searchImageReq.setQuery(imageQuery);
+//                var searchImageRes = naverClient.searchImage(searchImageReq);
+//
+//                String imageUrl = searchImageRes.getItems().stream()
+//                        .findFirst()
+//                        .map(imageItem -> imageItem.getLink())
+//                        .orElse(null);
+//
+//                return Spot.builder()
+//                        .location(localItem.getTitle().replaceAll("<[^>]*>", ""))
+//                        .likes(0) // Assuming likes are not available from the API, set to 0 or another default value
+//                        .imageUrl(imageUrl)
+//                        .region(region)
+//                        .build();
+//            }).collect(Collectors.toList());
+//        }
+//    }
+    public List<Spot> getSpotsByRegion(String region, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("likes").descending());
 
-        return spots.stream()
-                .map(spot -> new SpotResponseDTO(
-                 //       spot.getId(),
-                        spot.getLocation(),
-                        spot.getLikes(),
-                        spot.getImageUrl(),
-                        spot.getRegion()))
-                .collect(Collectors.toList());
+        if (region == null || region.isEmpty()) {
+            return spotRepository.findAll(pageable).getContent();
+        } else {
+            return spotRepository.findByRegion(region, pageable).getContent();
+        }
     }
 
     public Spot searchById(Long id){
@@ -76,12 +99,12 @@ public class SpotService {
         return new SpotDTO();
     }
 
-    public Spot add(SpotDTO spotDTO){
-        var entity = dtoToEntity(spotDTO);
-        spotRepository.save(entity);
-        return entity;
+    public Spot add(Spot spot){
+        //var entity = dtoToEntity(spotDTO);
+        spotRepository.save(spot);
+        return spot;
     }
-    private Spot dtoToEntity(SpotDTO spotDTO){
+    public Spot dtoToEntity(SpotDTO spotDTO){
         String address = spotDTO.getAddress().split(" ")[0];
         return Spot.builder()
                 .location(spotDTO.getTitle())
