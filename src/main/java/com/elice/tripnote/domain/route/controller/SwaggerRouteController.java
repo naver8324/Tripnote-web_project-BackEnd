@@ -1,7 +1,7 @@
 package com.elice.tripnote.domain.route.controller;
 
-import com.elice.tripnote.domain.route.dto.GetRegionResponseDto;
-import com.elice.tripnote.domain.route.dto.SaveRequestDto;
+import com.elice.tripnote.domain.route.entity.GetRegionResponseDTO;
+import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -23,7 +23,7 @@ public interface SwaggerRouteController {
                     content = {@Content(schema = @Schema(implementation = Long.class))}),
             @ApiResponse(responseCode = "404", description = "해당 유저 ID 또는 Order Id가 존재하지 않습니다."),
     })
-    ResponseEntity<Long> save(SaveRequestDto requestDto);
+    ResponseEntity<Long> save(SaveRequestDTO requestDto);
 
     @Operation(summary = "경로 비공개", description = "경로를 비공개 상태로 변경합니다.")
     @Parameters({
@@ -58,5 +58,5 @@ public interface SwaggerRouteController {
     })
     ResponseEntity<Long> deleteRoute(Long routeId);
 
-    ResponseEntity<GetRegionResponseDto> getRegion(String region);
+    ResponseEntity<GetRegionResponseDTO> getRegion(String region);
 }

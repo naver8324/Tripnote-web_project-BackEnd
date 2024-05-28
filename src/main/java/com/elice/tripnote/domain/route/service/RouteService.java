@@ -9,8 +9,8 @@ import com.elice.tripnote.domain.likebookmarkperiod.entity.LikeBookmarkPeriod;
 import com.elice.tripnote.domain.likebookmarkperiod.repository.LikeBookPeriodRepository;
 import com.elice.tripnote.domain.link.routespot.entity.RouteSpot;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
-import com.elice.tripnote.domain.route.dto.GetRegionResponseDto;
-import com.elice.tripnote.domain.route.dto.SaveRequestDto;
+import com.elice.tripnote.domain.route.entity.GetRegionResponseDTO;
+import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
 import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
 import com.elice.tripnote.domain.route.exception.EntityNotFoundException;
@@ -22,7 +22,6 @@ import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.repository.SpotRepository;
 import jakarta.transaction.Transactional;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,7 +50,7 @@ public class RouteService {
     private final SpotRepository spotRepository;
 
     @Transactional
-    public Long save(SaveRequestDto requestDto) {
+    public Long save(SaveRequestDTO requestDto) {
         //여행지 id 리스트 기반으로 uuid 만들기
         String uuid = generateUUID(requestDto.getSpotIds());
 
@@ -188,7 +186,7 @@ public class RouteService {
         return route.getId();
     }
 
-    public GetRegionResponseDto getRegion(IntegratedRouteStatus region){
+    public GetRegionResponseDTO getRegion(IntegratedRouteStatus region){
         // 통합 경로 중, 해당 지역을 지나는 통합 경로 필터링하고
 
         //TODO: 추후 해시태그에 대해 결졍되면 코드 추가
