@@ -1,13 +1,11 @@
 package com.elice.tripnote.domain.hashtag.entity;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class HashtagResponseDTO {
 
     private Long id;
