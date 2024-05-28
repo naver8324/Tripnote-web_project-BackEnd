@@ -9,7 +9,6 @@ import lombok.*;
 @NoArgsConstructor
 public class PostRequestDTO {
 
-    private Long id;
 
     private String title;
 
