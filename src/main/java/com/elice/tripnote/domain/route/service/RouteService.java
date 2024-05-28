@@ -9,6 +9,7 @@ import com.elice.tripnote.domain.likebookmarkperiod.entity.LikeBookmarkPeriod;
 import com.elice.tripnote.domain.likebookmarkperiod.repository.LikeBookPeriodRepository;
 import com.elice.tripnote.domain.link.routespot.entity.RouteSpot;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
+import com.elice.tripnote.domain.route.dto.GetRegionResponseDto;
 import com.elice.tripnote.domain.route.dto.SaveRequestDto;
 import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
@@ -185,6 +186,20 @@ public class RouteService {
         route.setRouteStatus(RouteStatus.DELETE);
         route = routeRepository.save(route);
         return route.getId();
+    }
+
+    public GetRegionResponseDto getRegion(IntegratedRouteStatus region){
+        // 통합 경로 중, 해당 지역을 지나는 통합 경로 필터링하고
+
+        //TODO: 추후 해시태그에 대해 결졍되면 코드 추가
+        // 해시태그 있으면 해시태그도 필터링
+
+        // 그 중에서 최근 좋아요(like bookmark period 이용) 많은 수 top 5 경로만 리턴
+        // 각 경로에 해당하는 여행지들도 함께 리턴하기
+
+        // top 5 각 경로의 하트 수, 북마크 수도 함께 리턴
+
+        return null;
     }
 
 

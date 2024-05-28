@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.route.controller;
 
+import com.elice.tripnote.domain.route.dto.GetRegionResponseDto;
 import com.elice.tripnote.domain.route.dto.SaveRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,4 +57,6 @@ public interface SwaggerRouteController {
             @ApiResponse(responseCode = "404", description = "해당 Route Id가 존재하지 않습니다."),
     })
     ResponseEntity<Long> deleteRoute(Long routeId);
+
+    ResponseEntity<GetRegionResponseDto> getRegion(String region);
 }

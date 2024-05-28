@@ -1,5 +1,7 @@
 package com.elice.tripnote.domain.route.controller;
 
+import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
+import com.elice.tripnote.domain.route.dto.GetRegionResponseDto;
 import com.elice.tripnote.domain.route.dto.SaveRequestDto;
 import com.elice.tripnote.domain.route.service.RouteService;
 import lombok.RequiredArgsConstructor;
@@ -51,5 +53,17 @@ public class RouteController implements SwaggerRouteController{
     @DeleteMapping("/{routeId}")
     public ResponseEntity<Long> deleteRoute(@PathVariable("routeId") Long routeId) {
         return ResponseEntity.ok(routeService.deleteRoute(routeId));
+    }
+
+    /**
+     * 지역 선택 후 경로 추천하는 페이지 불러오기
+     * @return
+     */
+    @Override
+    @GetMapping("/region")
+    //TODO: 추후 해시태그를 어떻게 관리할지 결정되면 해시 태그 입력 받는 것도 추가
+    public ResponseEntity<GetRegionResponseDto> getRegion(@RequestParam("region") String region) {
+        IntegratedRouteStatus status = IntegratedRouteStatus.fromName(region);
+        return ResponseEntity.ok(routeService.getRegion(status));
     }
 }
