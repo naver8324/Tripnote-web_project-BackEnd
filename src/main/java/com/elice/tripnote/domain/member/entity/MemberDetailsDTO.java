@@ -30,12 +30,12 @@ public class MemberDetailsDTO implements UserDetails {
         authorities.add(new GrantedAuthority() {
             @Override
             public String getAuthority() {
-                if (admin != null) {
-                    return "ROLE_ADMIN";
-                } else if (member != null) {
-                    return "ROLE_USER";
+                if (member != null) {
+                    return "MEMBER";
+                } else if (admin != null) {
+                    return "ADMIN";
                 }
-                return "ROLE_UNKNOWN";
+                throw new IllegalStateException("Member 또는 Admin 객체가 존재하지 않습니다.");
             }
         });
 

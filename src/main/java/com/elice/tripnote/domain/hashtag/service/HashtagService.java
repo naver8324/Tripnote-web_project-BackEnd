@@ -3,6 +3,7 @@ package com.elice.tripnote.domain.hashtag.service;
 import com.elice.tripnote.domain.hashtag.entity.Hashtag;
 import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagResponseDTO;
+import com.elice.tripnote.domain.hashtag.exception.HashtagNameDuplicateException;
 import com.elice.tripnote.domain.hashtag.repository.HashtagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,9 @@ public class HashtagService {
     public HashtagResponseDTO saveHashtag(HashtagRequestDTO hashtagRequestDTO){
 
         log.info("hashtagRequestDTO.isCity = {}", hashtagRequestDTO.isCity());
+
+        //해시태그명 중복 체크
+        duplicateNameCheck(hashtagRequestDTO.getName());
 
         Hashtag hashtag = Hashtag.builder()
                 .name(hashtagRequestDTO.getName())
@@ -55,6 +59,9 @@ public class HashtagService {
         //해시태그 목록에서 선택하는 것이므로 null이 반환되지 않을 것으로 판단되어 get을 사용
         Hashtag hashtag = hashtagRepository.getById(id);
 
+        //변경하려는 해시태그명 중복 체크
+        duplicateNameCheck(hashtagRequestDTO.getName());
+
         hashtag.update(hashtagRequestDTO);
 
         return hashtag.toResponseDTO();
@@ -68,5 +75,19 @@ public class HashtagService {
 
         hashtag.delete();
 
+    }
+
+    //해시태그명 중복 체크
+    private void duplicateNameCheck(String name){
+
+        boolean isDuplicate = hashtagRepository.existsByName(name);
+        //해당 해시태그명이 이미 존재하는 경우 true 반환 -> 예외 처리
+        if(!isDuplicate){
+            return;
+        }
+
+        HashtagNameDuplicateException ex = new HashtagNameDuplicateException();
+        log.error("에러 발생: {}", ex.getMessage(), ex);
+        throw ex;
     }
 }
