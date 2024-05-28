@@ -23,6 +23,11 @@ public class MemberController implements SwaggerMemberController {
         return "completed test.";
     }
 
+    @GetMapping("/test1")
+    public String test2(){
+        return "completed test1.";
+    }
+
     // 회원가입 테스트중
     @Override
     @PostMapping("/signup")

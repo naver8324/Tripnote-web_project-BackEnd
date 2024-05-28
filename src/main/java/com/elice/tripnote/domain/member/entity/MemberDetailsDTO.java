@@ -31,9 +31,9 @@ public class MemberDetailsDTO implements UserDetails {
             @Override
             public String getAuthority() {
                 if (member != null) {
-                    return "MEMBER";
+                    return "ROLE_MEMBER";
                 } else if (admin != null) {
-                    return "ADMIN";
+                    return "ROLE_ADMIN";
                 }
                 throw new IllegalStateException("Member 또는 Admin 객체가 존재하지 않습니다.");
             }
@@ -45,8 +45,7 @@ public class MemberDetailsDTO implements UserDetails {
     @Override
     public String getPassword() {
         if (admin != null) {
-//            return admin.getPassword();  //admin getter 추가시 주석해제
-            return "12345678"; // 임시 비밀번호
+            return admin.getPassword();
         } else if (member != null) {
             return member.getPassword();
         }
@@ -56,8 +55,7 @@ public class MemberDetailsDTO implements UserDetails {
     @Override
     public String getUsername() {
         if (admin != null) {
-//            return admin.getLogin_id();  //admin getter 추가시 주석해제
-            return "admin"; // 임시 아이디
+            return admin.getLogin_id();
         } else if (member != null) {
             return member.getEmail();
         }
