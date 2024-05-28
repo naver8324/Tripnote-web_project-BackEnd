@@ -21,11 +21,17 @@ public class SpotController {
 
     private final SpotService spotService;
     @GetMapping
-    public ResponseEntity<SpotDTO> getSpotsByRegion(@RequestParam(name = "region",required = false) String region) {
+    public ResponseEntity<Spot> getSpotsByRegion(@RequestParam(name = "region",required = false) String region) {
         SpotDTO result = spotService.search(region);
-        if (result != null) {
+        String address = result.getAddress().split(" ")[0];
+        Spot spot = Spot.builder()
+                .location(result.getTitle())
+                .likes(result.getVisitCount())
+                .imageUrl(result.getImageLink())
+                .region(address).build();
+        if (spot != null) {
             //return new ResponseEntity<>(result, HttpStatus.OK);
-            return ResponseEntity.ok().body(result);
+            return ResponseEntity.ok().body(spot);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
