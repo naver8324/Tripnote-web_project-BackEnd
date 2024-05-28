@@ -6,6 +6,7 @@ import com.elice.tripnote.domain.link.reportPost.entity.QReportPost;
 import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.entity.QPost;
+import com.elice.tripnote.domain.route.entity.QRoute;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,8 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
 
     private final QPost post = QPost.post;
+    private final QRoute route = QRoute.route;
+
     private final QLikePost likePost = QLikePost.likePost;
     private final QReportPost reportPost = QReportPost.reportPost;
 
@@ -159,9 +162,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         post.report,
                         post.isDeleted,
                         likePost.likedAt,
-                        reportPost.reportedAt
+                        reportPost.reportedAt,
+                        route.id
                 ))
                 .from(post)
+                .join(post.route, route)
                 .leftJoin(post.likePosts, likePost)
                 .leftJoin(post.reportPosts, reportPost)
                 .where(post.id.eq(postId)
