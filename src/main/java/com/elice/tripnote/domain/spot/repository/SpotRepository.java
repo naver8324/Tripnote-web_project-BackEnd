@@ -15,7 +15,9 @@ public interface SpotRepository extends JpaRepository<Spot, Long>  {
 
     Optional<Spot> findById(Long id);
 
+    Optional<Spot> findByLocation(String location);
     List<Spot> findByRegion(String region);
 
     Page<Spot> findByRegion(String region, Pageable pageable);
+
 }
