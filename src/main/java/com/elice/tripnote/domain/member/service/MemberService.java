@@ -4,7 +4,9 @@ import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberDetailsDTO;
 import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
 import com.elice.tripnote.domain.member.entity.Status;
+import com.elice.tripnote.domain.member.exception.CustomDuplicateException;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
+import com.elice.tripnote.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,14 +35,17 @@ public class MemberService implements UserDetailsService {
         String password = memberRequestDTO.getPassword();
         String nickname = memberRequestDTO.getNickname();
 
-        Boolean isExist = memberRepository.existsByEmail(email);
-
-        if (isExist) {
-            log.error("이미 존재하는 멤버");
-            return;
+        // 이메일 중복 검사
+        if (memberRepository.existsByEmail(email)) {
+            log.error("에러 발생: {}", ErrorCode.DUPLICATE_EMAIL);
+            throw new CustomDuplicateException(ErrorCode.DUPLICATE_EMAIL);
         }
 
-        log.info("DTO PW : " + memberRequestDTO.getPassword());
+        // 닉네임 중복 검사
+        if (memberRepository.existsByNickname(nickname)) {
+            log.error("에러 발생: {}", ErrorCode.DUPLICATE_NICKNAME);
+            throw new CustomDuplicateException(ErrorCode.DUPLICATE_NICKNAME);
+        }
 
         Member member = Member.builder()
                 .email(email)

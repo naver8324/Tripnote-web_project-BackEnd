@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Boolean existsByEmail(String email);
+    Boolean existsByNickname(String nickname);
     Optional<Member> findByEmail(String email);
 
     @Query("SELECT m.id FROM Member m WHERE m.email = :email")
