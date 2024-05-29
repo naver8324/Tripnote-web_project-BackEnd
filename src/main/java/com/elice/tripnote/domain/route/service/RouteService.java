@@ -12,6 +12,8 @@ import com.elice.tripnote.domain.link.routespot.repository.RouteSpotRepository;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagRepository;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
+import com.elice.tripnote.domain.post.exception.NoSuchRouteException;
+import com.elice.tripnote.domain.post.exception.NoSuchUserException;
 import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
 import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
@@ -21,6 +23,7 @@ import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.repository.SpotRepository;
+import com.elice.tripnote.global.exception.NoSuchSpotException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -105,7 +108,7 @@ public class RouteService {
         // route 객체 생성 -> 경로 저장
         Route route = Route.builder()
                 .member(memberRepository.findById(requestDto.getMemberId())
-                        .orElseThrow(() -> new EntityNotFoundException("해당하는 member id를 찾을 수 없습니다.")))
+                        .orElseThrow(() -> new NoSuchUserException()))
                 .integratedRoute(integratedRoute)
                 .routeStatus(RouteStatus.PUBLIC)
                 .expense(requestDto.getExpense())
@@ -116,7 +119,7 @@ public class RouteService {
         List<Long> spotIds = requestDto.getSpotIds();
         for (int i = 0; i < spotIds.size(); i++) {
             Spot spot = spotRepository.findById(spotIds.get(i))
-                    .orElseThrow(() -> new EntityNotFoundException("해당하는 spot id를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new NoSuchSpotException());
             Long nextSpotId = (i + 1 < spotIds.size()) ? spotIds.get(i + 1) : null;
             RouteSpot routeSpot = RouteSpot.builder()
                     .route(route)
@@ -163,7 +166,7 @@ public class RouteService {
     @Transactional
     public Long setRouteToPrivate(Long routeId) {
         Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new EntityNotFoundException("해당하는 route id를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NoSuchRouteException());
         route.setRouteStatus(RouteStatus.PRIVATE);
         route = routeRepository.save(route);
         return route.getId();
@@ -172,7 +175,7 @@ public class RouteService {
     @Transactional
     public Long setRouteToPublic(Long routeId) {
         Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new EntityNotFoundException("해당하는 route id를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NoSuchRouteException());
         route.setRouteStatus(RouteStatus.PUBLIC);
         route = routeRepository.save(route);
         return route.getId();
@@ -181,7 +184,7 @@ public class RouteService {
     @Transactional
     public Long deleteRoute(Long routeId) {
         Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new EntityNotFoundException("해당하는 route id를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NoSuchRouteException());
         route.setRouteStatus(RouteStatus.DELETE);
         route = routeRepository.save(route);
         return route.getId();
