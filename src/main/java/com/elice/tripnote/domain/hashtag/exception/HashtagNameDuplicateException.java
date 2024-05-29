@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.hashtag.exception;
 
+import com.elice.tripnote.global.exception.ErrorCode;
 import lombok.Getter;
 
 @Getter

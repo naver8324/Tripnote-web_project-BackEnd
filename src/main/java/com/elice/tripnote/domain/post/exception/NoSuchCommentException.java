@@ -10,6 +10,6 @@ public class NoSuchCommentException extends RuntimeException{
 
     public NoSuchCommentException(){
         super(ErrorCode.NO_COMMENT.getMessage());
-        errorCode = ErrorCode.NO_POST;
+        errorCode = ErrorCode.NO_COMMENT;
     }
 }

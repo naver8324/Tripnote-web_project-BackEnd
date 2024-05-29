@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Table(name="report_post")
+@Table(name="report_comment")
 public class ReportComment {
 
     @Id
@@ -21,8 +21,7 @@ public class ReportComment {
 
 
     @Column
-    @Builder.Default
-    private LocalDateTime reportedAt = LocalDateTime.now();
+    private LocalDateTime reportedAt;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

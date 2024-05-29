@@ -1,0 +1,8 @@
+-- Spot
+CREATE TABLE IF NOT EXISTS spot (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    location VARCHAR(255) NOT NULL,
+    likes INTEGER NOT NULL,
+    image_url VARCHAR(255),
+    region VARCHAR(20) NOT NULL
+);

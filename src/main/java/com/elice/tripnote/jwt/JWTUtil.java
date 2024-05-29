@@ -30,7 +30,6 @@ public class JWTUtil {
     }
 
     public String getRole(String token) {
-        log.info("getRole : "+ Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().get("role", String.class));
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().get("role", String.class);
     }
 

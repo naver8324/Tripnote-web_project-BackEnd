@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.spot.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,4 +27,12 @@ public class Spot {
 
     @Column(nullable = false)
     private String region; //지역
+
+    @Builder
+    public Spot(String location, int likes, String imageUrl, String region){
+        this.location=location;
+        this.likes=likes;
+        this.imageUrl=imageUrl;
+        this.region=region;
+    }
 }
