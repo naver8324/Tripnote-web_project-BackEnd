@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
-public interface SpotRepository extends JpaRepository<Spot, Long>  {
+
+public interface SpotRepository extends JpaRepository<Spot, Long>, CustomSpotRepository  {
     List<Spot> findAll();
 
     Optional<Spot> findById(Long id);
