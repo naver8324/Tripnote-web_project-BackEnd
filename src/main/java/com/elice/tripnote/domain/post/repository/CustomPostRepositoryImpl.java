@@ -8,6 +8,7 @@ import com.elice.tripnote.domain.member.entity.QMember;
 import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.entity.QPost;
+import com.elice.tripnote.domain.route.entity.LikeBookmarkResponseDTO;
 import com.elice.tripnote.domain.route.entity.QRoute;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -226,7 +227,14 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
     }
 
-
+    public int getLikeCount(Long integratedRouteId){
+        return query
+                .select(post.likes.sum())
+                .from(post)
+                .join(route).on(post.route.id.eq(route.id)
+                        .and(route.integratedRoute.id.eq(integratedRouteId)))
+                .fetchOne();
+    }
 
 
 }

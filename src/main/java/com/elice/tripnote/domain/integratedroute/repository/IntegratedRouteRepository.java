@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
-public interface IntegratedRouteRepository extends JpaRepository<IntegratedRoute, Long> {
+
+public interface IntegratedRouteRepository extends JpaRepository<IntegratedRoute, Long>, CustomIntegratedRouteRepository{
     Optional<IntegratedRoute> findByIntegratedRoutes(String integratedRoutes);
 }
