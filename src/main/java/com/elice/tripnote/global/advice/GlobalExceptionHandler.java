@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
     }
 
-    // 로그인 시 이메일, 닉네임 중복 검사
+    // 멤버 회원가입 - 이메일, 닉네임 중복 검사
     @ExceptionHandler(CustomDuplicateException.class)
     public ResponseEntity<ErrorResponse> handleCustomDuplicateException(CustomDuplicateException ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()

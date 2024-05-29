@@ -12,7 +12,7 @@ public interface SwaggerMemberController {
 
     @Operation(summary = "회원 가입")
     @PostMapping("/signup")
-    ResponseEntity<String> signup(@RequestBody MemberRequestDTO memberRequestDTO);
+    ResponseEntity<Void> signup(@RequestBody MemberRequestDTO memberRequestDTO);
 
     @Operation(summary = "이메일로 회원 조회")
     @GetMapping("/{email}")
@@ -21,4 +21,9 @@ public interface SwaggerMemberController {
     @Operation(summary = "이메일 중복 확인")
     @GetMapping("/check-email")
     ResponseEntity<Boolean> checkEmailDuplicate(@RequestParam String email);
+
+    @Operation(summary = "닉네임 중복 확인")
+    @GetMapping("/check-nickname")
+    public ResponseEntity<Boolean> checkNicknameDuplicate(@RequestParam String nickname);
+
 }
