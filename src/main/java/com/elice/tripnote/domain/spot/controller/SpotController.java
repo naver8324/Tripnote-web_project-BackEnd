@@ -4,6 +4,7 @@ import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.domain.spot.dto.SpotDTO;
 import com.elice.tripnote.domain.spot.dto.SpotResponseDTO;
 import com.elice.tripnote.domain.spot.entity.Spot;
+import com.elice.tripnote.domain.spot.exception.LandmarkNotFoundException;
 import com.elice.tripnote.domain.spot.service.SpotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,32 +35,6 @@ public class SpotController {
             return new ResponseEntity<>("Either region or landmark must be specified", HttpStatus.BAD_REQUEST);
         }
     }
-//    private ResponseEntity<SpotDTO> getSpotsByRegion(String region) {
-//        try {
-//            Region validRegion = Region.fromString(region);
-//            SpotDTO result = spotService.search(validRegion.getName());
-//            if (result != null) {
-//                return new ResponseEntity<>(result, HttpStatus.OK);
-//            } else {
-//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//            }
-//        } catch (IllegalArgumentException e) {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-//    }
-//    private ResponseEntity<List<Spot>> getSpotsByRegion(String region) {
-//        try {
-//            Region validRegion = Region.fromString(region);
-//            List<Spot> list = spotService.getSpotsByRegion(validRegion.getName());
-//            if (!list.isEmpty()) {
-//                return new ResponseEntity<>(list, HttpStatus.OK);
-//            } else {
-//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//            }
-//        } catch (IllegalArgumentException e) {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-//    }
     private ResponseEntity<List<Spot>> getSpotsByRegion(String region) {
         try {
             Region validRegion = Region.fromString(region);
@@ -74,6 +49,9 @@ public class SpotController {
         }
     }
     private ResponseEntity<Spot> getSpotsByLandmark(String landmark) {
+        if(spotService.searchByLocation(landmark) !=null){
+            return ResponseEntity.ok().body(spotService.searchByLocation(landmark));
+        }
         SpotDTO result = spotService.search(landmark);
         if (result == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -91,5 +69,29 @@ public class SpotController {
         log.info("{}", spot);
         Spot createdSpot = spotService.add(spot);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSpot);
+    }
+
+    @PatchMapping("/increaseLikes")
+    public ResponseEntity<Spot> increaseLike(@RequestParam(name = "landmark") String landmark) {
+        try {
+            Spot updatedSpot = spotService.increaseLike(landmark);
+            return ResponseEntity.ok().body(updatedSpot);
+        } catch (LandmarkNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PatchMapping("/decreaseLikes")
+    public ResponseEntity<Spot> decreaseLike(@RequestParam(name = "landmark") String landmark) {
+        try {
+            Spot updatedSpot = spotService.decreaseLike(landmark);
+            if (updatedSpot == null) {
+                throw new LandmarkNotFoundException();
+            } else {
+                return ResponseEntity.ok().body(updatedSpot);
+            }
+        } catch (LandmarkNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }
