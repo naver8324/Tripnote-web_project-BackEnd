@@ -20,18 +20,13 @@ public class MemberController implements SwaggerMemberController {
     private final MemberService memberService;
 
 
-    @GetMapping("/test")
-    public String test(){
-        return "completed test.";
-    }
-
     @GetMapping("/test1")
     public String test2(){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return email + " | completed test1.";
     }
 
-    // 회원가입 테스트중
+    // 회원가입
     @Override
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@RequestBody MemberRequestDTO memberRequestDTO) {
@@ -57,5 +52,29 @@ public class MemberController implements SwaggerMemberController {
     @GetMapping("/check-nickname")
     public ResponseEntity<Boolean> checkNicknameDuplicate(@RequestParam String nickname) {
         return ResponseEntity.ok().body(memberService.checkNicknameDuplicate(nickname));
+    }
+
+    // (로그인중) 닉네임 변경
+    @Override
+    @PatchMapping("/update-nickname")
+    public ResponseEntity<Void> updateNickname(@RequestHeader("Authorization") String jwt, @RequestParam String newNickname) {
+        memberService.updateNickname(newNickname);
+        return ResponseEntity.ok().build();
+    }
+
+    // (로그인중) 비밀번호 변경 (비밀번호는 노출을 피해야 하기 때문에 RequestBody 형식으로 보냄)
+    @Override
+    @PatchMapping("/update-password")
+    public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody String newPassword) {
+        memberService.updatePassword(newPassword);
+        return ResponseEntity.ok().build();
+    }
+
+    // (로그인중) 회원 삭제
+    @Override
+    @DeleteMapping("/delete-member")
+    public ResponseEntity<Void> deleteMember(@RequestHeader("Authorization") String jwt) {
+        memberService.deleteMember();
+        return ResponseEntity.ok().build();
     }
 }
