@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.route.controller;
 
+import com.elice.tripnote.domain.route.entity.LikeBookmarkResponseDTO;
 import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
 import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
 import com.elice.tripnote.global.entity.ErrorResponse;
@@ -62,15 +63,23 @@ public interface SwaggerRouteController {
     })
     ResponseEntity<Long> deleteRoute(Long routeId);
 
-    //    ResponseEntity<List<Long>> getRegion(String region, List<Long> hashtags);
+    ResponseEntity<List<Long>> getRegion(String region, List<Long> hashtags);
 
     @Operation(summary="경로에 포함된 여행지 리스트 리턴", description= "특정 경로 id를 이용해서 해당 경로에 포함된 여행지들을 리스트로 반환받을 수 있다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "댓글 조회에 성공하였습니다.",  content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.",  content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "성공하였습니다.",  content = @Content(mediaType = "application/json")),
     })
     @Parameters(value = {
             @Parameter(name="routeId", description = "경로 번호"),
     })
     ResponseEntity<List<SpotResponseDTO>> getSpots( Long integratedRouteId);
+
+    @Operation(summary="경로의 좋아요 수, 북마크 수 리턴", description= "특정 경로 id를 이용해서 해당 경로의 좋아요 수, 북마크 수를 반환받을 수 있다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공하였습니다.",  content = @Content(mediaType = "application/json")),
+    })
+    @Parameters(value = {
+            @Parameter(name="routeId", description = "경로 번호"),
+    })
+    ResponseEntity<LikeBookmarkResponseDTO> getLikeBookmark(Long integratedRouteId);
 }

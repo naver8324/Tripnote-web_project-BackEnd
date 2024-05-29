@@ -1,6 +1,7 @@
 package com.elice.tripnote.domain.route.controller;
 
 import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
+import com.elice.tripnote.domain.route.entity.LikeBookmarkResponseDTO;
 import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
 import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
 import com.elice.tripnote.domain.route.service.RouteService;
@@ -69,7 +70,7 @@ public class RouteController implements SwaggerRouteController {
      * @param hashtags 설정한 해시태그의 id
      * @return 해당하는 경로들의 id 리스트
      */
-//    @Override
+    @Override
     @GetMapping("/region")
     public ResponseEntity<List<Long>> getRegion(@RequestParam("region") String region,
                                                           @RequestParam(value = "hashtags", required = false) List<Long> hashtags) {
@@ -81,16 +82,18 @@ public class RouteController implements SwaggerRouteController {
     // 경로 id 리스트 보내면
     // 각 경로에 맡는 여행지 리스트 리턴
     @Override
-    @GetMapping("/route/{routeId}")
+    @GetMapping("/{routeId}/spots")
     public ResponseEntity<List<SpotResponseDTO>> getSpots(@PathVariable("routeId") Long integratedRouteId){
         return ResponseEntity.ok(routeService.getSpots(integratedRouteId));
     }
 
 
     // 경로 id 리스트 보내면 각 경로의 하트 수, 북마크 수 리턴
-//    @Override
-//    @GetMapping
-//    public ResponseEntity<List<SpotResponseDTO>> getLikeBookmark(){
-//        return ResponseEntity.ok();
-//    }
+    @Override
+    @GetMapping("/{routeId}/like-bookmark")
+    public ResponseEntity<LikeBookmarkResponseDTO> getLikeBookmark(@PathVariable("routeId") Long integratedRouteId){
+        return ResponseEntity.ok(routeService.getLikeBookmark(integratedRouteId));
+    }
+
+    // 여행지 선택했을 때, 해당 여행지를 지나가는 경로 id 리턴
 }

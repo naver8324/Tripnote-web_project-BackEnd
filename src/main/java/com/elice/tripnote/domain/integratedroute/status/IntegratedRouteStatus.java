@@ -1,6 +1,6 @@
 package com.elice.tripnote.domain.integratedroute.status;
 
-import com.elice.tripnote.domain.integratedroute.exception.EntityNotFoundException;
+import com.elice.tripnote.domain.integratedroute.exception.NoSuchIntegratedRouteStatusException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -34,6 +34,6 @@ public enum IntegratedRouteStatus {
                 return status;
             }
         }
-        throw new EntityNotFoundException("Unknown name: " + name);
+        throw new NoSuchIntegratedRouteStatusException();
     }
 }

@@ -7,6 +7,7 @@ import com.elice.tripnote.domain.integratedroute.repository.IntegratedRouteRepos
 import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
 import com.elice.tripnote.domain.likebookmarkperiod.entity.LikeBookmarkPeriod;
 import com.elice.tripnote.domain.likebookmarkperiod.repository.LikeBookPeriodRepository;
+import com.elice.tripnote.domain.link.bookmark.repository.BookmarkRepository;
 import com.elice.tripnote.domain.link.routespot.entity.RouteSpot;
 import com.elice.tripnote.domain.link.routespot.repository.RouteSpotRepository;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
@@ -14,10 +15,8 @@ import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagReposito
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.domain.post.exception.NoSuchRouteException;
 import com.elice.tripnote.domain.post.exception.NoSuchUserException;
-import com.elice.tripnote.domain.route.entity.LikeBookmarkResponseDTO;
-import com.elice.tripnote.domain.route.entity.Route;
-import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
-import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
+import com.elice.tripnote.domain.post.repository.PostRepository;
+import com.elice.tripnote.domain.route.entity.*;
 import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.route.status.RouteStatus;
@@ -52,6 +51,8 @@ public class RouteService {
     private final HashtagRepository hashtagRepository;
     private final MemberRepository memberRepository;
     private final SpotRepository spotRepository;
+    private final PostRepository postRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Transactional
     public Long save(SaveRequestDTO requestDto) {
@@ -217,10 +218,14 @@ public class RouteService {
         ORDER BY lbp.likes DESC
         LIMIT 5;
          */
+        List<IntegratedRouteRegionDTO> dtos=integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region, hashtags);
 
         // 그 중에서 최근 좋아요(like bookmark period 이용) 많은 수 top 5 경로 id를 리턴
-
-        return null;
+        List<Long> integratedIds = new ArrayList<>();
+        for(IntegratedRouteRegionDTO dto : dtos){
+            integratedIds.add(dto.getIntegratedRouteId());
+        }
+        return integratedIds;
     }
 
     public List<SpotResponseDTO> getSpots(Long integratedRouteId) {
@@ -238,13 +243,19 @@ public class RouteService {
             join route
             on post.route_id = route.id and route.integrated_route_id = :integratedRouteId
              */
+        int like = postRepository.getLikeCount(integratedRouteId);
 
             /*
             select count(*) from bookmark b
             join route r on r.id = b.route_id
-            where r.id = :routeId
+            where r.id = :integratedRouteId
              */
-        return null;
+        int bookmark = bookmarkRepository.getBookmarkCount(integratedRouteId);
+
+        return LikeBookmarkResponseDTO.builder()
+                .likes(like)
+                .bookmark(bookmark)
+                .build();
     }
 
 
