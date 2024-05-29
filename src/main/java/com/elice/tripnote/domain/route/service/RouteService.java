@@ -14,11 +14,11 @@ import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagReposito
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.domain.post.exception.NoSuchRouteException;
 import com.elice.tripnote.domain.post.exception.NoSuchUserException;
+import com.elice.tripnote.domain.route.entity.LikeBookmarkResponseDTO;
 import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
 import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
 import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
-import com.elice.tripnote.domain.route.exception.EntityNotFoundException;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.entity.Spot;
@@ -190,7 +190,7 @@ public class RouteService {
         return route.getId();
     }
 
-    public List<Long> getRegion(IntegratedRouteStatus region, List<Long> hashtags){
+    public List<Long> getRegion(IntegratedRouteStatus region, List<Long> hashtags) {
         // 통합 경로 중, 해당 지역을 지나는 통합 경로 필터링하고
         // 통합 경로의 지역이 region인 경로들 필터링
 
@@ -223,27 +223,15 @@ public class RouteService {
         return null;
     }
 
-    public List<SpotResponseDTO> getSpots(List<Long> routeIds){
-        List<SpotResponseDTO> responseDTOs = new ArrayList<>();
-        for(Long routeId : routeIds){
-            /*
-            select spot.id, spot.location, spot.region from spot
-            join route_spot
-            on route_spot.spot_id = spot.id
-            where route_spot.route_id=:routeId
-             */
-        }
-        return null;
+    public List<SpotResponseDTO> getSpots(Long integratedRouteId) {
+        return spotRepository.findByRouteIds(integratedRouteId);
     }
 
 
-    public List<SpotResponseDTO> getLikeBookmark(List<Long> integratedRouteIds){
-        //TODO: dto 새로 만들기
-        List<SpotResponseDTO> responseDTOs = new ArrayList<>();
-        for(Long integratedRouteId : integratedRouteIds){
-            // 해당 통합 경로 id를 가지고 있는 모든 route들의 좋아요 수 합치기
-            // 양방향 관계 설정하고
-            // 만약 게시물이 있으면 더하고, 없으면 패스
+    public LikeBookmarkResponseDTO getLikeBookmark(Long integratedRouteId) {
+        // 해당 통합 경로 id를 가지고 있는 모든 route들의 좋아요 수 합치기
+        // 양방향 관계 설정하고
+        // 만약 게시물이 있으면 더하고, 없으면 패스
 
             /*
             select sum(post.likes) from post
@@ -256,7 +244,6 @@ public class RouteService {
             join route r on r.id = b.route_id
             where r.id = :routeId
              */
-        }
         return null;
     }
 
