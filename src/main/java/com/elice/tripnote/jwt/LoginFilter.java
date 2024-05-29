@@ -43,7 +43,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, String> loginData = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
 
-            String email = loginData.get("username");
+            String email = loginData.get("email");
             String password = loginData.get("password");
 
             log.info("email : " + email);
