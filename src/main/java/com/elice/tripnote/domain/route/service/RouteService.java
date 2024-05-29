@@ -195,19 +195,24 @@ public class RouteService {
         // 해시태그 있으면 해시태그도 필터링
 
         /*
-        SELECT ih.integerated_route_id
-        FROM
-            uuid_hashtag ih
-        WHERE
-            ih.integerated_route_id IN (
-                SELECT id
-                FROM integrated_route
-                WHERE IntegratedRouteStatus = :region
-            )
-        GROUP BY
-            ih.integerated_route_id
-        HAVING
-            COUNT(DISTINCT CASE WHEN ih.hashtag_id IN :hashtag_ids THEN ih.hashtag_id END) = :hashtag_ids_size;
+        1. 통합 경로에서 region으로 필터링하기
+        2. 통합 경로 id 중, 해시태그_uuid_연결 테이블의 hashtag_id에 hashtags 값이 모두 있는 애들 필터링
+        3. 이렇게 나온 통합 경로 id와 기간별_좋아요_북마크 join해서 기간별 좋아요 수를 기준으로 통합 경로 id를 정렬한다
+        4. 이렇게 정렬한 것 중 상위 5개의 통합 경로 id를 리턴한다
+         */
+
+        /*
+        SELECT ir.id AS integrated_route_id, SUM(plb.likes) AS total_likes
+        FROM integrated_route ir
+        left JOIN uuid_hashtag uh ON ir.id = uh.integrated_route_id
+        JOIN like_bookmark_period lbp ON ir.id = lbp.integrated_route_id
+        WHERE ir.region = :region
+          AND uh.hashtag_id IN :hashtags  -- 제시된 해시태그 id 안에 속하는 row만 남김
+        GROUP BY ir.id
+        HAVING COUNT(DISTINCT uh.hashtag_id) = :hashtags_size  -- 그룹별로 묶었을 때, 해당 그룹의 해시태그 id 개수가 hashtags의 개수와 같으면 모든 hashtag가 포함된거?
+            and lbp.started_at = max(lbp.started_at) -- 그룹별로 묶었을 때 started_at 값이 가장 큰 row만 남게
+        ORDER BY lbp.likes DESC
+        LIMIT 5;
          */
 
         // 그 중에서 최근 좋아요(like bookmark period 이용) 많은 수 top 5 경로 id를 리턴
@@ -223,6 +228,30 @@ public class RouteService {
             join route_spot
             on route_spot.spot_id = spot.id
             where route_spot.route_id=:routeId
+             */
+        }
+        return null;
+    }
+
+
+    public List<SpotResponseDTO> getLikeBookmark(List<Long> integratedRouteIds){
+        //TODO: dto 새로 만들기
+        List<SpotResponseDTO> responseDTOs = new ArrayList<>();
+        for(Long integratedRouteId : integratedRouteIds){
+            // 해당 통합 경로 id를 가지고 있는 모든 route들의 좋아요 수 합치기
+            // 양방향 관계 설정하고
+            // 만약 게시물이 있으면 더하고, 없으면 패스
+
+            /*
+            select sum(post.likes) from post
+            join route
+            on post.route_id = route.id and route.integrated_route_id = :integratedRouteId
+             */
+
+            /*
+            select count(*) from bookmark b
+            join route r on r.id = b.route_id
+            where r.id = :routeId
              */
         }
         return null;

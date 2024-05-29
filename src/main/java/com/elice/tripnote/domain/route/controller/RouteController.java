@@ -88,4 +88,9 @@ public class RouteController implements SwaggerRouteController {
 
 
     // 경로 id 리스트 보내면 각 경로의 하트 수, 북마크 수 리턴
+//    @Override
+//    @GetMapping
+//    public ResponseEntity<List<SpotResponseDTO>> getLikeBookmark(){
+//        return ResponseEntity.ok();
+//    }
 }
