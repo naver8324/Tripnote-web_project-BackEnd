@@ -3,6 +3,7 @@ package com.elice.tripnote.domain.spot.service;
 import com.elice.tripnote.domain.spot.dto.SpotDTO;
 import com.elice.tripnote.domain.spot.dto.SpotResponseDTO;
 import com.elice.tripnote.domain.spot.entity.Spot;
+import com.elice.tripnote.domain.spot.exception.LandmarkNotFoundException;
 import com.elice.tripnote.domain.spot.exception.RegionNotFoundException;
 import com.elice.tripnote.domain.spot.naver.NaverClient;
 import com.elice.tripnote.domain.spot.naver.dto.SearchImageReq;
@@ -112,5 +113,35 @@ public class SpotService {
                 .imageUrl(spotDTO.getImageLink())
                 .region(address).build();
         //return entity;
+    }
+    public Spot searchByLocation(String location) {
+        return spotRepository.findByLocation(location).orElse(null);
+    }
+
+    public Spot increaseLike(String location){
+        Spot spot = spotRepository.findByLocation(location).orElse(null);
+        if (spot ==null) {
+            throw new LandmarkNotFoundException();
+
+        } else {
+            spot.increaseLikes();
+            return spotRepository.save(spot);
+        }
+    }
+
+    public Spot decreaseLike(String location){
+        Spot spot = spotRepository.findByLocation(location).orElse(null);
+        if (spot ==null) {
+            throw new LandmarkNotFoundException();
+
+        } else {
+            spot.decreaseLikes();
+            if (spot.isLikesZero()) {
+                spotRepository.delete(spot);
+                return null; // or you can return a custom response indicating deletion
+            } else {
+                return spotRepository.save(spot);
+            }
+        }
     }
 }
