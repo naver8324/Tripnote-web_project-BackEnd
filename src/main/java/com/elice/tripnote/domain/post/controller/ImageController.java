@@ -2,16 +2,19 @@ package com.elice.tripnote.domain.post.controller;
 
 
 import com.elice.tripnote.domain.post.entity.ImageRequestDTO;
+import com.elice.tripnote.domain.post.entity.ImageResponseDTO;
+import com.elice.tripnote.domain.post.exception.FileSizeExceedException;
+import com.elice.tripnote.domain.post.exception.FileTypeNotMatchedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -20,7 +23,6 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -31,37 +33,40 @@ public class ImageController implements SwaggerImageController {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    private final S3Client client;
+    private final S3Presigner presigner;
+
 
     @Override
     @PutMapping("/api/member/images")
-    public ResponseEntity<String> createPresignedImageUrl(@RequestBody ImageRequestDTO imageDTO){
+    public ResponseEntity<ImageResponseDTO> createPresignedImageUrl(@RequestBody ImageRequestDTO imageDTO){
 
+
+        // file size 10MB 이하로 제한
+        if(10485760L < imageDTO.getContentLength()){
+            throw new FileSizeExceedException();
+        }
+
+        // 이미지 파일만 업로드 가능
+        if(!imageDTO.getContentType().startsWith("image")){
+            throw new FileTypeNotMatchedException();
+        }
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
         String formattedNow = now.format(formatter);
 
+        String key = formattedNow + "/" + UUID.randomUUID().toString() + imageDTO.getFileName();
 
-        String name = createPresignedUrl(bucket, formattedNow + "/" + UUID.randomUUID().toString() + imageDTO.getFileName(), imageDTO.getMetaData());
-
-        return ResponseEntity.ok().body(name);
-    }
-
-    private final S3Presigner presigner;
-
-
-
-
-    public String createPresignedUrl(String bucketName, String keyName, Map<String, String> metadata) {
 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(keyName)
-                .metadata(metadata)
+                .bucket(bucket)
+                .key(key)
+                .contentType(imageDTO.getContentType())
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(10))  // The URL expires in 10 minutes.
+                .signatureDuration(Duration.ofMinutes(1)) // The URL expires in 1 minutes.
                 .putObjectRequest(objectRequest)
                 .build();
 
@@ -71,7 +76,37 @@ public class ImageController implements SwaggerImageController {
         log.info("Presigned URL to upload a file to: [{}]", myURL);
         log.info("HTTP method: [{}]", presignedRequest.httpRequest().method());
 
-        return presignedRequest.url().toExternalForm();
+
+        ImageResponseDTO imageResponseDTO = ImageResponseDTO.builder()
+                .presignedUrl(presignedRequest.url().toExternalForm())
+                .key(key)
+                .build();
+
+
+        return ResponseEntity.ok().body(imageResponseDTO);
     }
+
+    @Override
+    @GetMapping("/api/member/images")
+    public ResponseEntity<String> getImageUrl(@RequestParam(name = "key") String key){
+
+
+        String url = client.utilities()
+                    .getUrl(builder -> builder
+                            .bucket(bucket)
+                            .key(key))
+                    .toExternalForm();
+
+
+        return ResponseEntity.ok().body(url);
+
+    }
+
+
+
+
+
+
+
 
 }
