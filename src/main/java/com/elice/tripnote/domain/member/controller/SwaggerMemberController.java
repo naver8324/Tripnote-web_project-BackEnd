@@ -44,6 +44,7 @@ public interface SwaggerMemberController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "닉네임 변경에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "409", description = "이미 사용 중인 닉네임입니다.", content = @Content(mediaType = "application/json"))
     })
@@ -55,6 +56,7 @@ public interface SwaggerMemberController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "비밀번호 변경에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "409", description = "현재 비밀번호가 일치하지 않습니다.", content = @Content(mediaType = "application/json"))
     })
@@ -65,6 +67,7 @@ public interface SwaggerMemberController {
     @Operation(summary = "회원 삭제", description = "(로그인중) 회원을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 삭제에 성공하였습니다."),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.")
     })
     @DeleteMapping("/delete-member")
