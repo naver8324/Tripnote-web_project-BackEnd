@@ -43,7 +43,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, String> loginData = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
 
-            String email = loginData.get("username");
+            String email = loginData.get("email");
             String password = loginData.get("password");
 
             log.info("email : " + email);
@@ -73,9 +73,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
     // "email" 파라미터 추출 메서드
-    private String obtainEmail(HttpServletRequest request) {
-        return request.getParameter("email");
-    }
+//    private String obtainEmail(HttpServletRequest request) {
+//        return request.getParameter("email");
+//    }
 
 
     //로그인 성공시 실행하는 메소드 (여기서 JWT를 발급하면 됨)

@@ -1,11 +1,14 @@
 package com.elice.tripnote.domain.route.exception;
 
-import com.elice.tripnote.global.exception.NotFoundException;
+import com.elice.tripnote.global.exception.ErrorCode;
+import lombok.Getter;
 
-public class AlgorithmNotFoundException extends NotFoundException {
-    private static final String MESSAGE = "SHA-1 알고리즘을 찾을 수 없습니다.";
+@Getter
+public class AlgorithmNotFoundException extends RuntimeException {
+    private final ErrorCode errorCode;
 
-    public AlgorithmNotFoundException() {
-        super(MESSAGE);
+    public AlgorithmNotFoundException(){
+        super(ErrorCode.NOT_FOUND_ALGORITHM.getMessage());
+        this.errorCode = ErrorCode.NOT_FOUND_ALGORITHM;
     }
 }
