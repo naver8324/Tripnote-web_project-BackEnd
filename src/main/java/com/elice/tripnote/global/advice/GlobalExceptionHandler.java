@@ -99,6 +99,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
     }
 
+    @ExceptionHandler(NotValidRouteException.class)
+    public ResponseEntity<ErrorResponse> handleNotValidRouteException(NotValidRouteException ex){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
+    }
 
 
 
