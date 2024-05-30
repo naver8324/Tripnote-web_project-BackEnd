@@ -115,4 +115,35 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
     }
 
+    @ExceptionHandler(FileSizeExceedException.class)
+    public ResponseEntity<ErrorResponse> handleFileSizeExceedException(FileSizeExceedException ex){
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(FileTypeNotMatchedException.class)
+    public ResponseEntity<ErrorResponse> handleFileTypeNotMatchedException(FileTypeNotMatchedException ex){
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(NotValidRouteException.class)
+    public ResponseEntity<ErrorResponse> handleNotValidRouteException(NotValidRouteException ex){
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
+    }
+
+
 }
