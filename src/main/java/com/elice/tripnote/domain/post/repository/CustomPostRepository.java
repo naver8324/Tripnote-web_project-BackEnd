@@ -15,4 +15,6 @@ public interface CustomPostRepository {
     Page<PostResponseDTO> customFindNotDeletedPostsWithLikesByMemberId(Long memberId, int page, int size);
     Page<PostResponseDTO> customFindNotDeletedPostsWithMarkByMemberId(Long memberId, int page, int size);
 
+    boolean customCheckIfRouteIsAvailable(Long routeId, Long memberId);
+
 }

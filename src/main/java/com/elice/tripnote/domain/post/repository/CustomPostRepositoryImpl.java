@@ -9,7 +9,9 @@ import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.entity.QPost;
 import com.elice.tripnote.domain.route.entity.QRoute;
+import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -229,6 +231,37 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .where(post.id.eq(postId)
                         .and(post.isDeleted.isFalse()))
                 .fetchOne();
+
+    }
+
+
+    public boolean customCheckIfRouteHasPost(Long routeId){
+
+        return query
+                .select(post.count())
+                .from(post)
+                .join(post.route, route)
+                .where(route.id.eq(routeId)
+                        .and(route.routeStatus.eq(RouteStatus.PUBLIC))
+                )
+                .fetchOne() != null;
+
+
+    }
+
+
+    public boolean customCheckIfRouteIsAvailable(Long routeId, Long memberId){
+
+        return query
+                .select(Expressions.ONE)
+                .from(route)
+                .leftJoin(post)
+                .on(post.route.id.eq(route.id))
+                .where( route.id.eq(routeId)
+                        .and(post.id.isNull())
+                        .and(route.member.id.eq(memberId))
+                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+                .fetchFirst() != null;
 
     }
 
