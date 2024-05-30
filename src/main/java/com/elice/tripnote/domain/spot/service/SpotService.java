@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,34 +26,7 @@ public class SpotService {
     private final SpotRepository spotRepository;
     private final NaverClient naverClient;
 
-//    public List<Spot> getSpotsByRegion(String region) {
-//        if (region == null || region.isEmpty()) {
-//            return spotRepository.findAll();
-//        } else {
-//            var searchLocalReq = new SearchLocalReq();
-//            searchLocalReq.setQuery(region);
-//            var searchLocalRes = naverClient.searchLocal(searchLocalReq);
-//
-//            return searchLocalRes.getItems().stream().map(localItem -> {
-//                var imageQuery = localItem.getTitle().replaceAll("<[^>]*>", "");
-//                var searchImageReq = new SearchImageReq();
-//                searchImageReq.setQuery(imageQuery);
-//                var searchImageRes = naverClient.searchImage(searchImageReq);
-//
-//                String imageUrl = searchImageRes.getItems().stream()
-//                        .findFirst()
-//                        .map(imageItem -> imageItem.getLink())
-//                        .orElse(null);
-//
-//                return Spot.builder()
-//                        .location(localItem.getTitle().replaceAll("<[^>]*>", ""))
-//                        .likes(0) // Assuming likes are not available from the API, set to 0 or another default value
-//                        .imageUrl(imageUrl)
-//                        .region(region)
-//                        .build();
-//            }).collect(Collectors.toList());
-//        }
-//    }
+    @Transactional
     public List<Spot> getSpotsByRegion(String region, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("likes").descending());
 
@@ -63,14 +37,14 @@ public class SpotService {
         }
     }
 
+    @Transactional
     public Spot searchById(Long id){
-        Spot spot = spotRepository.findById(id).orElse(null);
-        if (spot==null) {
-            throw new RegionNotFoundException();
-        }
+        Spot spot = spotRepository.findById(id).orElseThrow(()->new LandmarkNotFoundException());
         // Assuming you want to return the first spot found
         return spot;
     }
+
+    @Transactional
     public SpotDTO search(String query) {
         var searchLocalReq = new SearchLocalReq();
         searchLocalReq.setQuery(query);
@@ -87,37 +61,36 @@ public class SpotService {
                 var imageItem = searchImageRes.getItems().stream().findFirst().get();
 
                 var result = new SpotDTO();
-                result.setTitle(localItem.getTitle());
-                result.setCategory(localItem.getCategory());
-                result.setAddress(localItem.getAddress());
-                result.setRoadAddress(localItem.getRoadAddress());
-              //  result.setHomePageLink(localItem.getLink());
-                result.setImageLink(imageItem.getLink());
-
+                result.setLocation(localItem.getTitle());
+                result.setImageUrl(localItem.getLink());
+                result.setLikes(0);
+                result.setRegion(localItem.getAddress().split(" ")[0]);
                 return result;
             }
         }
         return new SpotDTO();
     }
 
+    @Transactional
     public Spot add(Spot spot){
-        //var entity = dtoToEntity(spotDTO);
-        spotRepository.save(spot);
-        return spot;
+        return spotRepository.save(spot);
     }
+
+    @Transactional
     public Spot dtoToEntity(SpotDTO spotDTO){
-        String address = spotDTO.getAddress().split(" ")[0];
         return Spot.builder()
-                .location(spotDTO.getTitle())
-                .likes(spotDTO.getVisitCount())
-                .imageUrl(spotDTO.getImageLink())
-                .region(address).build();
-        //return entity;
+                .location(spotDTO.getLocation())
+                .likes(spotDTO.getLikes())
+                .imageUrl(spotDTO.getImageUrl())
+                .region(spotDTO.getRegion()).build();
     }
+
+    @Transactional
     public Spot searchByLocation(String location) {
         return spotRepository.findByLocation(location).orElse(null);
     }
 
+    @Transactional
     public Spot increaseLike(String location){
         Spot spot = spotRepository.findByLocation(location).orElse(null);
         if (spot ==null) {
@@ -129,6 +102,7 @@ public class SpotService {
         }
     }
 
+    @Transactional
     public Spot decreaseLike(String location){
         Spot spot = spotRepository.findByLocation(location).orElse(null);
         if (spot ==null) {
