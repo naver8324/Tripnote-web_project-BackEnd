@@ -10,6 +10,7 @@ import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.entity.QPost;
 import com.elice.tripnote.domain.route.entity.QRoute;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -43,9 +44,10 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         page = page > 0 ? page - 1 : 0;
 
         long totalCount = query
+                .select(post.count())
                 .from(post)
                 .where(post.isDeleted.isFalse())
-                .fetch().size();
+                .fetchFirst();
 
 
         List<PostResponseDTO> postResponseDTOs = query
@@ -72,8 +74,9 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         page = page > 0 ? page - 1 : 0;
 
         long totalCount =query
+                .select(post.count())
                 .from(post)
-                .fetch().size();
+                .fetchFirst();
 
 
         List<PostResponseDTO> postResponseDTOs = query
@@ -100,10 +103,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         page = page > 0 ? page - 1 : 0;
 
         long totalCount = query
+                .select(post.count())
                 .from(post)
                 .where(post.member.id.eq(memberId)
                         .and(post.isDeleted.isFalse()))
-                .fetch().size();
+                .fetchFirst();
 
 
         List<PostResponseDTO> postResponseDTOs = query
@@ -131,13 +135,14 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         page = page > 0 ? page - 1 : 0;
 
         long totalCount = query
+                .select(post.count())
                 .from(post)
                 .join(post.likePosts, likePost)
                 .on(likePost.likedAt.isNotNull())
                 .join(likePost.member, member)
                 .on(member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
-                .fetch().size();
+                .fetchFirst();
 
         List<PostResponseDTO> postResponseDTOs = query
                 .select(Projections.constructor(PostResponseDTO.class,
@@ -169,6 +174,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         page = page > 0 ? page - 1 : 0;
 
         long totalCount = query
+                .select(post.count())
                 .from(post)
                 .join(post.bookmarks, bookmark)
                 .on(bookmark.markedAt.isNotNull())
