@@ -61,6 +61,12 @@ dependencies {
 
 	//Bean Validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	//Amazon s3
+	implementation group: 'software.amazon.awssdk', name: 's3', version: '2.25.60'
+
+
+
 }
 
 tasks.named('test') {
