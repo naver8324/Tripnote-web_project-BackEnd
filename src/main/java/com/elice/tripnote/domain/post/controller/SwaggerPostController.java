@@ -102,6 +102,7 @@ public interface SwaggerPostController {
     @Operation(summary="게시글 생성 - 유저", description= "유저가 게시글을 생성할 때 사용하는 api입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "게시글 생성에 성공하였습니다.",  content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "이 경로는 비공개, 삭제되었거나 유저의 경로가 아닙니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "401", description = "Required request header 'Authorization' for method parameter type String is not present", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "<p>해당하는 유저는 존재하지 않습니다.</p><br><p>해당하는 게시글은 존재하지 않습니다.</p><br><p>해당하는 경로는 존재하지 않습니다.</p>",  content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     })
