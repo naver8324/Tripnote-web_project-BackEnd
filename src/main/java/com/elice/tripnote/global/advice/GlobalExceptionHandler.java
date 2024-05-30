@@ -2,7 +2,10 @@ package com.elice.tripnote.global.advice;
 
 
 import com.elice.tripnote.domain.hashtag.exception.HashtagNameDuplicateException;
+import com.elice.tripnote.domain.member.exception.CustomDuplicateException;
 import com.elice.tripnote.domain.post.exception.*;
+import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
+import com.elice.tripnote.global.exception.NoSuchSpotException;
 import com.elice.tripnote.global.entity.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,7 +75,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
-        @ExceptionHandler(NoSuchRouteException.class)
+    @ExceptionHandler(NoSuchRouteException.class)
     public ResponseEntity<ErrorResponse> handleNoSuchRouteException(NoSuchRouteException ex){
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
@@ -81,8 +84,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
     }
 
-    @ExceptionHandler(FileSizeExceedException.class)
-    public ResponseEntity<ErrorResponse> handleFileSizeExceedException(FileSizeExceedException ex){
+    // 멤버 회원가입 - 이메일, 닉네임 중복 검사
+    @ExceptionHandler(CustomDuplicateException.class)
+    public ResponseEntity<ErrorResponse> handleCustomDuplicateException(CustomDuplicateException ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
                 .timestamp(LocalDateTime.now())
@@ -90,8 +94,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
     }
 
-    @ExceptionHandler(FileTypeNotMatchedException.class)
-    public ResponseEntity<ErrorResponse> handleFileTypeNotMatchedException(FileTypeNotMatchedException ex){
+        
+
+    @ExceptionHandler(NoSuchSpotException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchMemberException(NoSuchSpotException ex){
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
                 .timestamp(LocalDateTime.now())
@@ -99,17 +105,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
     }
 
-    @ExceptionHandler(NotValidRouteException.class)
-    public ResponseEntity<ErrorResponse> handleNotValidRouteException(NotValidRouteException ex){
+    @ExceptionHandler(AlgorithmNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchMemberException(AlgorithmNotFoundException ex){
+
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
         return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
     }
-
-
-
-
 
 }

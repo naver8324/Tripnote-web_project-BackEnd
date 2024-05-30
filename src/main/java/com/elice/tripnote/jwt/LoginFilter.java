@@ -73,9 +73,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
     // "email" 파라미터 추출 메서드
-    private String obtainEmail(HttpServletRequest request) {
-        return request.getParameter("email");
-    }
+//    private String obtainEmail(HttpServletRequest request) {
+//        return request.getParameter("email");
+//    }
 
 
     //로그인 성공시 실행하는 메소드 (여기서 JWT를 발급하면 됨)

@@ -55,9 +55,9 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/member/**").permitAll()
-                        .requestMatchers("/test", "/api/member/test1").hasRole("MEMBER")
-                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .requestMatchers("/member/").permitAll()                    // 로그인 필요 없는 페이지 따로 설정 [ex) 메인페이지]
+                        .requestMatchers("/api/member/test1").hasRole("MEMBER")     // 개발 후 /api/member/** 로 수정
+                        .requestMatchers("/admin").hasRole("ADMIN")                 // 개발 후 /api/admin/** 로 수정
                         .anyRequest().permitAll());  // 그 외 경로에 대해서는 모두 접근가능
 
         //JWTFilter 등록
