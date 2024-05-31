@@ -5,144 +5,60 @@ import com.elice.tripnote.domain.hashtag.exception.HashtagNameDuplicateException
 import com.elice.tripnote.domain.member.exception.CustomDuplicateException;
 import com.elice.tripnote.domain.post.exception.*;
 import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
+import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.JwtTokenException;
 import com.elice.tripnote.global.exception.NoSuchSpotException;
 import com.elice.tripnote.global.entity.ErrorResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
 
-    @ExceptionHandler(HashtagNameDuplicateException.class)
-    public ResponseEntity<ErrorResponse> handelHashtagNameDuplicateException(HashtagNameDuplicateException ex){
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException ex){
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
+                .errorCode(ex.getErrorCode().name())
                 .build();
 
         return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
     }
 
-    @ExceptionHandler(NoSuchPostException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchPostException(NoSuchPostException ex){
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
 
-    @ExceptionHandler(NoSuchUserException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchUserException(NoSuchUserException ex){
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(MethodArgumentNotValidException ex){
 
-    @ExceptionHandler(NoSuchCommentException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchCommentException(NoSuchCommentException ex){
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
 
-    @ExceptionHandler(NoSuchAuthorizationException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchAuthorizationException(NoSuchAuthorizationException ex){
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
+        List<ErrorResponse.FieldError> errors = new ArrayList<>();
+        for(FieldError fieldError : ex.getFieldErrors()) {
+            ErrorResponse.FieldError error = new ErrorResponse.FieldError();
+            error.setField(fieldError.getField());
+            error.setMessage(fieldError.getDefaultMessage());
 
-    @ExceptionHandler(NoSuchRouteException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchRouteException(NoSuchRouteException ex){
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
-
-    // 멤버 회원가입 - 이메일, 닉네임 중복 검사
-    @ExceptionHandler(CustomDuplicateException.class)
-    public ResponseEntity<ErrorResponse> handleCustomDuplicateException(CustomDuplicateException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
-
-        
-
-    @ExceptionHandler(NoSuchSpotException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchMemberException(NoSuchSpotException ex){
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
-
-    @ExceptionHandler(AlgorithmNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchMemberException(AlgorithmNotFoundException ex){
+            errors.add(error);
+        }
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
+                .errorCode("WRONG_INPUT")
+                .validation(errors)
                 .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    @ExceptionHandler(FileSizeExceedException.class)
-    public ResponseEntity<ErrorResponse> handleFileSizeExceedException(FileSizeExceedException ex){
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
-
-    @ExceptionHandler(FileTypeNotMatchedException.class)
-    public ResponseEntity<ErrorResponse> handleFileTypeNotMatchedException(FileTypeNotMatchedException ex){
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
-
-    @ExceptionHandler(NotValidRouteException.class)
-    public ResponseEntity<ErrorResponse> handleNotValidRouteException(NotValidRouteException ex){
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
-
-    @ExceptionHandler(JwtTokenException.class)
-    public ResponseEntity<ErrorResponse> handleJwtTokenException(JwtTokenException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
 
 
 }
