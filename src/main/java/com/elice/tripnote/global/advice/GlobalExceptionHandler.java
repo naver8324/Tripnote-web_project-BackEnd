@@ -5,11 +5,10 @@ import com.elice.tripnote.domain.hashtag.exception.HashtagNameDuplicateException
 import com.elice.tripnote.domain.member.exception.CustomDuplicateException;
 import com.elice.tripnote.domain.post.exception.*;
 import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
+import com.elice.tripnote.global.exception.JwtTokenException;
 import com.elice.tripnote.global.exception.NoSuchSpotException;
 import com.elice.tripnote.global.entity.ErrorResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -64,15 +63,6 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .build();
         return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
-    }
-
-    @ExceptionHandler(MissingRequestHeaderException.class)
-    public ResponseEntity<ErrorResponse> handleMissingRequestHeaderException(MissingRequestHeaderException ex){
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
     @ExceptionHandler(NoSuchRouteException.class)
@@ -138,6 +128,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotValidRouteException.class)
     public ResponseEntity<ErrorResponse> handleNotValidRouteException(NotValidRouteException ex){
 
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(JwtTokenException.class)
+    public ResponseEntity<ErrorResponse> handleJwtTokenException(JwtTokenException ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
                 .timestamp(LocalDateTime.now())
