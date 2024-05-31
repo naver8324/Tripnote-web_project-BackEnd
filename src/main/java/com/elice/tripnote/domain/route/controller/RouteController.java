@@ -80,7 +80,7 @@ public class RouteController implements SwaggerRouteController {
     }
 
     // 경로 id 리스트 보내면
-    // 각 경로에 맡는 여행지 리스트 리턴
+    // 각 경로에 맞는 여행지 리스트 리턴
     @Override
     @GetMapping("/{routeId}/spots")
     public ResponseEntity<List<SpotResponseDTO>> getSpots(@PathVariable("routeId") Long integratedRouteId){

@@ -97,7 +97,7 @@ public class RouteService {
         }
 
         // 해당 통합경로 아이디 값을 가진 객체가 있는지 확인.
-        if (likeBookPeriodRepository.existsByIntegratedRoute(integratedRoute)) {
+        if (!likeBookPeriodRepository.existsByIntegratedRoute(integratedRoute)) {
             LikeBookmarkPeriod likeBookmarkPeriod = LikeBookmarkPeriod.builder()
                     .integratedRoute(integratedRoute)
                     .likes(0)
@@ -184,6 +184,7 @@ public class RouteService {
 
     @Transactional
     public Long deleteRoute(Long routeId) {
+        log.info("{}번 경로가 삭제됩니다.", routeId);
         Route route = routeRepository.findById(routeId)
                 .orElseThrow(() -> new NoSuchRouteException());
         route.setRouteStatus(RouteStatus.DELETE);
