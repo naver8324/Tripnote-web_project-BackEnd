@@ -236,7 +236,6 @@ public class RouteService {
 
     public LikeBookmarkResponseDTO getLikeBookmark(Long integratedRouteId) {
         // 해당 통합 경로 id를 가지고 있는 모든 route들의 좋아요 수 합치기
-        // 양방향 관계 설정하고
         // 만약 게시물이 있으면 더하고, 없으면 패스
 
             /*
@@ -271,6 +270,7 @@ public class RouteService {
         // 먼저 경로 중, spots가 모두 포함되는 거 찾기
         // 그리고 같은 통합 경로 id를 가진 애들끼리 묶어서 통합 경로 id 리턴 (ids로)
 
+        log.info("여행지 id: {}", spots);
         /*
         select distinct r.integrated_route_id
         from route r
@@ -281,6 +281,7 @@ public class RouteService {
                                                                (spot_id가 spots 중에 하나일 때만 통과이므로 spot_id가 spots의 크기라면 모든 spots가 있음)
          */
         List<Long> integratedIds = routeRepository.findIntegratedRouteIdsBySpots(spots);
+        log.info("통합 경로 id들: {}", integratedIds);
 
         /*
         SELECT ir.id AS integrated_route_id, SUM(plb.likes) AS total_likes
@@ -296,6 +297,7 @@ public class RouteService {
         ORDER BY lbp.likes DESC
         LIMIT 5;
          */
+        log.info("해시태그 id: {}", hashtags);
         List<IntegratedRouteDTO> dtos=integratedRouteRepository.findIntegratedRouteFilterByHashtags(integratedIds, hashtags);
 
         // 그 중에서 최근 좋아요(like bookmark period 이용) 많은 수 top 5 경로 id를 리턴
@@ -303,6 +305,7 @@ public class RouteService {
         for(IntegratedRouteDTO dto : dtos){
             result.add(dto.getIntegratedRouteId());
         }
+        log.info("통합 경로 id들(최종 결과): {}", result);
         return result;
 
 

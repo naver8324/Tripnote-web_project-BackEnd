@@ -89,6 +89,7 @@ public class RouteController implements SwaggerRouteController {
 
 
     // 경로 id 리스트 보내면 각 경로의 하트 수, 북마크 수 리턴
+    //TODO: 게시물 없고 경로만 존재할 때는 좋아요, 북마크 없는게 맞는지 다시 확인
     @Override
     @GetMapping("/{routeId}/like-bookmark")
     public ResponseEntity<LikeBookmarkResponseDTO> getLikeBookmark(@PathVariable("routeId") Long integratedRouteId){

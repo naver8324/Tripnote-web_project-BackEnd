@@ -48,6 +48,11 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
     }
 
     public List<IntegratedRouteDTO> findIntegratedRouteFilterByHashtags(List<Long> integratedIds, List<Long> hashtags) {
+        JPQLQuery<LocalDateTime> maxStartAtSubquery = JPAExpressions.select(lbp.startAt.max())
+                .from(lbp)
+                .where(lbp.integratedRoute.id.eq(ir.id))
+                .groupBy(lbp.integratedRoute.id);
+
         return query
                 .select(Projections.constructor(IntegratedRouteDTO.class,
                         ir.id,
@@ -59,15 +64,16 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
                 .where(
                         ir.id.in(integratedIds)
                                 .and(uh.hashtag.id.in(hashtags))
+                                .and(lbp.startAt.eq(maxStartAtSubquery))
                 )
                 .groupBy(ir.id)
                 .having(
-                        uh.hashtag.id.countDistinct().eq( (long)hashtags.size())
-                                .and(ir.id.countDistinct().eq((long) integratedIds.size()))
-                                .and(lbp.startAt.eq(lbp.startAt.max()))
+                        uh.hashtag.id.countDistinct().eq((long) hashtags.size())
                 )
-                .orderBy(lbp.likes.desc())
+                .orderBy(lbp.likes.sum().desc())
                 .limit(5)
                 .fetch();
+
+
     }
 }
