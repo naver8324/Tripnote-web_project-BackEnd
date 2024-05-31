@@ -96,4 +96,9 @@ public class RouteController implements SwaggerRouteController {
     }
 
     // 여행지 선택했을 때, 해당 여행지를 지나가는 경로 id 리턴
+    @GetMapping("/spot")
+    public ResponseEntity<List<Long>> getRoutesThroughSpot(@RequestParam(value = "hashtags", required = false) List<Long> hashtags,
+                                                           @RequestParam(value = "spots", required = false) List<Long> spots){
+        return ResponseEntity.ok(routeService.getRoutesThroughSpot(hashtags, spots));
+    }
 }
