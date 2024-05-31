@@ -1,5 +1,7 @@
 package com.elice.tripnote.domain.member.service;
 
+import com.elice.tripnote.domain.admin.entity.Admin;
+import com.elice.tripnote.domain.admin.repository.AdminRepository;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberDetailsDTO;
 import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
@@ -26,6 +28,7 @@ import java.util.Optional;
 public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
+    private final AdminRepository adminRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
@@ -35,6 +38,7 @@ public class MemberService implements UserDetailsService {
 
         String email = memberRequestDTO.getEmail();
         String password = memberRequestDTO.getPassword();
+        log.info("비번 : "+bCryptPasswordEncoder.encode(password));
         String nickname = memberRequestDTO.getNickname();
 
         // 이메일 중복 검사
@@ -96,16 +100,31 @@ public class MemberService implements UserDetailsService {
                 });
     }
 
+    // 로그인 로직
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return memberRepository.findByEmail(email)
-                .map(MemberDetailsDTO::new)
-                .orElseThrow(() -> {
-                    UsernameNotFoundException ex = new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email);
-                    log.error("에러 발생: {}", ex.getMessage(), ex);
-                    return ex;
-                });
+        Optional<Member> memberOptional = memberRepository.findByEmail(email);
+
+        if (memberOptional.isPresent()) {
+            return memberOptional.map(MemberDetailsDTO::new).get();
+        } else {
+            Optional<Admin> adminOptional = adminRepository.findByLoginId(email);
+            if (adminOptional.isPresent()) {
+                return adminOptional.map(MemberDetailsDTO::new).get();
+            } else {
+                throw new UsernameNotFoundException("해당 이메일(또는 아이디)로 사용자를 찾을 수 없습니다. 이메일(또는 아이디): " + email);
+            }
+        }
     }
+
+//        return memberRepository.findByEmail(email)
+//                .map(MemberDetailsDTO::new)
+//                .orElseThrow(() -> {
+//                    UsernameNotFoundException ex = new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email);
+//                    log.error("에러 발생: {}", ex.getMessage(), ex);
+//                    return ex;
+//                });
+//    }
 
 
     // 닉네임 변경 서비스

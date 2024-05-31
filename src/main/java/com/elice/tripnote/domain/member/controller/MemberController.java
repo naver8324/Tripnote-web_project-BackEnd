@@ -19,6 +19,8 @@ public class MemberController implements SwaggerMemberController {
 
     private final MemberService memberService;
 
+//    @GetMapping("/admin")
+//    public
 
     @GetMapping("/test1")
     public String test2(){
