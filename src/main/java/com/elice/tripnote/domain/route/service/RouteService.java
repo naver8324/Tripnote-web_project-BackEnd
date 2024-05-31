@@ -97,7 +97,7 @@ public class RouteService {
         }
 
         // 해당 통합경로 아이디 값을 가진 객체가 있는지 확인.
-        if (likeBookPeriodRepository.existsByIntegratedRoute(integratedRoute)) {
+        if (!likeBookPeriodRepository.existsByIntegratedRoute(integratedRoute)) {
             LikeBookmarkPeriod likeBookmarkPeriod = LikeBookmarkPeriod.builder()
                     .integratedRoute(integratedRoute)
                     .likes(0)
@@ -184,6 +184,7 @@ public class RouteService {
 
     @Transactional
     public Long deleteRoute(Long routeId) {
+        log.info("{}번 경로가 삭제됩니다.", routeId);
         Route route = routeRepository.findById(routeId)
                 .orElseThrow(() -> new NoSuchRouteException());
         route.setRouteStatus(RouteStatus.DELETE);
@@ -218,11 +219,11 @@ public class RouteService {
         ORDER BY lbp.likes DESC
         LIMIT 5;
          */
-        List<IntegratedRouteRegionDTO> dtos=integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region, hashtags);
+        List<IntegratedRouteDTO> dtos=integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region, hashtags);
 
         // 그 중에서 최근 좋아요(like bookmark period 이용) 많은 수 top 5 경로 id를 리턴
         List<Long> integratedIds = new ArrayList<>();
-        for(IntegratedRouteRegionDTO dto : dtos){
+        for(IntegratedRouteDTO dto : dtos){
             integratedIds.add(dto.getIntegratedRouteId());
         }
         return integratedIds;
@@ -235,7 +236,6 @@ public class RouteService {
 
     public LikeBookmarkResponseDTO getLikeBookmark(Long integratedRouteId) {
         // 해당 통합 경로 id를 가지고 있는 모든 route들의 좋아요 수 합치기
-        // 양방향 관계 설정하고
         // 만약 게시물이 있으면 더하고, 없으면 패스
 
             /*
@@ -256,6 +256,83 @@ public class RouteService {
                 .likes(like)
                 .bookmark(bookmark)
                 .build();
+    }
+
+    public List<Long> getRoutesThroughSpot(List<Long> hashtags, List<Long> spots) {
+
+        /*
+        1. 통합 경로의 여행지에 spots가 모두 포함되는거만 필터링
+        2. 통합 경로 id 중, 해시태그_uuid_연결 테이블의 hashtag_id에 hashtags 값이 모두 있는 애들 필터링
+        3. 이렇게 나온 통합 경로 id와 기간별_좋아요_북마크 join해서 기간별 좋아요 수를 기준으로 통합 경로 id를 정렬한다
+        4. 이렇게 정렬한 것 중 상위 5개의 통합 경로 id를 리턴한다
+         */
+
+        // 먼저 경로 중, spots가 모두 포함되는 거 찾기
+        // 그리고 같은 통합 경로 id를 가진 애들끼리 묶어서 통합 경로 id 리턴 (ids로)
+
+        log.info("여행지 id: {}", spots);
+        /*
+        select distinct r.integrated_route_id
+        from route r
+        join route_spot rs on rs.route_id = r.id
+        where rs.spot_id in :spots  -- spot_id가 spots 중에 하나일 때만 통과
+        group by r.id, r.integrated_route_id    -- 같은 통합 경로 id 그룹 안에 각 경로 id끼리 그룹
+        having count(distinct rs.spot_id) = :spots.size()   -- route id 기준으로 묶었을 때, 겹치지 않는 spot_id가 spots.size개인 row만
+                                                               (spot_id가 spots 중에 하나일 때만 통과이므로 spot_id가 spots의 크기라면 모든 spots가 있음)
+         */
+        List<Long> integratedIds = routeRepository.findIntegratedRouteIdsBySpots(spots);
+        log.info("통합 경로 id들: {}", integratedIds);
+
+        /*
+        SELECT ir.id AS integrated_route_id, SUM(plb.likes) AS total_likes
+        FROM integrated_route ir
+        left JOIN uuid_hashtag uh ON ir.id = uh.integrated_route_id
+        JOIN like_bookmark_period lbp ON ir.id = lbp.integrated_route_id
+        WHERE ir.id in :ids
+          AND uh.hashtag_id IN :hashtags  -- 제시된 해시태그 id 안에 속하는 row만 남김
+        GROUP BY ir.id
+        HAVING COUNT(DISTINCT uh.hashtag_id) = :hashtags.size  -- 그룹별로 묶었을 때, 해당 그룹의 해시태그 id 개수가 hashtags의 개수와 같으면 모든 hashtag가 포함된거?
+            and count(distinct ir.id) = :ids.size
+            and lbp.started_at = max(lbp.started_at) -- 그룹별로 묶었을 때 started_at 값이 가장 큰 row만 남게
+        ORDER BY lbp.likes DESC
+        LIMIT 5;
+         */
+        log.info("해시태그 id: {}", hashtags);
+        List<IntegratedRouteDTO> dtos=integratedRouteRepository.findIntegratedRouteFilterByHashtags(integratedIds, hashtags);
+
+        // 그 중에서 최근 좋아요(like bookmark period 이용) 많은 수 top 5 경로 id를 리턴
+        List<Long> result = new ArrayList<>();
+        for(IntegratedRouteDTO dto : dtos){
+            result.add(dto.getIntegratedRouteId());
+        }
+        log.info("통합 경로 id들(최종 결과): {}", result);
+        return result;
+
+
+        //gpt가 합친거
+        /*
+        SELECT ir.id AS integrated_route_id, SUM(plb.likes) AS total_likes
+        FROM integrated_route ir
+        LEFT JOIN uuid_hashtag uh ON ir.id = uh.integrated_route_id
+        JOIN like_bookmark_period lbp ON ir.id = lbp.integrated_route_id
+        JOIN (
+            SELECT r.id
+            FROM route r
+            JOIN route_spot rs ON rs.route_id = r.id
+            WHERE rs.spot_id IN :spots
+            GROUP BY r.id, r.integrated_route_id
+            HAVING COUNT(DISTINCT rs.spot_id) = :spots.size()
+        ) AS routes ON routes.id = ir.id
+        WHERE ir.id IN :ids
+          AND uh.hashtag_id IN :hashtags
+        GROUP BY ir.id
+        HAVING COUNT(DISTINCT uh.hashtag_id) = :hashtags.size
+           AND COUNT(DISTINCT ir.id) = :ids.size
+           AND lbp.started_at = MAX(lbp.started_at)
+        ORDER BY lbp.likes DESC
+        LIMIT 5;
+         */
+
     }
 
 
