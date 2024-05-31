@@ -65,8 +65,8 @@ dependencies {
 	//Amazon s3
 	implementation group: 'software.amazon.awssdk', name: 's3', version: '2.25.60'
 
-
-
+	// OAuth2
+//	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
 
 tasks.named('test') {
