@@ -1,5 +1,6 @@
 package com.elice.tripnote.jwt;
 
+import com.elice.tripnote.domain.admin.entity.Admin;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberDetailsDTO;
 import com.elice.tripnote.domain.member.entity.Status;
@@ -86,7 +87,19 @@ public class JWTFilter extends OncePerRequestFilter {
             // 관리자일 때
             log.info("admin - in");
             // 아직 미구현
+            Admin admin = Admin.builder()
+                    .loginId(email)
+                    .password("temppassword") // JWT에서 비밀번호는 사용되지 않으므로 임시 비밀번호 설정
+                    .build();
 
+            // MemberDetailsDTO에 회원 정보 객체 담기
+            MemberDetailsDTO memberDetailsDTO = new MemberDetailsDTO(admin);
+
+            // 스프링 시큐리티 인증 토큰 생성
+            Authentication authToken = new UsernamePasswordAuthenticationToken(memberDetailsDTO, null, memberDetailsDTO.getAuthorities());
+
+            // 세션에 사용자 등록
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }else{
             // 유효하지 않은 역할 처리
             log.error("Invalid role: " + role);

@@ -35,4 +35,18 @@ public class Spot {
         this.imageUrl=imageUrl;
         this.region=region;
     }
+
+    public void increaseLikes(){
+        this.likes++;
+    }
+
+    public void decreaseLikes() {
+        if (this.likes > 0) {
+            this.likes--;
+        }
+    }
+
+    public boolean isLikesZero() {
+        return this.likes <= 0;
+    }
 }

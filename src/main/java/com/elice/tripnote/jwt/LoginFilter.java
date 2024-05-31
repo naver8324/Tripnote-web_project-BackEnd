@@ -44,38 +44,33 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             Map<String, String> loginData = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
 
             String email = loginData.get("email");
+            String loginId = loginData.get("loginId");
             String password = loginData.get("password");
 
             log.info("email : " + email);
+            log.info("loginId : " + loginId);
             log.info("password : " + password);
 
-            // 스프링 시큐리티에서 email과 password를 검증하기 위해서는 token에 담아야 함
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password);
+            // 스프링 시큐리티에서 email(또는 loginId)과 password를 검증하기 위해서는 token에 담아야 함
+            UsernamePasswordAuthenticationToken authToken;
+
+            if (email != null) {
+                // 사용자 이메일로 로그인
+                authToken = new UsernamePasswordAuthenticationToken(email, password);
+            } else if (loginId != null) {
+                // 관리자 로그인 ID로 로그인
+                authToken = new UsernamePasswordAuthenticationToken(loginId, password);
+            } else {
+                throw new AuthenticationServiceException("Email or LoginId must be provided");
+            }
 
             // token에 담은 검증을 위한 AuthenticationManager로 전달
             return authenticationManager.authenticate(authToken);
+
         } catch (IOException e) {
             throw new AuthenticationServiceException("Failed to parse authentication request body", e);
         }
-//        //클라이언트 요청에서 username, password 추출
-//        String email = obtainEmail(request);
-//        String password = obtainPassword(request);
-//
-//        log.info("email : " + email);
-//        log.info("password : " + password);
-//
-//        //스프링 시큐리티에서 email과 password를 검증하기 위해서는 token에 담아야 함
-//        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password);
-//
-//        //token에 담은 검증을 위한 AuthenticationManager로 전달
-//        return authenticationManager.authenticate(authToken);
     }
-
-
-    // "email" 파라미터 추출 메서드
-//    private String obtainEmail(HttpServletRequest request) {
-//        return request.getParameter("email");
-//    }
 
 
     //로그인 성공시 실행하는 메소드 (여기서 JWT를 발급하면 됨)

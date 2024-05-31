@@ -55,7 +55,7 @@ public class MemberDetailsDTO implements UserDetails {
     @Override
     public String getUsername() {
         if (admin != null) {
-            return admin.getLogin_id();
+            return admin.getLoginId();
         } else if (member != null) {
             return member.getEmail();
         }

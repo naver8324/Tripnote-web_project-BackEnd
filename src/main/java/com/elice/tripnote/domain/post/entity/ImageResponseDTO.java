@@ -6,14 +6,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ImageRequestDTO {
+public class ImageResponseDTO {
 
-    private String fileName;
-    private String contentType;
-    private Long contentLength;
+    private String presignedUrl;
+    private String key;
 }

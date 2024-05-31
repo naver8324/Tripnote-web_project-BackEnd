@@ -127,6 +127,10 @@ public class PostService {
         Member member = memberOrElseThrowsException(email);
         Route route = routeOrElseThrowsException(routeId);
 
+        if(!postRepository.customCheckIfRouteIsAvailable(routeId, member.getId())){
+            throw new NotValidRouteException();
+        }
+
 
         Post post = Post.builder()
                 .title(postDTO.getTitle())

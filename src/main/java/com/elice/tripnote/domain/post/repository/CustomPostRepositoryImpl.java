@@ -10,7 +10,10 @@ import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.entity.QPost;
 import com.elice.tripnote.domain.route.entity.LikeBookmarkResponseDTO;
 import com.elice.tripnote.domain.route.entity.QRoute;
+import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,9 +47,10 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         page = page > 0 ? page - 1 : 0;
 
         long totalCount = query
+                .select(post.count())
                 .from(post)
                 .where(post.isDeleted.isFalse())
-                .fetch().size();
+                .fetchFirst();
 
 
         List<PostResponseDTO> postResponseDTOs = query
@@ -73,8 +77,9 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         page = page > 0 ? page - 1 : 0;
 
         long totalCount =query
+                .select(post.count())
                 .from(post)
-                .fetch().size();
+                .fetchFirst();
 
 
         List<PostResponseDTO> postResponseDTOs = query
@@ -101,10 +106,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         page = page > 0 ? page - 1 : 0;
 
         long totalCount = query
+                .select(post.count())
                 .from(post)
                 .where(post.member.id.eq(memberId)
                         .and(post.isDeleted.isFalse()))
-                .fetch().size();
+                .fetchFirst();
 
 
         List<PostResponseDTO> postResponseDTOs = query
@@ -132,13 +138,14 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         page = page > 0 ? page - 1 : 0;
 
         long totalCount = query
+                .select(post.count())
                 .from(post)
                 .join(post.likePosts, likePost)
                 .on(likePost.likedAt.isNotNull())
                 .join(likePost.member, member)
                 .on(member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
-                .fetch().size();
+                .fetchFirst();
 
         List<PostResponseDTO> postResponseDTOs = query
                 .select(Projections.constructor(PostResponseDTO.class,
@@ -170,6 +177,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         page = page > 0 ? page - 1 : 0;
 
         long totalCount = query
+                .select(post.count())
                 .from(post)
                 .join(post.bookmarks, bookmark)
                 .on(bookmark.markedAt.isNotNull())
@@ -227,6 +235,36 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
     }
 
+    public boolean customCheckIfRouteHasPost(Long routeId){
+
+        return query
+                .select(post.count())
+                .from(post)
+                .join(post.route, route)
+                .where(route.id.eq(routeId)
+                        .and(route.routeStatus.eq(RouteStatus.PUBLIC))
+                )
+                .fetchOne() != null;
+
+
+    }
+
+
+    public boolean customCheckIfRouteIsAvailable(Long routeId, Long memberId){
+
+        return query
+                .select(Expressions.ONE)
+                .from(route)
+                .leftJoin(post)
+                .on(post.route.id.eq(route.id))
+                .where( route.id.eq(routeId)
+                        .and(post.id.isNull())
+                        .and(route.member.id.eq(memberId))
+                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+                .fetchFirst() != null;
+
+    }
+
     public int getLikeCount(Long integratedRouteId){
         return query
                 .select(post.likes.sum())
@@ -235,6 +273,5 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         .and(route.integratedRoute.id.eq(integratedRouteId)))
                 .fetchOne();
     }
-
-
+    
 }
