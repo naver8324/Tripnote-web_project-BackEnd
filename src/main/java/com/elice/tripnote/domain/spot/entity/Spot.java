@@ -46,7 +46,4 @@ public class Spot {
         }
     }
 
-    public boolean isLikesZero() {
-        return this.likes <= 0;
-    }
 }
