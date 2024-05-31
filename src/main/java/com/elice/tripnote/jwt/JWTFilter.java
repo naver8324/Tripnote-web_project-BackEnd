@@ -4,6 +4,9 @@ import com.elice.tripnote.domain.admin.entity.Admin;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberDetailsDTO;
 import com.elice.tripnote.domain.member.entity.Status;
+import com.elice.tripnote.global.exception.ErrorCode;
+import com.elice.tripnote.global.exception.JwtTokenException;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -41,10 +45,9 @@ public class JWTFilter extends OncePerRequestFilter {
         //Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {
 
-            log.error("Token is null or does not start with 'Bearer '");
+            log.error("토큰이 null이거나 'Bearer '로 시작하지 않습니다");
+//            throw new JwtTokenException(ErrorCode.TOKEN_MISSING_OR_INVALID);
             filterChain.doFilter(request, response);
-
-            //조건이 해당되면 메소드 종료 (필수)
             return;
         }
 
@@ -54,10 +57,9 @@ public class JWTFilter extends OncePerRequestFilter {
 
         //토큰 소멸 시간 검증
         if (jwtUtil.isExpired(token)) {
-            log.error("Token is expired");
+            log.error("토큰이 만료되었습니다");
+//            throw new JwtTokenException(ErrorCode.TOKEN_EXPIRED);
             filterChain.doFilter(request, response);
-
-            //조건이 해당되면 메소드 종료 (필수)
             return;
         }
 

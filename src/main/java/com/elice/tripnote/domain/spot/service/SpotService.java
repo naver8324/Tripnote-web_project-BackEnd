@@ -38,9 +38,19 @@ public class SpotService {
     }
 
     @Transactional
+    public List<Spot> getSpotsByLocation(String location, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("likes").descending());
+
+        if (location == null || location.isEmpty()) {
+            return spotRepository.findAll(pageable).getContent();
+        } else {
+            return spotRepository.findByRegion(location, pageable).getContent();
+        }
+    }
+
+    @Transactional
     public Spot searchById(Long id){
         Spot spot = spotRepository.findById(id).orElseThrow(()->new LandmarkNotFoundException());
-        // Assuming you want to return the first spot found
         return spot;
     }
 
@@ -71,8 +81,10 @@ public class SpotService {
         return new SpotDTO();
     }
 
+
     @Transactional
-    public Spot add(Spot spot){
+    public Spot add(SpotDTO spotDTO){
+        Spot spot = dtoToEntity(spotDTO);
         return spotRepository.save(spot);
     }
 
@@ -86,36 +98,28 @@ public class SpotService {
     }
 
     @Transactional
+    public SpotDTO EntityToDTO(Spot spot){
+        return new SpotDTO(spot.getLocation(), spot.getLikes(), spot.getImageUrl(), spot.getRegion());
+    }
+
+    @Transactional
     public Spot searchByLocation(String location) {
         return spotRepository.findByLocation(location).orElse(null);
     }
 
     @Transactional
-    public Spot increaseLike(String location){
-        Spot spot = spotRepository.findByLocation(location).orElse(null);
-        if (spot ==null) {
-            throw new LandmarkNotFoundException();
-
-        } else {
-            spot.increaseLikes();
-            return spotRepository.save(spot);
-        }
+    public void increaseLike(String location) {
+        Spot spot = spotRepository.findByLocation(location).orElseThrow(() -> new LandmarkNotFoundException());
+        spotRepository.increaseLikes(location);
     }
 
-    @Transactional
-    public Spot decreaseLike(String location){
-        Spot spot = spotRepository.findByLocation(location).orElse(null);
-        if (spot ==null) {
-            throw new LandmarkNotFoundException();
 
-        } else {
-            spot.decreaseLikes();
-            if (spot.isLikesZero()) {
-                spotRepository.delete(spot);
-                return null; // or you can return a custom response indicating deletion
-            } else {
-                return spotRepository.save(spot);
-            }
+    @Transactional
+    public void decreaseLike(String location){
+        Spot spot = spotRepository.findByLocation(location).orElseThrow(()->new LandmarkNotFoundException());
+        spotRepository.decreaseLikes(location);
+        if(spot.getLikes() <0){
+            spotRepository.deleteByLocation(location);
         }
     }
 }

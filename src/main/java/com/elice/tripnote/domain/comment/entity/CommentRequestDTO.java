@@ -1,6 +1,7 @@
 package com.elice.tripnote.domain.comment.entity;
 
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Getter
@@ -9,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 public class CommentRequestDTO {
 
+    @NotBlank
     private String content;
 
 
