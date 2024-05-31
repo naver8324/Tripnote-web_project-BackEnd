@@ -46,7 +46,9 @@ public class JWTFilter extends OncePerRequestFilter {
         if (authorization == null || !authorization.startsWith("Bearer ")) {
 
             log.error("토큰이 null이거나 'Bearer '로 시작하지 않습니다");
-            throw new JwtTokenException(ErrorCode.TOKEN_MISSING_OR_INVALID);
+//            throw new JwtTokenException(ErrorCode.TOKEN_MISSING_OR_INVALID);
+            filterChain.doFilter(request, response);
+            return;
         }
 
         //Bearer 부분 제거 후 순수 토큰만 획득
@@ -56,7 +58,9 @@ public class JWTFilter extends OncePerRequestFilter {
         //토큰 소멸 시간 검증
         if (jwtUtil.isExpired(token)) {
             log.error("토큰이 만료되었습니다");
-            throw new JwtTokenException(ErrorCode.TOKEN_EXPIRED);
+//            throw new JwtTokenException(ErrorCode.TOKEN_EXPIRED);
+            filterChain.doFilter(request, response);
+            return;
         }
 
         //토큰에서 username과 role 획득
