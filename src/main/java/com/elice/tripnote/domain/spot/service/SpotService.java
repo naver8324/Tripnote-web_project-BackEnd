@@ -59,29 +59,66 @@ public class SpotService {
         var searchLocalReq = new SearchLocalReq();
         searchLocalReq.setQuery(query);
         var searchLocalRes = naverClient.searchLocal(searchLocalReq);
+
         if (searchLocalRes.getTotal() > 0) {
-            var localItem = searchLocalRes.getItems().stream().findFirst().get();
+            var localItemOptional = searchLocalRes.getItems().stream()
+                    .filter(localItem -> localItem.getCategory().contains("여행") && localItem.getCategory().contains("명소"))
+                    .findFirst();
 
-            var imageQuery = localItem.getTitle().replaceAll("<[^>]*>", "");
-            var searchImageReq = new SearchImageReq();
-            searchImageReq.setQuery(imageQuery);
-            var searchImageRes = naverClient.searchImage(searchImageReq);
+            if (localItemOptional.isPresent()) {
+                var localItem = localItemOptional.get();
+                var imageQuery = localItem.getTitle().replaceAll("<[^>]*>", "");
+                var searchImageReq = new SearchImageReq();
+                searchImageReq.setQuery(imageQuery);
+                var searchImageRes = naverClient.searchImage(searchImageReq);
 
-            if (searchImageRes.getTotal() > 0) {
-                var imageItem = searchImageRes.getItems().stream().findFirst().get();
+                if (searchImageRes.getTotal() > 0) {
+                    var imageItem = searchImageRes.getItems().stream().findFirst().get();
 
-                var result = new SpotDTO();
-                result.setLocation(localItem.getTitle());
-                result.setImageUrl(localItem.getLink());
-                result.setLikes(0);
-                result.setRegion(localItem.getAddress().split(" ")[0]);
-                return result;
+                    var result = new SpotDTO();
+                    result.setLocation(localItem.getTitle());
+                    result.setImageUrl(imageItem.getLink());
+                    result.setLikes(0);
+                    result.setRegion(localItem.getAddress().split(" ")[0]);
+                    return result;
+                }
             }
         }
         return new SpotDTO();
     }
 
+    @Transactional
+    public List<SpotDTO> searchByLocations(String query) {
+        var searchLocalReq = new SearchLocalReq();
+        searchLocalReq.setQuery(query);
+        var searchLocalRes = naverClient.searchLocal(searchLocalReq);
+        if (searchLocalRes.getTotal() > 0) {
+            return searchLocalRes.getItems().stream()
+                    .filter(localItem -> localItem.getCategory().contains("여행,명소"))
+                    .limit(5)
+                    .map(localItem -> {
+                        var imageQuery = localItem.getTitle().replaceAll("<[^>]*>", "");
+                        var searchImageReq = new SearchImageReq();
+                        searchImageReq.setQuery(imageQuery);
+                        var searchImageRes = naverClient.searchImage(searchImageReq);
 
+                        String imageUrl = null;
+                        if (searchImageRes.getTotal() > 0) {
+                            var imageItem = searchImageRes.getItems().stream().findFirst().get();
+                            imageUrl = imageItem.getLink();
+                        }
+
+                        return new SpotDTO(
+                                localItem.getTitle(),
+                                0,
+                                imageUrl,
+                                localItem.getAddress().split(" ")[0]
+                        );
+                    })
+                    .collect(Collectors.toList());
+        }
+        return List.of();
+    }
     @Transactional
     public Spot add(SpotDTO spotDTO){
         Spot spot = dtoToEntity(spotDTO);

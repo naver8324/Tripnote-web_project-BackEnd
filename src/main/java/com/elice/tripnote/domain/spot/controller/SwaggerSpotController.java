@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 
 @Tag(name = "Spot API", description = "여행지 관련 api입니다.")
 public interface SwaggerSpotController {
@@ -38,6 +40,17 @@ public interface SwaggerSpotController {
             @ApiResponse(responseCode = "404", description = "해당 여행지가 존재하지 않습니다.")
     })
     ResponseEntity<Spot> getSpotById(Long id);
+
+    @Operation(summary = "경로 생성 페이지", description = "특정 지역 선택 후 해당 지역 내 여행지 목록 조회")
+    @Parameters({
+            @Parameter(name = "region", description = "서울특별시, 제주특별자치도, 경기도 등 특별시, 광역시, 도 등 지역 검색")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    content = {@Content(schema = @Schema(implementation = Spot.class))}),
+            @ApiResponse(responseCode = "404", description = "해당이 존재하지 않습니다.")
+    })
+    ResponseEntity<List<Spot>> createRoute(String region);
 
     @Operation(summary = "DB에 여행지 추가", description = "여행지를 추가합니다.")
     @Parameters({

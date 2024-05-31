@@ -35,6 +35,7 @@ public class SpotController implements SwaggerSpotController{
             if(region !=null)
                 return getSpotsByRegion(region);
             else
+                //return getSpotsByLocations(location);
                 return getSpotsByLocation(location);
         }catch(LandmarkNotFoundException | RegionNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -60,7 +61,16 @@ public class SpotController implements SwaggerSpotController{
         Spot spot = spotService.dtoToEntity(result);
         return ResponseEntity.ok().body(spot);
     }
-
+    private ResponseEntity<List<Spot>> getSpotsByLocations(String location) {
+        if (spotService.searchByLocations(location).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<SpotDTO> temp = spotService.searchByLocations(location);
+        List<Spot> list = new ArrayList<>();
+        for(SpotDTO s : temp)
+            list.add(spotService.dtoToEntity(s));
+        return ResponseEntity.ok().body(list);
+    }
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<Spot> getSpotById(@PathVariable("id") Long id){
@@ -71,6 +81,12 @@ public class SpotController implements SwaggerSpotController{
             log.error("에러 발생: {}", e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @Override
+    @GetMapping("/createRoute")
+    public ResponseEntity<List<Spot>> createRoute(@RequestParam("region") String region) {
+        return getSpotsByRegion(region);
     }
 
     @Override
