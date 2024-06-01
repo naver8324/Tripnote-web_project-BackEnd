@@ -4,19 +4,11 @@ package com.elice.tripnote.domain.comment.controller;
 import com.elice.tripnote.domain.comment.entity.CommentRequestDTO;
 import com.elice.tripnote.domain.comment.entity.CommentResponseDTO;
 import com.elice.tripnote.domain.comment.service.CommentService;
-import com.elice.tripnote.domain.post.exception.NoSuchAuthorizationException;
-import com.elice.tripnote.domain.post.exception.NoSuchCommentException;
-import com.elice.tripnote.domain.post.exception.NoSuchPostException;
-import com.elice.tripnote.domain.post.exception.NoSuchUserException;
-import com.elice.tripnote.global.entity.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,48 +25,48 @@ public class CommentController implements SwaggerCommentController {
 
     @Override
     @GetMapping("/admin/comments")
-    public ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(@RequestHeader("Authorization") String jwt, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(commentService.getCommentsAll(jwt, page, size));
+    public ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(commentService.getCommentsAll(page, size));
     }
 
 
     @Override
     @GetMapping("/admin/comments/members/{memberId}")
-    public ResponseEntity<Page<CommentResponseDTO>> getCommentsByMemberId(@RequestHeader("Authorization") String jwt, @PathVariable(name = "memberId") Long memberId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(commentService.getCommentsByMemberId(jwt, memberId, page, size));
+    public ResponseEntity<Page<CommentResponseDTO>> getCommentsByMemberId( @PathVariable(name = "memberId") Long memberId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(commentService.getCommentsByMemberId(memberId, page, size));
     }
 
     @Override
     @PostMapping("/member/comments")
-    public ResponseEntity<CommentResponseDTO> saveComment(@RequestHeader("Authorization") String jwt, @RequestBody CommentRequestDTO commentDTO, @RequestParam(name="postId") Long postId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(commentService.saveComment(jwt, commentDTO, postId));
+    public ResponseEntity<CommentResponseDTO> saveComment(@RequestBody CommentRequestDTO commentDTO, @RequestParam(name="postId") Long postId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(commentService.saveComment(commentDTO, postId));
     }
 
     @Override
     @PatchMapping("/member/comments/{commentId}")
-    public ResponseEntity<CommentResponseDTO> updateComment(@RequestHeader("Authorization") String jwt, @RequestBody CommentRequestDTO commentDTO, @PathVariable(name="commentId") Long commentId) {
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.updateComment(jwt, commentDTO, commentId));
+    public ResponseEntity<CommentResponseDTO> updateComment(@RequestBody CommentRequestDTO commentDTO, @PathVariable(name="commentId") Long commentId) {
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.updateComment(commentDTO, commentId));
     }
 
     @Override
     @GetMapping("/member/comments/{commentId}/report")
-    public ResponseEntity reportComment(@RequestHeader("Authorization") String jwt, @PathVariable(name="commentId") Long commentId) {
+    public ResponseEntity reportComment(@PathVariable(name="commentId") Long commentId) {
 
-        commentService.reportComment(jwt, commentId);
+        commentService.reportComment(commentId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @Override
     @DeleteMapping("/member/comments/{commentId}")
-    public ResponseEntity deleteComment(@RequestHeader("Authorization") String jwt, @PathVariable(name="commentId") Long commentId) {
-        commentService.deleteComment(jwt, commentId);
+    public ResponseEntity deleteComment(@PathVariable(name="commentId") Long commentId) {
+        commentService.deleteComment(commentId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override
     @DeleteMapping("/admin/comments/{commentId}")
-    public ResponseEntity deleteCommentAdmin(@RequestHeader("Authorization") String jwt, @PathVariable(name="commentId") Long commentId) {
-        commentService.deleteCommentAdmin(jwt, commentId);
+    public ResponseEntity deleteCommentAdmin(@PathVariable(name="commentId") Long commentId) {
+        commentService.deleteCommentAdmin(commentId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

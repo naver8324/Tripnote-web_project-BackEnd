@@ -3,8 +3,8 @@ package com.elice.tripnote.domain.post.controller;
 
 import com.elice.tripnote.domain.post.entity.ImageRequestDTO;
 import com.elice.tripnote.domain.post.entity.ImageResponseDTO;
-import com.elice.tripnote.domain.post.exception.FileSizeExceedException;
-import com.elice.tripnote.domain.post.exception.FileTypeNotMatchedException;
+import com.elice.tripnote.global.exception.CustomException;
+import com.elice.tripnote.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,12 +44,12 @@ public class ImageController implements SwaggerImageController {
 
         // file size 10MB 이하로 제한
         if(10485760L < imageDTO.getContentLength()){
-            throw new FileSizeExceedException();
+            throw new CustomException(ErrorCode.EXCEED_SIZE_LIMIT);
         }
 
         // 이미지 파일만 업로드 가능
         if(!imageDTO.getContentType().startsWith("image")){
-            throw new FileTypeNotMatchedException();
+            throw new CustomException(ErrorCode.NOT_MATCHED_TYPE);
         }
 
         LocalDateTime now = LocalDateTime.now();
