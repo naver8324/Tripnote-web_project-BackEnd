@@ -8,12 +8,10 @@ import com.elice.tripnote.domain.link.reportComment.entity.ReportComment;
 import com.elice.tripnote.domain.link.reportComment.repository.ReportCommentRepository;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
-import com.elice.tripnote.domain.post.exception.NoSuchAuthorizationException;
-import com.elice.tripnote.domain.post.exception.NoSuchCommentException;
-import com.elice.tripnote.domain.post.exception.NoSuchPostException;
 import com.elice.tripnote.domain.post.entity.Post;
-import com.elice.tripnote.domain.post.exception.NoSuchUserException;
 import com.elice.tripnote.domain.post.repository.PostRepository;
+import com.elice.tripnote.global.exception.CustomException;
+import com.elice.tripnote.global.exception.ErrorCode;
 import com.elice.tripnote.jwt.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -205,7 +201,7 @@ public class CommentService {
 
         return postRepository.findById(postId)
                 .orElseThrow(() -> {
-                    NoSuchPostException ex = new NoSuchPostException();
+                    CustomException ex = new CustomException(ErrorCode.NO_POST);
                     log.error("에러 발생: {}", ex.getMessage(), ex);
                     return ex;
                 });
@@ -216,7 +212,7 @@ public class CommentService {
 
         return commentRepository.findById(commentId)
                 .orElseThrow(() -> {
-                    NoSuchCommentException ex = new NoSuchCommentException();
+                    CustomException ex = new CustomException(ErrorCode.NO_COMMENT);
                     log.error("에러 발생: {}", ex.getMessage(), ex);
                     return ex;
                 });
@@ -227,7 +223,7 @@ public class CommentService {
 
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> {
-                    NoSuchUserException ex = new NoSuchUserException();
+                    CustomException ex = new CustomException(ErrorCode.NO_USER);
                     log.error("에러 발생: {}", ex.getMessage(), ex);
                     return ex;
                 });
@@ -238,7 +234,7 @@ public class CommentService {
 
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> {
-                    NoSuchUserException ex = new NoSuchUserException();
+                    CustomException ex = new CustomException(ErrorCode.NO_USER);
                     log.error("에러 발생: {}", ex.getMessage(), ex);
                     return ex;
                 });
@@ -246,7 +242,7 @@ public class CommentService {
 
     //권한이 없는 경우 NoAuthorizationException을 반환하는 메서드입니다.
     private void handleNoAuthorization(){
-        NoSuchAuthorizationException ex = new NoSuchAuthorizationException();
+        CustomException ex = new CustomException(ErrorCode.UNAUTHORIZED);
         log.error("에러 발생: {}", ex.getMessage(), ex);
         throw ex;
     }

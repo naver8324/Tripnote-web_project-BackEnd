@@ -14,12 +14,11 @@ import com.elice.tripnote.domain.post.entity.Post;
 import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
-import com.elice.tripnote.domain.post.exception.*;
 import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.post.repository.PostRepository;
-import com.elice.tripnote.jwt.JWTUtil;
-import jakarta.persistence.EntityManager;
+import com.elice.tripnote.global.exception.CustomException;
+import com.elice.tripnote.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -107,7 +106,7 @@ public class PostService {
 
         PostDetailResponseDTO postDTO = postRepository.customFindPost(postId);
         if(postDTO == null){
-            NoSuchPostException ex = new NoSuchPostException();
+            CustomException ex = new CustomException(ErrorCode.NO_POST);
             log.error("에러 발생: {}", ex.getMessage(), ex);
             throw ex;
         }
@@ -128,7 +127,7 @@ public class PostService {
         Route route = routeOrElseThrowsException(routeId);
 
         if(!postRepository.customCheckIfRouteIsAvailable(routeId, member.getId())){
-            throw new NotValidRouteException();
+            throw new CustomException(ErrorCode.NOT_VALID_ROUTE);
         }
 
 
@@ -291,7 +290,7 @@ public class PostService {
 
         return postRepository.findById(postId)
                 .orElseThrow(() -> {
-                    NoSuchPostException ex = new NoSuchPostException();
+                    CustomException ex = new CustomException(ErrorCode.NO_POST);
                     log.error("에러 발생: {}", ex.getMessage(), ex);
                     return ex;
                 });
@@ -303,7 +302,7 @@ public class PostService {
 
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> {
-                    NoSuchUserException ex = new NoSuchUserException();
+                    CustomException ex = new CustomException(ErrorCode.NO_USER);
                     log.error("에러 발생: {}", ex.getMessage(), ex);
                     return ex;
                 });
@@ -314,7 +313,7 @@ public class PostService {
 
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> {
-                    NoSuchUserException ex = new NoSuchUserException();
+                    CustomException ex = new CustomException(ErrorCode.NO_USER);
                     log.error("에러 발생: {}", ex.getMessage(), ex);
                     return ex;
                 });
@@ -325,7 +324,7 @@ public class PostService {
 
         return routeRepository.findById(routeId)
                 .orElseThrow(() -> {
-                    NoSuchRouteException ex = new NoSuchRouteException();
+                    CustomException ex = new CustomException(ErrorCode.NO_ROUTE);
                     log.error("에러 발생: {}", ex.getMessage(), ex);
                     return ex;
                 });
@@ -333,7 +332,7 @@ public class PostService {
 
     //권한이 없는 경우 NoAuthorizationException을 반환하는 메서드입니다.
     private void handleNoAuthorization(){
-        NoSuchAuthorizationException ex = new NoSuchAuthorizationException();
+        CustomException ex = new CustomException(ErrorCode.UNAUTHORIZED);
         log.error("에러 발생: {}", ex.getMessage(), ex);
         throw ex;
     }
