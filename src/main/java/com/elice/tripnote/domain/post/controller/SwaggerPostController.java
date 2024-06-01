@@ -45,7 +45,7 @@ public interface SwaggerPostController {
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
 
-    ResponseEntity<Page<PostResponseDTO>> getPostsByMemberId(String jwt, int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsByMemberId(int page, int size);
 
 
     @Operation(summary="좋아요 게시글 조회 - 유저", description= "유저가 좋아요한 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
@@ -58,7 +58,7 @@ public interface SwaggerPostController {
             @Parameter(name="page", description = "페이지 번호", example = "5"),
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
-    ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithLikes(String jwt, int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithLikes(int page, int size);
 
 
     @Operation(summary="북마크 게시글 조회 - 유저", description= "유저가 북마크한 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
@@ -71,7 +71,7 @@ public interface SwaggerPostController {
             @Parameter(name="page", description = "페이지 번호", example = "5"),
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
-    ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithMark(String jwt, int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithMark(int page, int size);
 
 
     @Operation(summary="게시글 조회 - 관리자", description= "게시글을 조회할 때 사용하는 api입니다. 삭제된 게시글도 조회 가능합니다.")
@@ -83,7 +83,7 @@ public interface SwaggerPostController {
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
 
-    ResponseEntity<Page<PostResponseDTO>> getPostsAll(String jwt, int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsAll(int page, int size);
 
 
 
@@ -96,7 +96,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "112"),
     })
-    ResponseEntity<PostDetailResponseDTO> getPost(String jwt,Long postId);
+    ResponseEntity<PostDetailResponseDTO> getPost(Long postId);
 
 
     @Operation(summary="게시글 생성 - 유저", description= "유저가 게시글을 생성할 때 사용하는 api입니다.")
@@ -109,7 +109,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="routeId", description = "경로 번호", example = "1126"),
     })
-    ResponseEntity<PostResponseDTO> savePost(String jwt, PostRequestDTO postDTO, Long routeId);
+    ResponseEntity<PostResponseDTO> savePost(PostRequestDTO postDTO, Long routeId);
 
 
 
@@ -123,7 +123,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1356"),
     })
-    ResponseEntity<PostResponseDTO> updatePost(String jwt, PostRequestDTO postDTO, Long postId);
+    ResponseEntity<PostResponseDTO> updatePost(PostRequestDTO postDTO, Long postId);
 
 
 
@@ -136,7 +136,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1356"),
     })
-    ResponseEntity likePost(String jwt, Long postId);
+    ResponseEntity likePost(Long postId);
 
 
     @Operation(summary="게시글 북마크 - 유저", description= "게시글을 북마크 할 때 사용하는 api입니다. 다시 누르면 북마크를 해제합니다.")
@@ -148,7 +148,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1356"),
     })
-    ResponseEntity markPost(String jwt, Long postId);
+    ResponseEntity markPost(Long postId);
 
     @Operation(summary="게시글 신고 - 유저", description= "게시글을 신고할 때 사용하는 api입니다. 다시 누르면 신고를 해제합니다.")
     @ApiResponses(value = {
@@ -159,7 +159,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1356"),
     })
-    ResponseEntity reportPost(String jwt, Long postId);
+    ResponseEntity reportPost(Long postId);
 
 
     @Operation(summary="게시글 삭제 - 유저", description= "게시글을 삭제할 때 사용하는 api입니다. 게시글을 쓴 유저가 사용합니다.")
@@ -171,7 +171,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1356"),
     })
-    ResponseEntity deletePost(String jwt, Long postId);
+    ResponseEntity deletePost(Long postId);
 
 
     @Operation(summary="게시글 삭제 - 관리자", description= "게시글을 삭제할 때 사용하는 api입니다. 관리자가 사용합니다.")
@@ -182,7 +182,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1356"),
     })
-    ResponseEntity deletePostAdmin(String jwt, Long postId);
+    ResponseEntity deletePostAdmin(Long postId);
 
 
 

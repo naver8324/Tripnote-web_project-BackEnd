@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 public class PostController implements SwaggerPostController {
 
     private final PostService postService;
-    private final CommentService commentService;
 
     @Override
     @GetMapping("/posts")
@@ -30,80 +29,80 @@ public class PostController implements SwaggerPostController {
 
     @Override
     @GetMapping("/member/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberId(@RequestHeader("Authorization") String jwt, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getPostsByMemberId(jwt, page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberId(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(postService.getPostsByMemberId(page, size));
     }
 
 
     @Override
     @GetMapping("/member/posts/likes")
-    public ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithLikes(@RequestHeader("Authorization") String jwt, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getCommentsByMemberWithLikes(jwt, page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithLikes(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(postService.getCommentsByMemberWithLikes(page, size));
     }
 
     @Override
     @GetMapping("/member/posts/mark")
-    public ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithMark(@RequestHeader("Authorization") String jwt, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getCommentsByMemberWithMark(jwt, page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithMark(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(postService.getCommentsByMemberWithMark(page, size));
     }
 
     @Override
     @GetMapping("/admin/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsAll(@RequestHeader("Authorization") String jwt, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getPostsAll(jwt, page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPostsAll(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(postService.getPostsAll(page, size));
     }
 
     @Override
     @GetMapping("/member/posts/{postId}")
-    public ResponseEntity<PostDetailResponseDTO> getPost(@RequestHeader("Authorization") String jwt, @PathVariable(name = "postId") Long postId) {
-        return ResponseEntity.ok().body(postService.getPost(jwt, postId));
+    public ResponseEntity<PostDetailResponseDTO> getPost(@PathVariable(name = "postId") Long postId) {
+        return ResponseEntity.ok().body(postService.getPost(postId));
     }
 
     @Override
     @PostMapping("/member/posts")
-    public ResponseEntity<PostResponseDTO> savePost(@RequestHeader("Authorization") String jwt, @RequestBody PostRequestDTO postDTO, @RequestParam(name="routeId") Long routeId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(postService.savePost(jwt, postDTO, routeId));
+    public ResponseEntity<PostResponseDTO> savePost(@RequestBody PostRequestDTO postDTO, @RequestParam(name="routeId") Long routeId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(postService.savePost(postDTO, routeId));
     }
 
     @Override
     @PatchMapping("/member/posts/{postId}")
-    public ResponseEntity<PostResponseDTO> updatePost(@RequestHeader("Authorization") String jwt, @RequestBody PostRequestDTO postDTO, @PathVariable(name="postId") Long postId) {
-        return ResponseEntity.status(HttpStatus.OK).body(postService.updatePost(jwt, postDTO, postId));
+    public ResponseEntity<PostResponseDTO> updatePost(@RequestBody PostRequestDTO postDTO, @PathVariable(name="postId") Long postId) {
+        return ResponseEntity.status(HttpStatus.OK).body(postService.updatePost(postDTO, postId));
     }
 
     @Override
     @GetMapping("/member/posts/{postId}/like")
-    public ResponseEntity likePost(@RequestHeader("Authorization") String jwt, @PathVariable(name="postId") Long postId) {
-        postService.likePost(jwt, postId);
+    public ResponseEntity likePost(@PathVariable(name="postId") Long postId) {
+        postService.likePost(postId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @Override
     @GetMapping("/member/posts/{postId}/mark")
-    public ResponseEntity markPost(@RequestHeader("Authorization") String jwt, @PathVariable(name="postId") Long postId) {
-        postService.markPost(jwt, postId);
+    public ResponseEntity markPost(@PathVariable(name="postId") Long postId) {
+        postService.markPost(postId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @Override
     @GetMapping("/member/posts/{postId}/report")
-    public ResponseEntity reportPost(@RequestHeader("Authorization") String jwt, @PathVariable(name="postId") Long postId) {
-        postService.reportPost(jwt, postId);
+    public ResponseEntity reportPost(@PathVariable(name="postId") Long postId) {
+        postService.reportPost(postId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @Override
     @DeleteMapping("/member/posts/{postId}")
-    public ResponseEntity deletePost(@RequestHeader("Authorization") String jwt, @PathVariable(name="postId") Long postId) {
-        postService.deletePost(jwt, postId);
+    public ResponseEntity deletePost(@PathVariable(name="postId") Long postId) {
+        postService.deletePost(postId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 
     @Override
     @DeleteMapping("/admin/posts/{postId}")
-    public ResponseEntity deletePostAdmin(@RequestHeader("Authorization") String jwt, @PathVariable(name="postId") Long postId) {
-        postService.deletePostAdmin(jwt, postId);
+    public ResponseEntity deletePostAdmin(@PathVariable(name="postId") Long postId) {
+        postService.deletePostAdmin(postId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

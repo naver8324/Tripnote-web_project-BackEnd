@@ -53,7 +53,7 @@ public class PostService {
 
     // 한 유저가 쓴 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getPostsByMemberId(String jwt, int page, int size){
+    public Page<PostResponseDTO> getPostsByMemberId(int page, int size){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
@@ -64,7 +64,7 @@ public class PostService {
 
     // 한 유저가 좋아요 한 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getCommentsByMemberWithLikes(String jwt, int page, int size){
+    public Page<PostResponseDTO> getCommentsByMemberWithLikes(int page, int size){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
@@ -76,7 +76,7 @@ public class PostService {
 
     // 한 유저가 북마크 한 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getCommentsByMemberWithMark(String jwt, int page, int size){
+    public Page<PostResponseDTO> getCommentsByMemberWithMark(int page, int size){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
@@ -88,7 +88,7 @@ public class PostService {
 
     //  전체 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제된 게시글도 불러오며 관리자만 사용할 수 있습니다.
 
-    public Page<PostResponseDTO> getPostsAll(String jwt, int page, int size){
+    public Page<PostResponseDTO> getPostsAll(int page, int size){
 
         return postRepository.customFindPosts(page, size);
 
@@ -99,7 +99,7 @@ public class PostService {
 
     // 게시글을 상세 조회하는 메서드입니다. 삭제되지 않은 게시글만 볼 수 있습니다.
 
-    public PostDetailResponseDTO getPost(String jwt, Long postId){
+    public PostDetailResponseDTO getPost(Long postId){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
@@ -120,7 +120,7 @@ public class PostService {
     // 게시글을 저장하는 메서드입니다.
     // TO DO: presigned URL 사용 예정.
     @Transactional
-    public PostResponseDTO savePost(String jwt, PostRequestDTO postDTO, Long routeId){
+    public PostResponseDTO savePost(PostRequestDTO postDTO, Long routeId){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
@@ -153,7 +153,7 @@ public class PostService {
 
     // 게시글을 수정하는 메서드입니다.
     @Transactional
-    public PostResponseDTO updatePost(String jwt, PostRequestDTO postDTO, Long postId){
+    public PostResponseDTO updatePost(PostRequestDTO postDTO, Long postId){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -171,7 +171,7 @@ public class PostService {
 
     // 게시글에 좋아요를 누를 때 사용하는 메서드입니다. 이미 좋아요를 눌렀으면 좋아요를 해제합니다.
     @Transactional
-    public void likePost(String jwt, Long postId){
+    public void likePost(Long postId){
 
         Post post = postOrElseThrowsException(postId);
 
@@ -196,7 +196,7 @@ public class PostService {
 
     // 게시글에 북마크를 누를 때 사용하는 메서드입니다. 이미 눌렀으면 북마크를 해제합니다.
     @Transactional
-    public void markPost(String jwt, Long postId){
+    public void markPost(Long postId){
 
         Post post = postOrElseThrowsException(postId);
 
@@ -219,7 +219,7 @@ public class PostService {
 
     // 게시글에 신고를 누를 때 사용하는 메서드입니다. 이미 신고를 눌렀으면 신고를 해제합니다.
     @Transactional
-    public void reportPost(String jwt, Long postId){
+    public void reportPost(Long postId){
 
         Post post = postOrElseThrowsException(postId);
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -243,7 +243,7 @@ public class PostService {
 
     // 게시글을 삭제하는 메서드입니다. 게시글을 쓴 유저가 사용합니다.
     @Transactional
-    public void deletePost(String jwt, Long postId){
+    public void deletePost(Long postId){
 
         Post post = postOrElseThrowsException(postId);
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -261,7 +261,7 @@ public class PostService {
 
     // 게시글을 삭제하는 메서드입니다. 관리자만 사용할 수 있습니다.
     @Transactional
-    public void deletePostAdmin(String jwt, Long postId){
+    public void deletePostAdmin(Long postId){
 
 
         Post post = postOrElseThrowsException(postId);

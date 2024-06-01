@@ -46,7 +46,7 @@ public interface SwaggerCommentController {
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
 
-    ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(String jwt, int page, int size);
+    ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(int page, int size);
 
 
     @Operation(summary="게시글 유저 댓글 조회 - 관리자", description= "관리자가 유저의 모든 댓글을 조회할 때 사용하는 api입니다. 삭제된 댓글도 조회 가능합니다.")
@@ -60,7 +60,7 @@ public interface SwaggerCommentController {
             @Parameter(name="page", description = "페이지 번호", example = "5"),
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
-    ResponseEntity<Page<CommentResponseDTO>> getCommentsByMemberId(String jwt, Long memberId, int page, int size);
+    ResponseEntity<Page<CommentResponseDTO>> getCommentsByMemberId(Long memberId, int page, int size);
 
 
     @Operation(summary="게시글 유저 댓글 생성 - 유저", description= "유저의 댓글을 생성할 때 사용하는 api입니다.")
@@ -72,7 +72,7 @@ public interface SwaggerCommentController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1356"),
     })
-    ResponseEntity<CommentResponseDTO> saveComment(String jwt, CommentRequestDTO commentDTO, Long postId);
+    ResponseEntity<CommentResponseDTO> saveComment(CommentRequestDTO commentDTO, Long postId);
 
 
 
@@ -86,7 +86,7 @@ public interface SwaggerCommentController {
     @Parameters(value = {
             @Parameter(name="commentId", description = "댓글 번호", example = "1356"),
     })
-    ResponseEntity<CommentResponseDTO> updateComment(String jwt, CommentRequestDTO commentDTO, Long commentId);
+    ResponseEntity<CommentResponseDTO> updateComment(CommentRequestDTO commentDTO, Long commentId);
 
 
     @Operation(summary="게시글 댓글 신고 - 유저", description= "댓글을 신고할 때 사용하는 api입니다. 다시 누르면 신고를 해제합니다.")
@@ -98,7 +98,7 @@ public interface SwaggerCommentController {
     @Parameters(value = {
             @Parameter(name="commentId", description = "댓글 번호", example = "1356"),
     })
-    ResponseEntity reportComment(String jwt, Long commentId);
+    ResponseEntity reportComment(Long commentId);
 
 
     @Operation(summary="게시글 댓글 삭제 - 유저", description= "댓글을 삭제할 때 사용하는 api입니다. 댓글을 쓴 유저가 사용합니다.")
@@ -110,7 +110,7 @@ public interface SwaggerCommentController {
     @Parameters(value = {
             @Parameter(name="commentId", description = "댓글 번호", example = "1356"),
     })
-    ResponseEntity deleteComment(String jwt, Long commentId);
+    ResponseEntity deleteComment(Long commentId);
 
 
 
@@ -124,7 +124,7 @@ public interface SwaggerCommentController {
     @Parameters(value = {
             @Parameter(name="commentId", description = "댓글 번호", example = "1356"),
     })
-    ResponseEntity deleteCommentAdmin(String jwt, Long commentId);
+    ResponseEntity deleteCommentAdmin(Long commentId);
 
 
 

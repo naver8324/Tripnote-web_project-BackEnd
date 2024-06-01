@@ -12,7 +12,6 @@ import com.elice.tripnote.domain.post.entity.Post;
 import com.elice.tripnote.domain.post.repository.PostRepository;
 import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
-import com.elice.tripnote.jwt.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,9 +28,6 @@ public class CommentService {
     private final ReportCommentRepository reportCommentRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
-
-    private final JWTUtil jwtUtil;
-
 
 
     // 게시글에서 게시글에 해당하는 댓글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 댓글만 불러옵니다.
@@ -51,7 +47,7 @@ public class CommentService {
 
 
     // 관리자가 모든 댓글을 불러올 때 사용하는 메서드. 삭제된 댓글도 불러옵니다.
-    public Page<CommentResponseDTO> getCommentsAll(String jwt, int page, int size){
+    public Page<CommentResponseDTO> getCommentsAll(int page, int size){
 
 
 
@@ -61,7 +57,7 @@ public class CommentService {
     }
 
     // 관리자가 한 유저의 전체 댓글을 불러올 때 사용하는 메서드. 삭제된 댓글도 불러옵니다.
-    public Page<CommentResponseDTO> getCommentsByMemberId(String jwt, Long memberId, int page, int size){
+    public Page<CommentResponseDTO> getCommentsByMemberId(Long memberId, int page, int size){
 
 
         Member member = memberOrElseThrowsException(memberId);
@@ -76,7 +72,7 @@ public class CommentService {
     // 댓글을 저장하는 메서드입니다.
 
     @Transactional
-    public CommentResponseDTO saveComment(String jwt, CommentRequestDTO commentDTO, Long postId){
+    public CommentResponseDTO saveComment(CommentRequestDTO commentDTO, Long postId){
 
         Post post = postOrElseThrowsException(postId);
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -104,7 +100,7 @@ public class CommentService {
     // 댓글을 수정하는 메서드입니다.
 
     @Transactional
-    public CommentResponseDTO updateComment(String jwt, CommentRequestDTO commentDTO, Long commentId){
+    public CommentResponseDTO updateComment(CommentRequestDTO commentDTO, Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
 
@@ -123,7 +119,7 @@ public class CommentService {
 
     // 댓글에 신고를 누를 때 사용하는 메서드입니다. 이미 신고를 눌렀으면 신고를 해제합니다.
     @Transactional
-    public void reportComment(String jwt, Long commentId){
+    public void reportComment(Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -151,7 +147,7 @@ public class CommentService {
 
     // 댓글을 삭제하는 메서드입니다. 댓글을 쓴 유저가 사용합니다.
     @Transactional
-    public void deleteComment(String jwt, Long commentId){
+    public void deleteComment(Long commentId){
 
         Comment comment = commentOrElseThrowsException(commentId);
 
@@ -168,7 +164,7 @@ public class CommentService {
     // 댓글을 삭제하는 메서드입니다. 관리자만 사용할 수 있습니다.
 
     @Transactional
-    public void deleteCommentAdmin(String jwt, Long commentId){
+    public void deleteCommentAdmin(Long commentId){
 
 
         Comment comment = commentOrElseThrowsException(commentId);
