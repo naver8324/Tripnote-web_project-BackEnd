@@ -33,44 +33,15 @@ public class SpotController implements SwaggerSpotController{
                 return new ResponseEntity<>("Both region and landmark cannot be specified", HttpStatus.BAD_REQUEST);
             }
             if(region !=null)
-                return getSpotsByRegion(region);
+                return spotService.getByRegion(region);
             else
                 //return getSpotsByLocations(location);
-                return getSpotsByLocation(location);
+                return spotService.getByLocation(location);
         }catch(LandmarkNotFoundException | RegionNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
-    private ResponseEntity<List<Spot>> getSpotsByRegion(String region) {
-        Region validRegion = Region.fromString(region);
-        List<Spot> list = spotService.getSpotsByRegion(validRegion.getName(),0,5);
-        if(list.isEmpty())
-            throw new RegionNotFoundException();
-        return new ResponseEntity<>(list,HttpStatus.OK);
-    }
-
-    private ResponseEntity<Spot> getSpotsByLocation(String location) {
-        if (spotService.searchByLocation(location) != null) {
-            return ResponseEntity.ok().body(spotService.searchByLocation(location));
-        }
-        SpotDTO result = spotService.search(location);
-        if (result == null) {
-            throw new LandmarkNotFoundException();
-        }
-        Spot spot = spotService.dtoToEntity(result);
-        return ResponseEntity.ok().body(spot);
-    }
-    private ResponseEntity<List<Spot>> getSpotsByLocations(String location) {
-        if (spotService.searchByLocations(location).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        List<SpotDTO> temp = spotService.searchByLocations(location);
-        List<Spot> list = new ArrayList<>();
-        for(SpotDTO s : temp)
-            list.add(spotService.dtoToEntity(s));
-        return ResponseEntity.ok().body(list);
-    }
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<Spot> getSpotById(@PathVariable("id") Long id){
@@ -86,7 +57,7 @@ public class SpotController implements SwaggerSpotController{
     @Override
     @GetMapping("/createRoute")
     public ResponseEntity<List<Spot>> createRoute(@RequestParam("region") String region) {
-        return getSpotsByRegion(region);
+        return spotService.getByRegion(region);
     }
 
     @Override
@@ -117,5 +88,10 @@ public class SpotController implements SwaggerSpotController{
         } catch (LandmarkNotFoundException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/spots/address")
+    public ResponseEntity<String> getAddressByCoordinates(@RequestParam(name="lat") double lat, @RequestParam(name="lng") double lng) {
+        return spotService.getAddressByCoordinates(lat, lng);
     }
 }

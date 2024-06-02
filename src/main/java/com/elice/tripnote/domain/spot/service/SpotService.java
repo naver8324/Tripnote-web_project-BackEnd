@@ -1,11 +1,13 @@
 package com.elice.tripnote.domain.spot.service;
 
+import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.domain.spot.dto.SpotDTO;
 import com.elice.tripnote.domain.spot.dto.SpotResponseDTO;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.exception.LandmarkNotFoundException;
 import com.elice.tripnote.domain.spot.exception.RegionNotFoundException;
 import com.elice.tripnote.domain.spot.naver.NaverClient;
+import com.elice.tripnote.domain.spot.naver.dto.ReverseGeocodeRes;
 import com.elice.tripnote.domain.spot.naver.dto.SearchImageReq;
 import com.elice.tripnote.domain.spot.naver.dto.SearchLocalReq;
 import com.elice.tripnote.domain.spot.repository.SpotRepository;
@@ -13,9 +15,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +31,36 @@ public class SpotService {
     private final SpotRepository spotRepository;
     private final NaverClient naverClient;
 
+
+    public ResponseEntity<List<Spot>> getByRegion(String region) {
+        Region validRegion = Region.fromString(region);
+        List<Spot> list = getSpotsByRegion(validRegion.getName(),0,5);
+        if(list.isEmpty())
+            throw new RegionNotFoundException();
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
+
+    public ResponseEntity<Spot> getByLocation(String location) {
+        if (searchByLocation(location) != null) {
+            return ResponseEntity.ok().body(searchByLocation(location));
+        }
+        SpotDTO result = search(location);
+        if (result == null) {
+            throw new LandmarkNotFoundException();
+        }
+        Spot spot = dtoToEntity(result);
+        return ResponseEntity.ok().body(spot);
+    }
+    public ResponseEntity<List<Spot>> getSpotsByLocations(String location) {
+        if (searchByLocations(location).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<SpotDTO> temp = searchByLocations(location);
+        List<Spot> list = new ArrayList<>();
+        for(SpotDTO s : temp)
+            list.add(dtoToEntity(s));
+        return ResponseEntity.ok().body(list);
+    }
     @Transactional
     public List<Spot> getSpotsByRegion(String region, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("likes").descending());
@@ -157,6 +192,27 @@ public class SpotService {
         spotRepository.decreaseLikes(location);
         if(spot.getLikes() <0){
             spotRepository.deleteByLocation(location);
+        }
+    }
+
+    public ResponseEntity<String> getAddressByCoordinates(double lat, double lng) {
+        ReverseGeocodeRes res = naverClient.reverseGeocode(lat, lng);
+        if (res != null && !res.getResults().isEmpty()) {
+            ReverseGeocodeRes.Result result = res.getResults().get(0);
+            String address = result.getRegion().getArea1().getName() + " " +
+                    result.getRegion().getArea2().getName() + " " +
+                    result.getRegion().getArea3().getName();
+
+            if (result.getLand() != null) {
+                address += " " + result.getLand().getNumber1();
+                if (result.getLand().getNumber2() != null && !result.getLand().getNumber2().isEmpty()) {
+                    address += "-" + result.getLand().getNumber2();
+                }
+            }
+
+            return new ResponseEntity<>(address, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Address not found", HttpStatus.NOT_FOUND);
         }
     }
 }
