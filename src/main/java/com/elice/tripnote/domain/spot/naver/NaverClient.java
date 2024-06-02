@@ -2,10 +2,7 @@ package com.elice.tripnote.domain.spot.naver;
 
 import com.elice.tripnote.domain.spot.dto.SpotRequestDTO;
 import com.elice.tripnote.domain.spot.dto.SpotResponseDTO;
-import com.elice.tripnote.domain.spot.naver.dto.SearchImageReq;
-import com.elice.tripnote.domain.spot.naver.dto.SearchImageRes;
-import com.elice.tripnote.domain.spot.naver.dto.SearchLocalReq;
-import com.elice.tripnote.domain.spot.naver.dto.SearchLocalRes;
+import com.elice.tripnote.domain.spot.naver.dto.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -30,6 +27,11 @@ public class NaverClient {
     @Value("${naver.url.search.image}")
     private String naverSearchImage;
 
+    @Value("${naver.map.id}")
+    private String naverMapId;
+
+    @Value("${naver.map.secret}")
+    private String naverMapSecret;
     public SearchLocalRes searchLocal(SearchLocalReq searchLocalReq){
         var uri = UriComponentsBuilder
                 .fromUriString(naverSearchLocal)
@@ -84,5 +86,15 @@ public class NaverClient {
                 );
 
         return responseEntity.getBody();
+    }
+
+    public ReverseGeocodeRes reverseGeocode(double lat, double lng) {
+        String url = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=" + lng + "," + lat + "&output=json";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-NCP-APIGW-API-KEY-ID", naverMapId);
+        headers.set("X-NCP-APIGW-API-KEY", naverMapSecret);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        return new RestTemplate().exchange(url, HttpMethod.GET, entity, ReverseGeocodeRes.class).getBody();
     }
 }

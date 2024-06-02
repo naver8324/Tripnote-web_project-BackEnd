@@ -33,32 +33,13 @@ public class SpotController implements SwaggerSpotController{
                 return new ResponseEntity<>("Both region and landmark cannot be specified", HttpStatus.BAD_REQUEST);
             }
             if(region !=null)
-                return getSpotsByRegion(region);
+                return spotService.getByRegion(region);
             else
-                return getSpotsByLocation(location);
+                //return getSpotsByLocations(location);
+                return spotService.getByLocation(location);
         }catch(LandmarkNotFoundException | RegionNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
-    }
-
-    private ResponseEntity<List<Spot>> getSpotsByRegion(String region) {
-        Region validRegion = Region.fromString(region);
-        List<Spot> list = spotService.getSpotsByRegion(validRegion.getName(),0,5);
-        if(list.isEmpty())
-            throw new RegionNotFoundException();
-        return new ResponseEntity<>(list,HttpStatus.OK);
-    }
-
-    private ResponseEntity<Spot> getSpotsByLocation(String location) {
-        if (spotService.searchByLocation(location) != null) {
-            return ResponseEntity.ok().body(spotService.searchByLocation(location));
-        }
-        SpotDTO result = spotService.search(location);
-        if (result == null) {
-            throw new LandmarkNotFoundException();
-        }
-        Spot spot = spotService.dtoToEntity(result);
-        return ResponseEntity.ok().body(spot);
     }
 
     @Override
@@ -71,6 +52,12 @@ public class SpotController implements SwaggerSpotController{
             log.error("에러 발생: {}", e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @Override
+    @GetMapping("/createRoute")
+    public ResponseEntity<List<Spot>> createRoute(@RequestParam("region") String region) {
+        return spotService.getByRegion(region);
     }
 
     @Override
@@ -101,5 +88,10 @@ public class SpotController implements SwaggerSpotController{
         } catch (LandmarkNotFoundException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/spots/address")
+    public ResponseEntity<String> getAddressByCoordinates(@RequestParam(name="lat") double lat, @RequestParam(name="lng") double lng) {
+        return spotService.getAddressByCoordinates(lat, lng);
     }
 }
