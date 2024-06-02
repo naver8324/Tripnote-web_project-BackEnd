@@ -10,6 +10,7 @@ import java.util.List;
 public interface UUIDHashtagRepository extends JpaRepository<UUIDHashtag, Long> {
     List<UUIDHashtag> findByIntegratedRoute_IntegratedRoutes(String integratedRoutes);
 
-    @Query("SELECT ir.uuidHashtags FROM IntegratedRoute ir WHERE ir.id = :integratedRouteId")
+
+    @Query("SELECT uh.id FROM IntegratedRoute ir JOIN ir.uuidHashtags uh WHERE ir.id = :integratedRouteId")
     List<Long> findHashtagIdsByIntegratedRouteId(@Param("integratedRouteId") Long integratedRouteId);
 }

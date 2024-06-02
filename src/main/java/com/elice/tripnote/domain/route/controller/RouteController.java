@@ -80,7 +80,7 @@ public class RouteController implements SwaggerRouteController {
     }
 
     // 경로 id 리스트 보내면
-    // 각 경로에 맡는 여행지 리스트 리턴
+    // 각 경로에 맞는 여행지 리스트 리턴
     @Override
     @GetMapping("/{routeId}/spots")
     public ResponseEntity<List<SpotResponseDTO>> getSpots(@PathVariable("routeId") Long integratedRouteId){
@@ -89,6 +89,7 @@ public class RouteController implements SwaggerRouteController {
 
 
     // 경로 id 리스트 보내면 각 경로의 하트 수, 북마크 수 리턴
+    //TODO: 게시물 없고 경로만 존재할 때는 좋아요, 북마크 없는게 맞는지 다시 확인
     @Override
     @GetMapping("/{routeId}/like-bookmark")
     public ResponseEntity<LikeBookmarkResponseDTO> getLikeBookmark(@PathVariable("routeId") Long integratedRouteId){
@@ -96,4 +97,9 @@ public class RouteController implements SwaggerRouteController {
     }
 
     // 여행지 선택했을 때, 해당 여행지를 지나가는 경로 id 리턴
+    @GetMapping("/spot")
+    public ResponseEntity<List<Long>> getRoutesThroughSpot(@RequestParam(value = "hashtags", required = false) List<Long> hashtags,
+                                                           @RequestParam(value = "spots", required = false) List<Long> spots){
+        return ResponseEntity.ok(routeService.getRoutesThroughSpot(hashtags, spots));
+    }
 }

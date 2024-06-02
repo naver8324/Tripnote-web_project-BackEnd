@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -63,6 +64,14 @@ public interface SwaggerRouteController {
     })
     ResponseEntity<Long> deleteRoute(Long routeId);
 
+    @Operation(summary="특정 지역의 경로 리턴", description= "지역을 입력받아서서 해당 지역 안을 여행하는 경로 id 리스트를 반환받을 수 있다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공하였습니다.",  content = @Content(mediaType = "application/json")),
+    })
+    @Parameters(value = {
+            @Parameter(name="region", description = "지역"),
+            @Parameter(name="hashtags", description = "해시태그 리스트"),
+    })
     ResponseEntity<List<Long>> getRegion(String region, List<Long> hashtags);
 
     @Operation(summary="경로에 포함된 여행지 리스트 리턴", description= "특정 경로 id를 이용해서 해당 경로에 포함된 여행지들을 리스트로 반환받을 수 있다.")
@@ -82,4 +91,14 @@ public interface SwaggerRouteController {
             @Parameter(name="routeId", description = "경로 번호"),
     })
     ResponseEntity<LikeBookmarkResponseDTO> getLikeBookmark(Long integratedRouteId);
+
+    @Operation(summary="여행지를 포함한 경로 리턴", description= "특정 여행지 id를 이용해서 해당 여행지를 지나가는 경로 id 리스트를 반환받을 수 있다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공하였습니다.",  content = @Content(mediaType = "application/json")),
+    })
+    @Parameters(value = {
+            @Parameter(name="hashtags", description = "해시태그 리스트"),
+            @Parameter(name="spots", description = "여행지 리스트"),
+    })
+    ResponseEntity<List<Long>> getRoutesThroughSpot(List<Long> hashtags, List<Long> spots);
 }

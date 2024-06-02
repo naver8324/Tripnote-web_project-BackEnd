@@ -1,6 +1,7 @@
 package com.elice.tripnote.domain.member.controller;
 
 import com.elice.tripnote.domain.member.entity.Member;
+import com.elice.tripnote.domain.member.entity.PasswordDTO;
 import com.elice.tripnote.domain.member.service.MemberService;
 import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
 import jakarta.validation.Valid;
@@ -65,8 +66,8 @@ public class MemberController implements SwaggerMemberController {
     // (로그인중) 비밀번호 변경 (비밀번호는 노출을 피해야 하기 때문에 RequestBody 형식으로 보냄)
     @Override
     @PatchMapping("/update-password")
-    public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody String newPassword) {
-        memberService.updatePassword(newPassword);
+    public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody PasswordDTO newPasswordDTO) {
+        memberService.updatePassword(newPasswordDTO);
         return ResponseEntity.ok().build();
     }
 
@@ -76,5 +77,13 @@ public class MemberController implements SwaggerMemberController {
     public ResponseEntity<Void> deleteMember(@RequestHeader("Authorization") String jwt) {
         memberService.deleteMember();
         return ResponseEntity.ok().build();
+    }
+
+
+    // (로그인중) (내정보 변경 시) 비밀번호 검증
+    @Override
+    @GetMapping("/validate-password")
+    public ResponseEntity<Boolean> validatePassword(@RequestHeader("Authorization") String jwt, @RequestBody PasswordDTO validatePasswordDTO) {
+        return ResponseEntity.ok().body(memberService.validatePassword(validatePasswordDTO));
     }
 }

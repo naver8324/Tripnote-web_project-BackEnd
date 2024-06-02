@@ -2,10 +2,7 @@ package com.elice.tripnote.domain.member.service;
 
 import com.elice.tripnote.domain.admin.entity.Admin;
 import com.elice.tripnote.domain.admin.repository.AdminRepository;
-import com.elice.tripnote.domain.member.entity.Member;
-import com.elice.tripnote.domain.member.entity.MemberDetailsDTO;
-import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
-import com.elice.tripnote.domain.member.entity.Status;
+import com.elice.tripnote.domain.member.entity.*;
 import com.elice.tripnote.domain.member.exception.CustomDuplicateException;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.domain.post.exception.NoSuchUserException;
@@ -144,10 +141,11 @@ public class MemberService implements UserDetailsService {
 
     // 비밀번호 변경 서비스
     @Transactional
-    public void updatePassword(String newPassword) {
+    public void updatePassword(PasswordDTO newPasswordDTO) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("newPW : "+ newPasswordDTO.getPassword());
 
-        memberRepository.updatePassword(email, bCryptPasswordEncoder.encode(newPassword));
+        memberRepository.updatePassword(email, bCryptPasswordEncoder.encode(newPasswordDTO.getPassword()));
     }
 
 
@@ -165,4 +163,18 @@ public class MemberService implements UserDetailsService {
         member.deleteByUser();
         memberRepository.save(member); // 상태 및 삭제 시간 업데이트
     }
+
+    // 비밀번호 검증 서비스
+    @Transactional
+    public boolean validatePassword(PasswordDTO validatePasswordDTO) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String password = memberRepository.findPasswordByEmail(email);
+
+        // BCryptPasswordEncoder의 matches 메소드를 사용하여 비밀번호 검증
+        boolean isPasswordMatch = bCryptPasswordEncoder.matches(validatePasswordDTO.getPassword(), password);
+        log.info("Password Match: " + isPasswordMatch);
+
+        return isPasswordMatch;
+    }
+
 }

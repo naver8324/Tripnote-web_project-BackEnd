@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.member.controller;
 
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
+import com.elice.tripnote.domain.member.entity.PasswordDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -61,7 +62,7 @@ public interface SwaggerMemberController {
             @ApiResponse(responseCode = "409", description = "현재 비밀번호가 일치하지 않습니다.", content = @Content(mediaType = "application/json"))
     })
     @PatchMapping("/update-password")
-    ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody @Parameter(description = "새 비밀번호", required = true) String newPassword);
+    ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody @Parameter(description = "새 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO newPasswordDTO);
 
 
     @Operation(summary = "회원 삭제", description = "(로그인중) 회원을 삭제합니다.")
@@ -72,4 +73,17 @@ public interface SwaggerMemberController {
     })
     @DeleteMapping("/delete-member")
     ResponseEntity<Void> deleteMember(@RequestHeader("Authorization") String jwt);
+
+
+    @Operation(summary = "비밀번호 검증", description = "(로그인 중) 회원의 비밀번호를 검증합니다. (비밀번호가 일치하면 true 반환, 일치하지 않으면 false 반환)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "비밀번호가 일치합니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
+    })
+    @GetMapping("/validate-password")
+    ResponseEntity<Boolean> validatePassword(@RequestHeader("Authorization") String jwt, @RequestBody @Parameter(description = "검증할 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO validatePasswordDTO);
+
+
 }
