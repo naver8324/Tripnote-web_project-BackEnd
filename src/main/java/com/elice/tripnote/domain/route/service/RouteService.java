@@ -11,6 +11,7 @@ import com.elice.tripnote.domain.link.routespot.entity.RouteSpot;
 import com.elice.tripnote.domain.link.routespot.repository.RouteSpotRepository;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagRepository;
+import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.domain.post.exception.NoSuchRouteException;
 import com.elice.tripnote.domain.post.exception.NoSuchUserException;
@@ -22,10 +23,13 @@ import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.repository.SpotRepository;
+import com.elice.tripnote.global.exception.CustomException;
+import com.elice.tripnote.global.exception.ErrorCode;
 import com.elice.tripnote.global.exception.NoSuchSpotException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -56,8 +60,11 @@ public class RouteService {
 
     @Transactional
     public Long save(SaveRequestDTO requestDto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         //여행지 id 리스트 기반으로 uuid 만들기
         String uuid = generateUUID(requestDto.getSpotIds());
+
+        //TODO: List<Long> spotIds의 지역 알아내서 모두 같은 지역이라면 해당 값을 region에 넣기
 
         // 만들어진 uuid 이용해서 integrated_route 객체 생성
         IntegratedRoute integratedRoute = integratedRouteRepository.findByIntegratedRoutes(uuid)
@@ -70,6 +77,8 @@ public class RouteService {
                     return integratedRouteRepository.save(newRoute);
                 });
 
+
+        //TODO: 해시태그에 아무값이 없어도 돌아가게끔
 
         // 통합 경로 객체(IntegratedRoute) 이용해서 uuid_hashtag 객체 생성
         // 현재 db에서 integratedRoute와 연관된 해시태그 찾기(이미 저장돼있는 해시태그)
@@ -107,9 +116,11 @@ public class RouteService {
         }
 
         // route 객체 생성 -> 경로 저장
+        Member member = memberRepository.findByEmail(email).orElseThrow(()->{
+            throw new CustomException(ErrorCode.NO_MEMBER);
+        });
         Route route = Route.builder()
-                .member(memberRepository.findById(requestDto.getMemberId())
-                        .orElseThrow(() -> new NoSuchUserException()))
+                .member(member)
                 .integratedRoute(integratedRoute)
                 .routeStatus(RouteStatus.PUBLIC)
                 .expense(requestDto.getExpense())
@@ -120,7 +131,9 @@ public class RouteService {
         List<Long> spotIds = requestDto.getSpotIds();
         for (int i = 0; i < spotIds.size(); i++) {
             Spot spot = spotRepository.findById(spotIds.get(i))
-                    .orElseThrow(() -> new NoSuchSpotException());
+                    .orElseThrow(() -> {
+                        throw new CustomException(ErrorCode.NO_SPOT);
+                    });
             Long nextSpotId = (i + 1 < spotIds.size()) ? spotIds.get(i + 1) : null;
             RouteSpot routeSpot = RouteSpot.builder()
                     .route(route)
@@ -166,28 +179,59 @@ public class RouteService {
 
     @Transactional
     public Long setRouteToPrivate(Long routeId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
+            throw new CustomException(ErrorCode.NO_MEMBER);
+        });
+
         Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new NoSuchRouteException());
-        route.setRouteStatus(RouteStatus.PRIVATE);
+                .orElseThrow(() -> {
+                    throw new CustomException(ErrorCode.NO_ROUTE);
+                });
+
+        // 해당 경로가 자신의 것이 맞는지 확인
+        if(member.getId() != route.getMember().getId()) throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_STATUS);
+
+        route.updateStatus(RouteStatus.PRIVATE);
         route = routeRepository.save(route);
         return route.getId();
     }
 
     @Transactional
     public Long setRouteToPublic(Long routeId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
+            throw new CustomException(ErrorCode.NO_MEMBER);
+        });
+
         Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new NoSuchRouteException());
-        route.setRouteStatus(RouteStatus.PUBLIC);
+                .orElseThrow(() -> {
+                    throw new CustomException(ErrorCode.NO_ROUTE);
+                });
+
+        // 해당 경로가 자신의 것이 맞는지 확인
+        if(member.getId() != route.getMember().getId()) throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_STATUS);
+        route.updateStatus(RouteStatus.PUBLIC);
         route = routeRepository.save(route);
         return route.getId();
     }
 
     @Transactional
     public Long deleteRoute(Long routeId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
+            throw new CustomException(ErrorCode.NO_MEMBER);
+        });
+        //TODO: 관리자가 다른 사람의 경로를 지울 수 있는지...?
+
         log.info("{}번 경로가 삭제됩니다.", routeId);
         Route route = routeRepository.findById(routeId)
                 .orElseThrow(() -> new NoSuchRouteException());
-        route.setRouteStatus(RouteStatus.DELETE);
+
+        // 해당 경로가 자신의 것이 맞는지 확인
+        if(member.getId() != route.getMember().getId()) throw new CustomException(ErrorCode.UNAUTHORIZED_DELETE);
+
+        route.updateStatus(RouteStatus.DELETE);
         route = routeRepository.save(route);
         return route.getId();
     }

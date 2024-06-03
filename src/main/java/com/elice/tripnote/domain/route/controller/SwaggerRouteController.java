@@ -22,12 +22,12 @@ import java.util.List;
 public interface SwaggerRouteController {
     @Operation(summary = "경로 생성", description = "경로를 추가합니다.")
     @Parameters({
-            @Parameter(name = "requestDto", description = "경로를 만드는 유저 id, 총 경비, 여행지 id 리스트, 해시태그 id 리스트")
+            @Parameter(name = "requestDto", description = "총 경비, 여행지 id 리스트, 해시태그 id 리스트")
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",
                     content = {@Content(schema = @Schema(implementation = Long.class))}),
-            @ApiResponse(responseCode = "404", description = "해당 유저 ID 또는 Order Id가 존재하지 않습니다."),
+            @ApiResponse(responseCode = "404", description = "해당 member ID가 존재하지 않습니다."),
     })
     ResponseEntity<Long> save(SaveRequestDTO requestDto);
 
@@ -69,7 +69,9 @@ public interface SwaggerRouteController {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.",  content = @Content(mediaType = "application/json")),
     })
     @Parameters(value = {
-            @Parameter(name="region", description = "지역"),
+            @Parameter(name="region", description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 뛰어쓰기 없이 '여러지역'이라는 값을 넣으면 된다.\n" +
+                    "특별시/광역시 - 서울특별시, 인천광역시, 부산광역시, 대구광역시, 울산광역시, 광주광역시, 대전광역시, 세종특별자치시\n" +
+                    "도단위 - 경기도, 강원특별자치도, 충청북도, 충청남도, 경상북도, 경상남도, 전라북도, 전라남도, 제주특별자치도"),
             @Parameter(name="hashtags", description = "해시태그 리스트"),
     })
     ResponseEntity<List<Long>> getRegion(String region, List<Long> hashtags);
@@ -81,16 +83,16 @@ public interface SwaggerRouteController {
     @Parameters(value = {
             @Parameter(name="routeId", description = "경로 번호"),
     })
-    ResponseEntity<List<SpotResponseDTO>> getSpots( Long integratedRouteId);
+    ResponseEntity<List<SpotResponseDTO>> getSpots(Long integratedRouteId);
 
-    @Operation(summary="경로의 좋아요 수, 북마크 수 리턴", description= "특정 경로 id를 이용해서 해당 경로의 좋아요 수, 북마크 수를 반환받을 수 있다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공하였습니다.",  content = @Content(mediaType = "application/json")),
-    })
-    @Parameters(value = {
-            @Parameter(name="routeId", description = "경로 번호"),
-    })
-    ResponseEntity<LikeBookmarkResponseDTO> getLikeBookmark(Long integratedRouteId);
+//    @Operation(summary="경로의 좋아요 수, 북마크 수 리턴", description= "특정 경로 id를 이용해서 해당 경로의 좋아요 수, 북마크 수를 반환받을 수 있다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "성공하였습니다.",  content = @Content(mediaType = "application/json")),
+//    })
+//    @Parameters(value = {
+//            @Parameter(name="routeId", description = "경로 번호"),
+//    })
+//    ResponseEntity<LikeBookmarkResponseDTO> getLikeBookmark(Long integratedRouteId);
 
     @Operation(summary="여행지를 포함한 경로 리턴", description= "특정 여행지 id를 이용해서 해당 여행지를 지나가는 경로 id 리스트를 반환받을 수 있다.")
     @ApiResponses(value = {
