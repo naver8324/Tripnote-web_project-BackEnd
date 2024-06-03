@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.link.likePost.entity;
 
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.post.entity.Post;
+import com.elice.tripnote.domain.route.entity.Route;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,8 +30,12 @@ public class LikePost{
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
+    @JoinColumn(name = "post_id", nullable = true)
     private Post post;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "route_id", nullable = true)
+    private Route route;
 
 
 

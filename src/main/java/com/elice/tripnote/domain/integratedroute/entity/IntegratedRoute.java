@@ -1,6 +1,5 @@
 package com.elice.tripnote.domain.integratedroute.entity;
 
-import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
 import com.elice.tripnote.domain.likebookmarkperiod.entity.LikeBookmarkPeriod;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.elice.tripnote.domain.spot.constant.Region;

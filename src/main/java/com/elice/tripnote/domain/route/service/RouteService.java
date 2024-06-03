@@ -4,7 +4,6 @@ import com.elice.tripnote.domain.hashtag.entity.Hashtag;
 import com.elice.tripnote.domain.hashtag.repository.HashtagRepository;
 import com.elice.tripnote.domain.integratedroute.entity.IntegratedRoute;
 import com.elice.tripnote.domain.integratedroute.repository.IntegratedRouteRepository;
-import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
 import com.elice.tripnote.domain.likebookmarkperiod.entity.LikeBookmarkPeriod;
 import com.elice.tripnote.domain.likebookmarkperiod.repository.LikeBookPeriodRepository;
 import com.elice.tripnote.domain.link.bookmark.repository.BookmarkRepository;

@@ -1,7 +1,6 @@
 package com.elice.tripnote.domain.integratedroute.repository;
 
 import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
-import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
 import com.elice.tripnote.domain.likebookmarkperiod.entity.QLikeBookmarkPeriod;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.QUUIDHashtag;
 import com.elice.tripnote.domain.route.entity.IntegratedRouteDTO;

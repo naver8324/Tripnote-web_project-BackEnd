@@ -1,7 +1,5 @@
 package com.elice.tripnote.domain.spot.constant;
 
-import com.elice.tripnote.domain.integratedroute.exception.NoSuchIntegratedRouteStatusException;
-import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
 import com.elice.tripnote.domain.spot.exception.RegionNotFoundException;
 
 public enum Region {
