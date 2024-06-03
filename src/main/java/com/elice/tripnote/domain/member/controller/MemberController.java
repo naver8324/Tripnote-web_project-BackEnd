@@ -5,6 +5,7 @@ import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
 import com.elice.tripnote.domain.member.entity.PasswordDTO;
 import com.elice.tripnote.domain.member.service.KakaoService;
 import com.elice.tripnote.domain.member.service.MemberService;
+import com.elice.tripnote.jwt.JWTUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class MemberController implements SwaggerMemberController {
 
     private final MemberService memberService;
     private final KakaoService kakaoService;
+    private final JWTUtil jwtUtil;
 
 
     @GetMapping("/test1")
@@ -115,10 +117,7 @@ public class MemberController implements SwaggerMemberController {
     @Override
     @GetMapping("/kakao/logout")
     public ResponseEntity<Long> kakaoLogout(HttpServletResponse response) throws IOException {
-
-        //TODO: jwt 토큰을 통해서 email 가져오기
-        String email = "";
-        Long kakaoId = kakaoService.logout(email);
+        Long kakaoId = kakaoService.logout();
 
         log.info("로그아웃이 완료되었습니다.");
         return ResponseEntity.ok(kakaoId);
@@ -134,15 +133,8 @@ public class MemberController implements SwaggerMemberController {
     @Override
     @GetMapping("/kakao/unlink")
     public ResponseEntity<Long> kakaoUnlink(HttpServletResponse response) throws IOException {
-
-        //jwt 토큰으로 로그아웃할 유저 아이디 받아오기
-//            int userId = jwtService.getUserIdx();
-
-        //TODO: jwt 토큰을 통해서 email 가져오기
-        String email = "";
-
         //유저 아이디로 카카오 아이디 받아오기
-        Long kakaoId = kakaoService.unlink(email);
+        Long kakaoId = kakaoService.unlink();
         log.info("회원 탈퇴가 완료되었습니다.");
         return ResponseEntity.ok(kakaoId);
 

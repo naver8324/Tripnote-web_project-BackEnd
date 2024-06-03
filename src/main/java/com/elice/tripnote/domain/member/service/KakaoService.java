@@ -17,6 +17,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -181,7 +182,8 @@ public class KakaoService {
 
     //카카오 로그아웃
     @Transactional
-    public Long logout(String email) throws IOException {
+    public Long logout() throws IOException {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
             throw new CustomException(NO_MEMBER);
         });
@@ -236,7 +238,8 @@ public class KakaoService {
 
     //카카오 연결끊기
     @Transactional
-    public Long unlink(String email) throws IOException {
+    public Long unlink() throws IOException {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 //        User user = userService.findUser(Long.valueOf(userId));
 //        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
 //            throw new CustomException(NO_MEMBER);
