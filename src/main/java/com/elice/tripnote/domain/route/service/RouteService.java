@@ -20,6 +20,7 @@ import com.elice.tripnote.domain.route.entity.*;
 import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.route.status.RouteStatus;
+import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.repository.SpotRepository;
 import com.elice.tripnote.global.exception.NoSuchSpotException;
@@ -65,7 +66,7 @@ public class RouteService {
                     IntegratedRoute newRoute = IntegratedRoute.builder()
                             .integratedRoutes(uuid)
                             //TODO: 나중에 여행지 주소가 어떻게 전달되는지 확인 후, 수정하기
-                            .region(IntegratedRouteStatus.MULTI_REGION)
+                            .region(Region.MULTI_REGION)
                             .build();
                     return integratedRouteRepository.save(newRoute);
                 });
@@ -192,7 +193,7 @@ public class RouteService {
         return route.getId();
     }
 
-    public List<Long> getRegion(IntegratedRouteStatus region, List<Long> hashtags) {
+    public List<Long> getRegion(Region region, List<Long> hashtags) {
         // 통합 경로 중, 해당 지역을 지나는 통합 경로 필터링하고
         // 통합 경로의 지역이 region인 경로들 필터링
 

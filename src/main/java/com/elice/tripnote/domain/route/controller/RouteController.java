@@ -5,6 +5,7 @@ import com.elice.tripnote.domain.route.entity.LikeBookmarkResponseDTO;
 import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
 import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
 import com.elice.tripnote.domain.route.service.RouteService;
+import com.elice.tripnote.domain.spot.constant.Region;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -74,7 +75,7 @@ public class RouteController implements SwaggerRouteController {
     public ResponseEntity<List<Long>> getRegion(@RequestParam("region") String region,
                                                           @RequestParam(value = "hashtags", required = false) List<Long> hashtags) {
         if (hashtags == null) hashtags = Collections.emptyList();
-        IntegratedRouteStatus status = IntegratedRouteStatus.fromName(region);
+        Region status = Region.fromString(region);
         return ResponseEntity.ok(routeService.getRegion(status, hashtags));
     }
 
