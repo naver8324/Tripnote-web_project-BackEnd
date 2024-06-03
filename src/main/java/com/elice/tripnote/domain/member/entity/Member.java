@@ -35,6 +35,9 @@ public class Member {
     @Column(name = "oauth_id")
     private Long oauthId;
 
+    @Column(name = "oauth_type")
+    private String oauthType;
+
     @Column(nullable = false, length = 20, unique = true)
     private String nickname;
 
