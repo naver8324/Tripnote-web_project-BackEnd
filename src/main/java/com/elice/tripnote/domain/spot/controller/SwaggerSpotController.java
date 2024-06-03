@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -84,4 +86,17 @@ public interface SwaggerSpotController {
             @ApiResponse(responseCode = "404", description = "해당 여행지가 존재하지 않습니다.")
     })
     ResponseEntity<Void> decreaseLike(String location);
+
+
+    @Operation(summary = "좌표 기반 위치 조회", description = "위도, 경도 기반으로 서울, 경기도 등 특정 위치 조회")
+    @Parameters({
+            @Parameter(name = "lat", description = "위도"),
+            @Parameter(name = "lng", description = "경도")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    content = {@Content(schema = @Schema(implementation = Spot.class))}),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 좌표값입니다.")
+    })
+    ResponseEntity<String> getAddressByCoordinates(double lat,double lng);
 }

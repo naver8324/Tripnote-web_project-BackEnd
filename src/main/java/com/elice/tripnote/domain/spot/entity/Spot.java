@@ -1,6 +1,6 @@
 package com.elice.tripnote.domain.spot.entity;
 
-import com.elice.tripnote.domain.link.spotlike.entity.SpotLike;
+import com.elice.tripnote.domain.link.likeSpot.entity.LikeSpot;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -33,7 +33,7 @@ public class Spot {
     private String region; //지역
 
     @OneToMany(mappedBy = "spot")
-    private List<SpotLike> spotLikes = new ArrayList<>();
+    private List<LikeSpot> likespot = new ArrayList<>();
 
     @Builder
     public Spot(String location, int likes, String imageUrl, String region){

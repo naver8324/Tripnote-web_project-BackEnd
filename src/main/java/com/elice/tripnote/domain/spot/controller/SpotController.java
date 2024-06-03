@@ -18,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/users/spots")
+@RequestMapping("/api/member/spots")
 @RequiredArgsConstructor
 public class SpotController implements SwaggerSpotController{
 
@@ -30,7 +30,7 @@ public class SpotController implements SwaggerSpotController{
                                       @RequestParam(required = false, name = "location") String location) {
         try{
             if (region != null && location != null) {
-                return new ResponseEntity<>("Both region and landmark cannot be specified", HttpStatus.BAD_REQUEST);
+                return spotService.getByRegionAndLocation(region,location);
             }
             if(region !=null)
                 return spotService.getByRegion(region);
@@ -90,6 +90,7 @@ public class SpotController implements SwaggerSpotController{
         }
     }
 
+    @Override
     @GetMapping("/spots/address")
     public ResponseEntity<String> getAddressByCoordinates(@RequestParam(name="lat") double lat, @RequestParam(name="lng") double lng) {
         return spotService.getAddressByCoordinates(lat, lng);

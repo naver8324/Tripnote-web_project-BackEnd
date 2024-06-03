@@ -40,6 +40,7 @@ public class SpotService {
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
+
     public ResponseEntity<Spot> getByLocation(String location) {
         if (searchByLocation(location) != null) {
             return ResponseEntity.ok().body(searchByLocation(location));
@@ -51,6 +52,8 @@ public class SpotService {
         Spot spot = dtoToEntity(result);
         return ResponseEntity.ok().body(spot);
     }
+
+
     public ResponseEntity<List<Spot>> getSpotsByLocations(String location) {
         if (searchByLocations(location).isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -61,7 +64,7 @@ public class SpotService {
             list.add(dtoToEntity(s));
         return ResponseEntity.ok().body(list);
     }
-    @Transactional
+
     public List<Spot> getSpotsByRegion(String region, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("likes").descending());
 
@@ -195,6 +198,7 @@ public class SpotService {
         }
     }
 
+    @Transactional
     public ResponseEntity<String> getAddressByCoordinates(double lat, double lng) {
         ReverseGeocodeRes res = naverClient.reverseGeocode(lat, lng);
         if (res != null && !res.getResults().isEmpty()) {
@@ -214,5 +218,13 @@ public class SpotService {
         } else {
             return new ResponseEntity<>("Address not found", HttpStatus.NOT_FOUND);
         }
+    }
+
+    public ResponseEntity<Spot> getByRegionAndLocation(String region, String location) {
+        Spot spot = spotRepository.findByRegionAndLocation(region, location);
+        if (spot == null) {
+            throw new LandmarkNotFoundException();
+        }
+        return ResponseEntity.ok(spot);
     }
 }
