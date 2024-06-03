@@ -74,4 +74,8 @@ public class Member {
         this.deletedAt = LocalDateTime.now();
         this.status = Status.DELETED_BY_USER;
     }
+
+    public void updateStatusACTIVE(){
+        this.status=Status.ACTIVE;
+    }
 }

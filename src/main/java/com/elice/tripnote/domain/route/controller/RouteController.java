@@ -54,7 +54,6 @@ public class RouteController implements SwaggerRouteController {
 
     /**
      * 경로 삭제
-     *
      * @return '삭제 상태'로 변경된 경로 id
      */
     @Override
@@ -97,6 +96,7 @@ public class RouteController implements SwaggerRouteController {
     }
 
     // 여행지 선택했을 때, 해당 여행지를 지나가는 경로 id 리턴
+    @Override
     @GetMapping("/spot")
     public ResponseEntity<List<Long>> getRoutesThroughSpot(@RequestParam(value = "hashtags", required = false) List<Long> hashtags,
                                                            @RequestParam(value = "spots", required = false) List<Long> spots){
