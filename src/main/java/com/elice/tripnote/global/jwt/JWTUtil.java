@@ -1,4 +1,4 @@
-package com.elice.tripnote.jwt;
+package com.elice.tripnote.global.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

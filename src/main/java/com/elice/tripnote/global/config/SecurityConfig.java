@@ -1,8 +1,7 @@
 package com.elice.tripnote.global.config;
 
-import com.elice.tripnote.jwt.JWTFilter;
-import com.elice.tripnote.jwt.JWTUtil;
-import com.elice.tripnote.jwt.LoginFilter;
+import com.elice.tripnote.global.jwt.JWTUtil;
+import com.elice.tripnote.global.jwt.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,14 +80,11 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/member/").permitAll()                    // 로그인 필요 없는 페이지 따로 설정 [ex) 메인페이지]
-                        .requestMatchers("/api/member/test1").hasRole("MEMBER")     // 개발 후 /api/member/** 로 수정
-                        .requestMatchers("/admin").hasRole("ADMIN")                 // 개발 후 /api/admin/** 로 수정
                         .anyRequest().permitAll());  // 그 외 경로에 대해서는 모두 접근가능
 
         //JWTFilter 등록
-        http
-                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+//        http
+//                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
         //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요
         http

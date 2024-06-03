@@ -1,6 +1,9 @@
-package com.elice.tripnote.jwt;
+package com.elice.tripnote.global.jwt;
 
 import com.elice.tripnote.domain.member.entity.MemberDetailsDTO;
+import com.elice.tripnote.domain.member.entity.Status;
+import com.elice.tripnote.global.exception.CustomException;
+import com.elice.tripnote.global.exception.ErrorCode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -87,6 +90,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
 
         String role = auth.getAuthority();
+
+        // 회원 상태값 확인
+        if (memberDetailsDTO.getStatus() != Status.ACTIVE) {
+            if(memberDetailsDTO.getStatus() == Status.DELETED_BY_ADMIN){
+                throw new CustomException(ErrorCode.DELETED_BY_ADMIN);
+            }else if(memberDetailsDTO.getStatus() == Status.DELETED_BY_USER){
+                throw new CustomException(ErrorCode.DELETED_BY_USER);
+            }
+        }
+
 
         String token = jwtUtil.createJwt(email, role, 1000*60*60*10L); //60 * 60 * 10 = 10시간
 
