@@ -6,7 +6,6 @@ import com.elice.tripnote.domain.member.entity.PasswordDTO;
 import com.elice.tripnote.domain.member.service.KakaoService;
 import com.elice.tripnote.domain.member.service.MemberService;
 import com.elice.tripnote.global.annotation.MemberRole;
-import com.elice.tripnote.jwt.JWTUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,6 @@ public class MemberController implements SwaggerMemberController {
 
     private final MemberService memberService;
     private final KakaoService kakaoService;
-    private final JWTUtil jwtUtil;
 
 
     @MemberRole
