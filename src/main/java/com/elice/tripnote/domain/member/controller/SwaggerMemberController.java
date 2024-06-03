@@ -5,13 +5,18 @@ import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
 import com.elice.tripnote.domain.member.entity.PasswordDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @Tag(name = "Member API", description = "회원 API입니다.")
 public interface SwaggerMemberController {
@@ -73,6 +78,37 @@ public interface SwaggerMemberController {
     })
     @DeleteMapping("/delete-member")
     ResponseEntity<Void> deleteMember(@RequestHeader("Authorization") String jwt);
+
+
+    /*
+    카카오 로그인 api
+     */
+    @Operation(summary = "카카오 로그인 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
+    })
+    @Parameters({
+            @Parameter(name = "Authorization", description = "카카오에서 받아오는 엑세스 토큰을 넣어주세요.", in = ParameterIn.HEADER)
+    })
+    ResponseEntity<Void> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws IOException;
+
+    @Operation(summary = "회원 로그아웃 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
+    })
+    ResponseEntity<Long> kakaoLogout(HttpServletResponse response) throws IOException;
+
+    @Operation(summary = "회원 탈퇴 API")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
+    })
+    ResponseEntity<Long> kakaoUnlink(HttpServletResponse response) throws IOException;
+
+    @Operation(summary = "회원 탈퇴 API - 사용자가 앱이 아닌 카카오 계정 관리 페이지나 고객센터에서 연결 끊기를 진행하는 경우")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
+    })
+    ResponseEntity<Long> kakaoDisconnect(String kakaoId, String referrerType, String authorizationHeader, HttpServletResponse response) throws IOException;
 
 
     @Operation(summary = "비밀번호 검증", description = "(로그인 중) 회원의 비밀번호를 검증합니다. (비밀번호가 일치하면 true 반환, 일치하지 않으면 false 반환)")

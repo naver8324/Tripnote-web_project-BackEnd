@@ -1,5 +1,7 @@
 package com.elice.tripnote.domain.spot.constant;
 
+import com.elice.tripnote.domain.integratedroute.exception.NoSuchIntegratedRouteStatusException;
+import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
 import com.elice.tripnote.domain.spot.exception.RegionNotFoundException;
 
 public enum Region {
@@ -7,7 +9,8 @@ public enum Region {
     GWANGJU("광주광역시"), DAEJEON("대전광역시"),
     GYEONGGI("경기도"), GANGWON("강원특별자치도"),
     CHUNGBUK("충청북도"),CHUNGNAM("충청남도"), GYEONGBUK("경상북도"),GYEONGNAM("경상남도"), JEONBUK("전라북도"),JEONNAM("전라남도"),
-    JEJU("제주특별자치도");
+    JEJU("제주특별자치도"),
+    MULTI_REGION("여러 지역");
 
     private String name;
 

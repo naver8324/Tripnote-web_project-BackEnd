@@ -5,6 +5,7 @@ import com.elice.tripnote.domain.route.entity.LikeBookmarkResponseDTO;
 import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
 import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
 import com.elice.tripnote.domain.route.service.RouteService;
+import com.elice.tripnote.domain.spot.constant.Region;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +55,6 @@ public class RouteController implements SwaggerRouteController {
 
     /**
      * 경로 삭제
-     *
      * @return '삭제 상태'로 변경된 경로 id
      */
     @Override
@@ -75,7 +75,7 @@ public class RouteController implements SwaggerRouteController {
     public ResponseEntity<List<Long>> getRegion(@RequestParam("region") String region,
                                                           @RequestParam(value = "hashtags", required = false) List<Long> hashtags) {
         if (hashtags == null) hashtags = Collections.emptyList();
-        IntegratedRouteStatus status = IntegratedRouteStatus.fromName(region);
+        Region status = Region.fromString(region);
         return ResponseEntity.ok(routeService.getRegion(status, hashtags));
     }
 
@@ -97,6 +97,7 @@ public class RouteController implements SwaggerRouteController {
     }
 
     // 여행지 선택했을 때, 해당 여행지를 지나가는 경로 id 리턴
+    @Override
     @GetMapping("/spot")
     public ResponseEntity<List<Long>> getRoutesThroughSpot(@RequestParam(value = "hashtags", required = false) List<Long> hashtags,
                                                            @RequestParam(value = "spots", required = false) List<Long> spots){
