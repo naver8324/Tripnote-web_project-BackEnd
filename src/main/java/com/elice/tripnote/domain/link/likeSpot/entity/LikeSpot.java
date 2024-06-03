@@ -1,4 +1,4 @@
-package com.elice.tripnote.domain.link.spotlike.entity;
+package com.elice.tripnote.domain.link.likeSpot.entity;
 
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.spot.entity.Spot;
@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Table(name="spot_like")
-public class SpotLike {
+@Table(name="like_spot")
+public class LikeSpot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
