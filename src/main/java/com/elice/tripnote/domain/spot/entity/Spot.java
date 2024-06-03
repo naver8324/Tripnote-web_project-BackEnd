@@ -1,10 +1,14 @@
 package com.elice.tripnote.domain.spot.entity;
 
+import com.elice.tripnote.domain.link.spotlike.entity.SpotLike;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,13 +24,16 @@ public class Spot {
     private String location; //주소명?
 
     @Column(nullable = false)
-    private int likes;
+    private int likes;//누가 좋아요 눌렀는지에 대해 모르므로 무한대로 증가할 수가 있다. => 유지보수
 
     @Column(nullable = true)
     private String imageUrl;
 
     @Column(nullable = false)
     private String region; //지역
+
+    @OneToMany(mappedBy = "spot")
+    private List<SpotLike> spotLikes = new ArrayList<>();
 
     @Builder
     public Spot(String location, int likes, String imageUrl, String region){

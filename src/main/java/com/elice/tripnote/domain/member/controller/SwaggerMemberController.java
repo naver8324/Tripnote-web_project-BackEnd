@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.member.controller;
 
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
+import com.elice.tripnote.domain.member.entity.PasswordDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -66,7 +67,7 @@ public interface SwaggerMemberController {
             @ApiResponse(responseCode = "409", description = "현재 비밀번호가 일치하지 않습니다.", content = @Content(mediaType = "application/json"))
     })
     @PatchMapping("/update-password")
-    ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody @Parameter(description = "새 비밀번호", required = true) String newPassword);
+    ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody @Parameter(description = "새 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO newPasswordDTO);
 
 
     @Operation(summary = "회원 삭제", description = "(로그인중) 회원을 삭제합니다.")
@@ -78,15 +79,13 @@ public interface SwaggerMemberController {
     @DeleteMapping("/delete-member")
     ResponseEntity<Void> deleteMember(@RequestHeader("Authorization") String jwt);
 
+
     /*
     카카오 로그인 api
      */
     @Operation(summary = "카카오 로그인 API")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "JWT4001", description = "JWT 토큰을 주세요!"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "JWT4002", description = "JWT 토큰 만료"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "USER4010", description = "DB에 존재하지 않는 회원"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
     })
     @Parameters({
             @Parameter(name = "Authorization", description = "카카오에서 받아오는 엑세스 토큰을 넣어주세요.", in = ParameterIn.HEADER)
@@ -95,23 +94,32 @@ public interface SwaggerMemberController {
 
     @Operation(summary = "회원 로그아웃 API")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "JWT4001", description = "JWT 토큰을 주세요!"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "JWT4002", description = "JWT 토큰 만료"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
     })
     ResponseEntity<Long> kakaoLogout(HttpServletResponse response) throws IOException;
 
     @Operation(summary = "회원 탈퇴 API")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "JWT4001", description = "JWT 토큰을 주세요!"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "JWT4002", description = "JWT 토큰 만료"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
     })
     ResponseEntity<Long> kakaoUnlink(HttpServletResponse response) throws IOException;
 
     @Operation(summary = "회원 탈퇴 API - 사용자가 앱이 아닌 카카오 계정 관리 페이지나 고객센터에서 연결 끊기를 진행하는 경우")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
     })
     ResponseEntity<Long> kakaoDisconnect(String kakaoId, String referrerType, String authorizationHeader, HttpServletResponse response) throws IOException;
+
+
+    @Operation(summary = "비밀번호 검증", description = "(로그인 중) 회원의 비밀번호를 검증합니다. (비밀번호가 일치하면 true 반환, 일치하지 않으면 false 반환)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "비밀번호가 일치합니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
+    })
+    @GetMapping("/validate-password")
+    ResponseEntity<Boolean> validatePassword(@RequestHeader("Authorization") String jwt, @RequestBody @Parameter(description = "검증할 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO validatePasswordDTO);
+
+
 }

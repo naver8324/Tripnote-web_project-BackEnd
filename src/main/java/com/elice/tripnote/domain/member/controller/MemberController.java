@@ -1,11 +1,11 @@
 package com.elice.tripnote.domain.member.controller;
 
 import com.elice.tripnote.domain.member.entity.Member;
+import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
+import com.elice.tripnote.domain.member.entity.PasswordDTO;
 import com.elice.tripnote.domain.member.service.KakaoService;
 import com.elice.tripnote.domain.member.service.MemberService;
-import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ public class MemberController implements SwaggerMemberController {
 
 
     @GetMapping("/test1")
-    public String test2(){
+    public String test2() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return email + " | completed test1.";
     }
@@ -70,8 +70,8 @@ public class MemberController implements SwaggerMemberController {
     // (로그인중) 비밀번호 변경 (비밀번호는 노출을 피해야 하기 때문에 RequestBody 형식으로 보냄)
     @Override
     @PatchMapping("/update-password")
-    public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody String newPassword) {
-        memberService.updatePassword(newPassword);
+    public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody PasswordDTO newPasswordDTO) {
+        memberService.updatePassword(newPasswordDTO);
         return ResponseEntity.ok().build();
     }
 
@@ -82,6 +82,7 @@ public class MemberController implements SwaggerMemberController {
         memberService.deleteMember();
         return ResponseEntity.ok().build();
     }
+
 
 
 
@@ -125,6 +126,7 @@ public class MemberController implements SwaggerMemberController {
 
     /**
      * 회원 탈퇴(카카오 연결 끊기)
+     *
      * @param response
      * @return 탈퇴 유저 id
      * @throws IOException
@@ -148,6 +150,7 @@ public class MemberController implements SwaggerMemberController {
 
     /**
      * 회원 탈퇴(앱이 아닌 경로로 연결 끊기)
+     *
      * @param kakaoId
      * @param referrerType
      * @param authorizationHeader
@@ -171,6 +174,12 @@ public class MemberController implements SwaggerMemberController {
         Long logout_kakaoId = kakaoService.disconnect(Long.parseLong(kakaoId));
         log.info("회원 탈퇴가 완료되었습니다.");
         return ResponseEntity.ok(logout_kakaoId);
+    }
 
+    // (로그인중) (내정보 변경 시) 비밀번호 검증
+    @Override
+    @GetMapping("/validate-password")
+    public ResponseEntity<Boolean> validatePassword(@RequestHeader("Authorization") String jwt, @RequestBody PasswordDTO validatePasswordDTO) {
+        return ResponseEntity.ok().body(memberService.validatePassword(validatePasswordDTO));
     }
 }
