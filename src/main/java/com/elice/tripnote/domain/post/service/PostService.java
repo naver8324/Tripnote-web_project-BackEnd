@@ -46,9 +46,9 @@ public class PostService {
 
     // 전체 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getPosts(int page, int size){
+    public Page<PostResponseDTO> getPosts(String order, int page, int size){
 
-        return postRepository.customFindNotDeletedPosts(page, size);
+        return postRepository.customFindNotDeletedPosts(order, page, size);
     }
 
     // 한 유저가 쓴 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
