@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.spot.repository;
 
+import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,27 +14,24 @@ import java.util.List;
 import java.util.Optional;
 
 
+@Repository
 public interface SpotRepository extends JpaRepository<Spot, Long>, CustomSpotRepository  {
     List<Spot> findAll();
 
     Optional<Spot> findById(Long id);
 
     Optional<Spot> findByLocation(String location);
-    List<Spot> findByRegion(String region);
+    List<Spot> findByRegion(Region region); // 변경
 
-    Page<Spot> findByRegion(String region, Pageable pageable);
+    Page<Spot> findByRegion(Region region, Pageable pageable);
 
-
-    @Modifying
-    @Query("UPDATE Spot s SET s.likes = s.likes + 1 WHERE s.location = :location")
-    void increaseLikes(@Param("location") String location);
-
-
-    @Modifying
-    @Query("UPDATE Spot s SET s.likes = s.likes - 1 WHERE s.location = :location")
-    void decreaseLikes(@Param("location") String location);
+    Page<Spot> findByLocation(String location, Pageable pageable);
 
     @Modifying
     @Query("DELETE FROM Spot s WHERE s.location = :location")
     Spot deleteByLocation(String location);
+
+
+    @Query("SELECT s FROM Spot s WHERE s.region = :region AND s.location = :location")
+    Spot findByRegionAndLocation(@Param("region") Region region, @Param("location") String location); // 변경
 }

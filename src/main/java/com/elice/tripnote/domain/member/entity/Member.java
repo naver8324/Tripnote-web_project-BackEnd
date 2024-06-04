@@ -3,7 +3,7 @@ package com.elice.tripnote.domain.member.entity;
 import com.elice.tripnote.domain.link.bookmark.entity.Bookmark;
 import com.elice.tripnote.domain.comment.entity.Comment;
 import com.elice.tripnote.domain.link.likePost.entity.LikePost;
-import com.elice.tripnote.domain.link.spotlike.entity.SpotLike;
+import com.elice.tripnote.domain.link.likeSpot.entity.LikeSpot;
 import com.elice.tripnote.domain.post.entity.Post;
 import com.elice.tripnote.domain.route.entity.Route;
 import jakarta.persistence.*;
@@ -70,7 +70,7 @@ public class Member {
 
     @Builder.Default
     @OneToMany(mappedBy = "member")
-    private List<SpotLike> spotLikes = new ArrayList<>();
+    private List<LikeSpot> spotLikes = new ArrayList<>();
 
 
     @PrePersist
