@@ -46,7 +46,8 @@ public enum ErrorCode {
     DUPLICATE_NAME(HttpStatus.CONFLICT, "이미 존재하는 해시태그명입니다."),
 
     // 500
-    SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 응답 오류입니다.");
+    SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 응답 오류입니다."),
+    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송에 실패했습니다.");
 
 
     private final HttpStatus httpStatus;

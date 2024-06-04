@@ -91,7 +91,7 @@ public interface SwaggerMemberController {
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
     })
-    @GetMapping("/validate-password")
+    @PostMapping("/validate-password")
     ResponseEntity<Boolean> validatePassword(@RequestBody @Parameter(description = "검증할 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO validatePasswordDTO);
 
 
