@@ -7,6 +7,8 @@ import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.service.PostService;
+import com.elice.tripnote.global.annotation.AdminRole;
+import com.elice.tripnote.global.annotation.MemberRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,7 @@ public class PostController implements SwaggerPostController {
 
 
     @Override
+    @MemberRole
     @GetMapping("/member/posts")
     public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberId(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(postService.getPostsByMemberId(page, size));
@@ -44,42 +47,49 @@ public class PostController implements SwaggerPostController {
 
 
     @Override
+    @MemberRole
     @GetMapping("/member/posts/likes")
     public ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithLikes(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(postService.getCommentsByMemberWithLikes(page, size));
     }
 
     @Override
+    @MemberRole
     @GetMapping("/member/posts/mark")
     public ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithMark(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(postService.getCommentsByMemberWithMark(page, size));
     }
 
     @Override
+    @AdminRole
     @GetMapping("/admin/posts")
     public ResponseEntity<Page<PostResponseDTO>> getPostsAll(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(postService.getPostsAll(page, size));
     }
 
     @Override
+    @MemberRole
     @GetMapping("/member/posts/{postId}")
     public ResponseEntity<PostDetailResponseDTO> getPost(@PathVariable(name = "postId") Long postId) {
         return ResponseEntity.ok().body(postService.getPost(postId));
     }
 
     @Override
+    @MemberRole
     @PostMapping("/member/posts")
     public ResponseEntity<PostResponseDTO> savePost(@RequestBody PostRequestDTO postDTO, @RequestParam(name="routeId") Long routeId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(postService.savePost(postDTO, routeId));
     }
 
     @Override
+    @MemberRole
     @PatchMapping("/member/posts/{postId}")
     public ResponseEntity<PostResponseDTO> updatePost(@RequestBody PostRequestDTO postDTO, @PathVariable(name="postId") Long postId) {
         return ResponseEntity.status(HttpStatus.OK).body(postService.updatePost(postDTO, postId));
     }
 
     @Override
+    @MemberRole
     @GetMapping("/member/posts/{postId}/like")
     public ResponseEntity likePost(@PathVariable(name="postId") Long postId) {
         postService.likePost(postId);
@@ -87,6 +97,7 @@ public class PostController implements SwaggerPostController {
     }
 
     @Override
+    @MemberRole
     @GetMapping("/member/posts/{postId}/mark")
     public ResponseEntity markPost(@PathVariable(name="postId") Long postId) {
         postService.markPost(postId);
@@ -94,6 +105,7 @@ public class PostController implements SwaggerPostController {
     }
 
     @Override
+    @MemberRole
     @GetMapping("/member/posts/{postId}/report")
     public ResponseEntity reportPost(@PathVariable(name="postId") Long postId) {
         postService.reportPost(postId);
@@ -101,6 +113,7 @@ public class PostController implements SwaggerPostController {
     }
 
     @Override
+    @MemberRole
     @DeleteMapping("/member/posts/{postId}")
     public ResponseEntity deletePost(@PathVariable(name="postId") Long postId) {
         postService.deletePost(postId);
@@ -109,6 +122,7 @@ public class PostController implements SwaggerPostController {
 
 
     @Override
+    @AdminRole
     @DeleteMapping("/admin/posts/{postId}")
     public ResponseEntity deletePostAdmin(@PathVariable(name="postId") Long postId) {
         postService.deletePostAdmin(postId);
