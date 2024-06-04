@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.hashtag.controller;
 
+import com.elice.tripnote.domain.hashtag.entity.HashtagDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,10 @@ import java.util.List;
 
 @Tag(name = "Hashtag API", description = "해시태그 관련 api입니다.")
 public interface SwaggerHashtagController {
+
+    @Operation(summary = "해시태그 전체 조회", description = "해시태그의 모든 정보를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "성공")
+    ResponseEntity<List<HashtagDTO>> getHashtags();
 
     @Operation(summary = "해시태그 조회", description = "도시 또는 도시가 아닌 해시태그를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공")

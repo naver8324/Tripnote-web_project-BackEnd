@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.hashtag.controller;
 
+import com.elice.tripnote.domain.hashtag.entity.HashtagDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagResponseDTO;
 import com.elice.tripnote.domain.hashtag.repository.HashtagRepository;
@@ -18,6 +19,16 @@ public class HashtagController implements SwaggerHashtagController{
 
     private final HashtagService hashtagService;
     private final HashtagRepository hashtagRepository;
+
+    //전체 해시태그 조회
+    @Override
+    @GetMapping
+    public ResponseEntity<List<HashtagDTO>> getHashtags(){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(hashtagRepository.customFindAll());
+    }
+
 
     //지역 해시태그 조회 isCity의 = true ,  isDelete = false
     //지역 아닌 해시태그 조회 isCity의 = false, isDelete = false
