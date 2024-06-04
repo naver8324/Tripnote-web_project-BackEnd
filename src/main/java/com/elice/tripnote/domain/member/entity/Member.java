@@ -87,4 +87,17 @@ public class Member {
     public void updateStatusACTIVE(){
         this.status=Status.ACTIVE;
     }
+
+    public MemberResponseDTO toDto() {
+        return MemberResponseDTO.builder()
+                .id(this.id)
+                .email(this.email)
+                .password(this.password)
+                .oauthId(this.oauthId)
+                .oauthType(this.oauthType)
+                .nickname(this.nickname)
+                .deletedAt(this.deletedAt)
+                .status(this.status)
+                .build();
+    }
 }

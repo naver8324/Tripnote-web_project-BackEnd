@@ -1,6 +1,8 @@
 package com.elice.tripnote.domain.member.repository;
 
 import com.elice.tripnote.domain.member.entity.Member;
+import com.elice.tripnote.domain.member.entity.MemberResponseDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,4 +34,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m.password FROM Member m WHERE m.email = :email")
     String findPasswordByEmail(@Param("email") String email);
+
 }
