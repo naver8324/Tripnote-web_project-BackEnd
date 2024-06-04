@@ -29,14 +29,14 @@ public class LikeSpot {
     @Column
     private LocalDateTime likedAt;
 
-    public void like(){
-        if(likedAt == null){
-            likedAt = LocalDateTime.now();
-            spot.increaseLikes();
-            return;
-        }
-        likedAt = null;
-        spot.decreaseLikes();
-
-    }
+//    public void like(){
+//        if(likedAt == null){
+//            likedAt = LocalDateTime.now();
+//            spot.increaseLikes();
+//            return;
+//        }
+//        likedAt = null;
+//        spot.decreaseLikes();
+//
+//    }
 }
