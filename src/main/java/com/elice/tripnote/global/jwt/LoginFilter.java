@@ -102,6 +102,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
         String token = jwtUtil.createJwt(email, role, 1000*60*60*10L); //60 * 60 * 10 = 10시간
+        log.info("JWT 토큰: {}", token);
 
         response.addHeader("Authorization", "Bearer " + token);
         log.info("login success");

@@ -70,7 +70,7 @@ public class MemberController implements SwaggerMemberController {
     @Override
     @MemberRole
     @PatchMapping("/update-nickname")
-    public ResponseEntity<Void> updateNickname(@RequestHeader("Authorization") String jwt, @RequestParam String newNickname) {
+    public ResponseEntity<Void> updateNickname(@RequestParam String newNickname) {
         memberService.updateNickname(newNickname);
         return ResponseEntity.ok().build();
     }
@@ -79,7 +79,7 @@ public class MemberController implements SwaggerMemberController {
     @Override
     @MemberRole
     @PatchMapping("/update-password")
-    public ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody PasswordDTO newPasswordDTO) {
+    public ResponseEntity<Void> updatePassword(@RequestBody PasswordDTO newPasswordDTO) {
         memberService.updatePassword(newPasswordDTO);
         return ResponseEntity.ok().build();
     }
@@ -88,7 +88,7 @@ public class MemberController implements SwaggerMemberController {
     @Override
     @MemberRole
     @DeleteMapping("/delete-member")
-    public ResponseEntity<Void> deleteMember(@RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<Void> deleteMember() {
         memberService.deleteMember();
         return ResponseEntity.ok().build();
     }
@@ -97,7 +97,7 @@ public class MemberController implements SwaggerMemberController {
     @Override
     @MemberRole
     @GetMapping("/validate-password")
-    public ResponseEntity<Boolean> validatePassword(@RequestHeader("Authorization") String jwt, @RequestBody PasswordDTO validatePasswordDTO) {
+    public ResponseEntity<Boolean> validatePassword(@RequestBody PasswordDTO validatePasswordDTO) {
         return ResponseEntity.ok().body(memberService.validatePassword(validatePasswordDTO));
     }
 
@@ -106,6 +106,14 @@ public class MemberController implements SwaggerMemberController {
     @GetMapping("/admin/members")
     public ResponseEntity<Page<MemberResponseDTO>> getMembers(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
         return ResponseEntity.ok().body(memberService.findMembers(pageable));
+    }
+
+    // 로그인중인 회원 정보 리턴
+    @Override
+    @MemberRole
+    @GetMapping()
+    public ResponseEntity<MemberResponseDTO> getMemberByToken() {
+        return ResponseEntity.ok().body(memberService.getMemberResponseDTO());
     }
 
 
