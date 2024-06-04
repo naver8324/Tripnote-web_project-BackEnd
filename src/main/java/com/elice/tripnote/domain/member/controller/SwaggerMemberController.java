@@ -59,7 +59,7 @@ public interface SwaggerMemberController {
             @ApiResponse(responseCode = "409", description = "이미 사용 중인 닉네임입니다.", content = @Content(mediaType = "application/json"))
     })
     @PatchMapping("/update-nickname")
-    public ResponseEntity<Void> updateNickname(@RequestHeader("Authorization") String jwt, @RequestParam @Parameter(description = "새 닉네임", required = true) String newNickname);
+    public ResponseEntity<Void> updateNickname(@RequestParam @Parameter(description = "새 닉네임", required = true) String newNickname);
 
 
     @Operation(summary = "비밀번호 변경", description = "(로그인중) 회원의 비밀번호를 변경합니다.")
@@ -71,7 +71,7 @@ public interface SwaggerMemberController {
             @ApiResponse(responseCode = "409", description = "현재 비밀번호가 일치하지 않습니다.", content = @Content(mediaType = "application/json"))
     })
     @PatchMapping("/update-password")
-    ResponseEntity<Void> updatePassword(@RequestHeader("Authorization") String jwt, @RequestBody @Parameter(description = "새 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO newPasswordDTO);
+    ResponseEntity<Void> updatePassword(@RequestBody @Parameter(description = "새 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO newPasswordDTO);
 
 
     @Operation(summary = "회원 삭제", description = "(로그인중) 회원을 삭제합니다.")
@@ -81,7 +81,36 @@ public interface SwaggerMemberController {
             @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.")
     })
     @DeleteMapping("/delete-member")
-    ResponseEntity<Void> deleteMember(@RequestHeader("Authorization") String jwt);
+    ResponseEntity<Void> deleteMember();
+
+
+    @Operation(summary = "비밀번호 검증", description = "(로그인 중) 회원의 비밀번호를 검증합니다. (비밀번호가 일치하면 true 반환, 일치하지 않으면 false 반환)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "비밀번호가 일치합니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
+    })
+    @GetMapping("/validate-password")
+    ResponseEntity<Boolean> validatePassword(@RequestBody @Parameter(description = "검증할 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO validatePasswordDTO);
+
+
+
+    @Operation(summary = "회원 목록 조회(관리자)", description = "전체 회원 목록을 페이징하여 조회합니다. (관리자 전용)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원 목록 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "관리자 권한이 없습니다.", content = @Content(mediaType = "application/json"))
+    })
+    @GetMapping("/admin/members")
+    public ResponseEntity<Page<MemberResponseDTO>> getMembers(@PageableDefault(size = 10, sort = "id") Pageable pageable);
+
+
+    @Operation(summary = "로그인중인 회원 조회", description = "토큰 기반으로 회원을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "회원 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Member.class)))
+    @GetMapping
+    ResponseEntity<MemberResponseDTO> getMemberByToken();
+
 
 
     /*
@@ -115,23 +144,7 @@ public interface SwaggerMemberController {
     ResponseEntity<Long> kakaoDisconnect(String kakaoId, String referrerType, String authorizationHeader, HttpServletResponse response) throws IOException;
 
 
-    @Operation(summary = "비밀번호 검증", description = "(로그인 중) 회원의 비밀번호를 검증합니다. (비밀번호가 일치하면 true 반환, 일치하지 않으면 false 반환)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "비밀번호가 일치합니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.", content = @Content(mediaType = "application/json"))
-    })
-    @GetMapping("/validate-password")
-    ResponseEntity<Boolean> validatePassword(@RequestHeader("Authorization") String jwt, @RequestBody @Parameter(description = "검증할 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO validatePasswordDTO);
 
 
-    @Operation(summary = "회원 목록 조회(관리자)", description = "전체 회원 목록을 페이징하여 조회합니다. (관리자 전용)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원 목록 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "403", description = "관리자 권한이 없습니다.", content = @Content(mediaType = "application/json"))
-    })
-    @GetMapping("/admin/members")
-    public ResponseEntity<Page<MemberResponseDTO>> getMembers(@PageableDefault(size = 10, sort = "id") Pageable pageable);
+
 }

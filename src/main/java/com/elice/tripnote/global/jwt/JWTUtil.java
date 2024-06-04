@@ -44,6 +44,11 @@ public class JWTUtil {
         claims.put("email", email);
         claims.put("role", role);
 
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expiredMs);
+
+        log.info("JWT 생성 - 발행 시각: {}, 만료 시각: {}", now, expiryDate);
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))

@@ -175,9 +175,25 @@ public class MemberService implements UserDetailsService {
         return isPasswordMatch;
     }
 
+    // 전체 멤버 조회 서비스
     public Page<MemberResponseDTO> findMembers(Pageable pageable) {
         Page<Member> members = memberRepository.findAll(pageable);
         return members.map(Member::toDto);
     }
 
+
+    // 로그인중인 멤버 정보 조회 서비스
+    @Transactional(readOnly = true)
+    public MemberResponseDTO getMemberResponseDTO() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Member member =  memberRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    UsernameNotFoundException ex = new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email);
+                    log.error("에러 발생: {}", ex.getMessage(), ex);
+                    return ex;
+                });
+
+        return member.toDto();
+    }
 }
