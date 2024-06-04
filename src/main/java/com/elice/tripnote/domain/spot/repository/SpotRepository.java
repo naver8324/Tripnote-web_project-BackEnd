@@ -32,6 +32,7 @@ public interface SpotRepository extends JpaRepository<Spot, Long>, CustomSpotRep
     Spot deleteByLocation(String location);
 
 
+//    @Modifying
     @Query("SELECT s FROM Spot s WHERE s.region = :region AND s.location = :location")
     Spot findByRegionAndLocation(@Param("region") Region region, @Param("location") String location); // 변경
 }

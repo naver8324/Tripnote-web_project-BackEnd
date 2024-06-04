@@ -1,6 +1,7 @@
 package com.elice.tripnote.domain.spot.constant;
 
 import com.elice.tripnote.domain.spot.exception.RegionNotFoundException;
+import com.elice.tripnote.global.exception.ErrorCode;
 
 public enum Region {
     SEOUL("서울특별시"),INCHEON("인천광역시"),BUSAN("부산광역시"), DAEGU("대구광역시"),ULSAN("울산광역시"),
@@ -25,6 +26,6 @@ public enum Region {
                 return region;
             }
         }
-        throw new RegionNotFoundException();
+        throw new RegionNotFoundException(ErrorCode.NO_REGION);
     }
 }

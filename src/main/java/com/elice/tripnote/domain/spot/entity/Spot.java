@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Table(name = "spot")
+@Table(name = "spot", uniqueConstraints = {@UniqueConstraint(columnNames = {"region", "location"})})
 public class Spot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,9 +41,9 @@ public class Spot {
     @Column(nullable = false)
     private double lng;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "spot")
-    private List<LikeSpot> likespot = new ArrayList<>();
+//    @JsonIgnore
+//    @OneToMany(mappedBy = "spot")
+//    private List<LikeSpot> likespot = new ArrayList<>();
 
     @Builder
     public Spot(String location, String imageUrl, Region region, String address, double lat, double lng){
