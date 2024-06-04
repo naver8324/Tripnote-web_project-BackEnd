@@ -7,25 +7,23 @@ import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.exception.LandmarkNotFoundException;
 import com.elice.tripnote.domain.spot.exception.RegionNotFoundException;
 import com.elice.tripnote.domain.spot.naver.NaverClient;
-import com.elice.tripnote.domain.spot.naver.dto.ReverseGeocodeRes;
 import com.elice.tripnote.domain.spot.naver.dto.SearchImageReq;
 import com.elice.tripnote.domain.spot.naver.dto.SearchLocalReq;
 import com.elice.tripnote.domain.spot.repository.SpotRepository;
+import com.elice.tripnote.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SpotService {
 
     private final SpotRepository spotRepository;
@@ -45,7 +43,8 @@ public class SpotService {
         Region validRegion = Region.fromString(region);
         List<Spot> list = getSpotsByRegion(validRegion, 0, 5);
         if (list.isEmpty()){
-            throw new RegionNotFoundException();
+            log.error("에러 발생: {}", ErrorCode.NO_REGION);
+            throw new RegionNotFoundException(ErrorCode.NO_REGION);
         }
         return list;
     }
@@ -99,20 +98,16 @@ public class SpotService {
 
                 if (searchImageRes.getTotal() > 0) {
                     var imageItem = searchImageRes.getItems().stream().findFirst().get();
-                    double[] coordinates = naverClient.geocoding(localItem.getRoadAddress());
-                    double mapX = localItem.getMapx();
-                    double mapY = localItem.getMapy();
-                    double[] coordinate = naverClient.convertMapXYToLatLon(mapX, mapY);
 
                     var result = new SpotDTO();
                     result.setLocation(localItem.getTitle());
                     result.setImageUrl(imageItem.getLink());
                     result.setRegion(Region.fromString(localItem.getAddress().split(" ")[0])); // 변경
                     result.setAddress(localItem.getAddress());
-                   // result.setLat(coordinate[0]);
-                   //result.setLng(coordinate[1]);
-                    result.setLat(localItem.getMapx());
-                    result.setLng(localItem.getMapy());
+                    result.setLat(localItem.getMapy() / 1E7);
+                    result.setLng(localItem.getMapx() / 1E7);
+//                    result.setLat(localItem.getMapx());
+//                    result.setLng(localItem.getMapy());
                     return result;
                 }
             }
@@ -179,8 +174,8 @@ public class SpotService {
 //                                imageUrl,
 //                                Region.fromString(localItem.getAddress().split(" ")[0]), // 변경
 //                                localItem.getAddress(),
-//                                localItem.getMapx(),
-//                                localItem.getMapy()
+//                                localItem.getMapy()/ 1E7,
+//                                localItem.getMapx()/ 1E7
 //
 //                        );
 //                    })

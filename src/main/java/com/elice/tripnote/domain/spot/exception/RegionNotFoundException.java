@@ -1,11 +1,15 @@
 package com.elice.tripnote.domain.spot.exception;
 
+import com.elice.tripnote.global.exception.ErrorCode;
 import com.elice.tripnote.global.exception.NotFoundException;
+import lombok.Getter;
 
-public class RegionNotFoundException extends NotFoundException {
-    private final static String MESSAGE = "존재하지 않는 지역입니다.";
+@Getter
+public class RegionNotFoundException extends RuntimeException {
+    private final ErrorCode errorCode;
 
-    public RegionNotFoundException(){
-        super(MESSAGE);
+    public RegionNotFoundException(ErrorCode errorCode){
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
     }
 }
