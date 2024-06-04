@@ -70,7 +70,7 @@ public class Member {
 
     @Builder.Default
     @OneToMany(mappedBy = "member")
-    private List<LikeSpot> spotLikes = new ArrayList<>();
+    private List<LikeSpot> likeSpots = new ArrayList<>();
 
 
     @PrePersist
