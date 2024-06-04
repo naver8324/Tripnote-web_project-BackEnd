@@ -28,9 +28,13 @@ public class PostResponseDTO{
     @NotNull
     private boolean isDeleted;
 
+    @NotNull
     private LocalDateTime createdAt;
 
+
+    @NotBlank
     private String nickname;
+
 
     private List<HashtagResponseDTO> hashtagResponseDTOList;
 
