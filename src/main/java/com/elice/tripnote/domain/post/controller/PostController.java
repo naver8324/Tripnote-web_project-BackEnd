@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.post.controller;
 
 
 import com.elice.tripnote.domain.comment.service.CommentService;
+import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,9 +25,16 @@ public class PostController implements SwaggerPostController {
 
     @Override
     @GetMapping("/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPosts(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getPosts(page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPosts(@RequestParam(name="order", required = false) String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(postService.getPosts(order, page, size));
     }
+
+    @Override
+    @PostMapping("/posts")
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@RequestBody List<HashtagRequestDTO> hashtagRequestDTOList, @RequestParam(name="order", required = false) String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(postService.getPosts(order, page, size));
+    }
+
 
     @Override
     @GetMapping("/member/posts")

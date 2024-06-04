@@ -1,6 +1,7 @@
 package com.elice.tripnote.domain.post.repository;
 
 
+import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagResponseDTO;
 import com.elice.tripnote.domain.hashtag.entity.QHashtag;
 import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
@@ -14,10 +15,9 @@ import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.entity.QPost;
 import com.elice.tripnote.domain.route.entity.QRoute;
 import com.elice.tripnote.domain.route.status.RouteStatus;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.core.group.GroupBy.list;
@@ -52,7 +53,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     private final QBookmark bookmark = QBookmark.bookmark;
 
 
-    public Page<PostResponseDTO> customFindNotDeletedPosts(int page, int size){
+    public Page<PostResponseDTO> customFindNotDeletedPosts(String order, int page, int size){
 
         page = page > 0 ? page - 1 : 0;
 
@@ -62,6 +63,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .where(post.isDeleted.isFalse())
                 .fetchFirst();
 
+        OrderSpecifier orderSpecifier = post.id.desc() ;
+
+        if(order.equals("likes")){
+            orderSpecifier = post.likes.desc();
+        }
 
         List<PostResponseDTO> postResponseDTOs = query
                 .from(post)
@@ -71,7 +77,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(integratedRoute.uuidHashtags, uuidHashtags)
                 .join(uuidHashtags.hashtag, hashtag)
                 .where(post.isDeleted.isFalse())
-                .orderBy(post.id.desc())
+                .orderBy(orderSpecifier)
                 .offset(page * size)
                 .limit(size)
                 .transform(groupBy(post.id).list(Projections.constructor(PostResponseDTO.class,
@@ -93,6 +99,63 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
     }
+
+    public Page<PostResponseDTO> customFindByHashtagNotDeletedPosts(List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size){
+
+        page = page > 0 ? page - 1 : 0;
+
+        long totalCount = query
+                .select(post.count())
+                .from(post)
+                .join(post.member, member)
+                .join(post.route, route)
+                .join(route.integratedRoute, integratedRoute)
+                .join(integratedRoute.uuidHashtags, uuidHashtags)
+                .join(uuidHashtags.hashtag, hashtag)
+                .on(hashtag.name.in(hashtagRequestDTOList.stream().map(HashtagRequestDTO::getName).collect(Collectors.toList())))
+                .fetchFirst();
+
+        OrderSpecifier orderSpecifier = post.id.desc();
+
+        if(order.equals("likes")){
+            orderSpecifier = post.likes.desc();
+        }
+
+        List<PostResponseDTO> postResponseDTOs = query
+                .from(post)
+                .join(post.member, member)
+                .join(post.route, route)
+                .join(route.integratedRoute, integratedRoute)
+                .join(integratedRoute.uuidHashtags, uuidHashtags)
+                .join(uuidHashtags.hashtag, hashtag)
+                .on(hashtag.name.in(hashtagRequestDTOList.stream().map(HashtagRequestDTO::getName).collect(Collectors.toList())))
+                .where(post.isDeleted.isFalse())
+                .orderBy(orderSpecifier)
+                .offset(page * size)
+                .limit(size)
+                .transform(groupBy(post.id).list(Projections.constructor(PostResponseDTO.class,
+                                post.id,
+                                post.title,
+                                post.content,
+                                post.isDeleted,
+                                post.createdAt,
+                                member.nickname,
+                                list(Projections.constructor(HashtagResponseDTO.class,
+                                        hashtag.id,
+                                        hashtag.name,
+                                        hashtag.isCity)
+                                )
+                        )
+                ));
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
+    }
+
+
+
+
 
     public Page<PostResponseDTO> customFindPosts(int page, int size){
 
@@ -278,7 +341,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         bookmark.markedAt,
                         reportPost.reportedAt,
                         route.id,
-                        member.id,
+                        member.nickname,
                                 list(Projections.constructor(HashtagResponseDTO.class,
                                         hashtag.id,
                                         hashtag.name,

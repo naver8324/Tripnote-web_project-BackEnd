@@ -51,7 +51,7 @@ public class PostDetailResponseDTO {
     private Long routeId;
 
     @NotNull
-    private Long memberId;
+    private String nickname;
 
     private List<HashtagResponseDTO> hashtagResponseDTOList;
 
