@@ -1,10 +1,10 @@
 package com.elice.tripnote.domain.integratedroute.repository;
 
 import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
-import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
 import com.elice.tripnote.domain.likebookmarkperiod.entity.QLikeBookmarkPeriod;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.QUUIDHashtag;
 import com.elice.tripnote.domain.route.entity.IntegratedRouteDTO;
+import com.elice.tripnote.domain.spot.constant.Region;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -23,7 +23,7 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
     private final QUUIDHashtag uh = new QUUIDHashtag("uh");
     private final QLikeBookmarkPeriod lbp = new QLikeBookmarkPeriod("lbp");
 
-    public List<IntegratedRouteDTO> findTopIntegratedRoutesByRegionAndHashtags(IntegratedRouteStatus region, List<Long> hashtags) {
+    public List<IntegratedRouteDTO> findTopIntegratedRoutesByRegionAndHashtags(Region region, List<Long> hashtags) {
         JPQLQuery<LocalDateTime> maxStartAtSubquery = JPAExpressions.select(lbp.startAt.max())
                 .from(lbp)
                 .where(lbp.integratedRoute.id.eq(ir.id));

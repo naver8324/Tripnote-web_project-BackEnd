@@ -3,6 +3,7 @@ package com.elice.tripnote.domain.post.controller;
 
 import com.elice.tripnote.domain.post.entity.ImageRequestDTO;
 import com.elice.tripnote.domain.post.entity.ImageResponseDTO;
+import com.elice.tripnote.global.annotation.MemberRole;
 import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class ImageController implements SwaggerImageController {
 
 
     @Override
+    @MemberRole
     @PutMapping("/api/member/images")
     public ResponseEntity<ImageResponseDTO> createPresignedImageUrl(@RequestBody ImageRequestDTO imageDTO){
 
@@ -87,6 +89,7 @@ public class ImageController implements SwaggerImageController {
     }
 
     @Override
+    @MemberRole
     @GetMapping("/api/member/images")
     public ResponseEntity<String> getImageUrl(@RequestParam(name = "key") String key){
 

@@ -3,6 +3,7 @@ package com.elice.tripnote.domain.post.controller;
 
 import com.elice.tripnote.domain.comment.entity.CommentRequestDTO;
 import com.elice.tripnote.domain.comment.entity.CommentResponseDTO;
+import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
@@ -18,6 +19,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 @Tag(name = "Post API", description = "게시글 API입니다.")
 public interface SwaggerPostController {
 
@@ -27,11 +30,25 @@ public interface SwaggerPostController {
             @ApiResponse(responseCode = "200", description = "게시글 조회에 성공하였습니다.",  content = @Content(mediaType = "application/json")),
     })
     @Parameters(value = {
+            @Parameter(name="order", description = "정렬 방식, likes라고 쓰면 좋아요순, 아닌 경우는 모두 최신순", example = "likes"),
             @Parameter(name="page", description = "페이지 번호", example = "5"),
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
 
-    ResponseEntity<Page<PostResponseDTO>> getPosts(int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPosts(String order, int page, int size);
+
+
+    @Operation(summary="해쉬태그 게시글 조회  - 모두", description= "특정 해쉬태그들을 가진 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "게시글 조회에 성공하였습니다.",  content = @Content(mediaType = "application/json")),
+    })
+    @Parameters(value = {
+            @Parameter(name="order", description = "정렬 방식, likes라고 쓰면 좋아요순, 아닌 경우는 모두 최신순", example = "likes"),
+            @Parameter(name="page", description = "페이지 번호", example = "5"),
+            @Parameter(name="size", description = "페이지 크기", example = "30")
+    })
+
+    ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size);
 
 
     @Operation(summary="게시글 조회 - 유저", description= "유저가 자기가 쓴 모든 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
