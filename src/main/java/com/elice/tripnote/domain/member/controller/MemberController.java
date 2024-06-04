@@ -2,13 +2,18 @@ package com.elice.tripnote.domain.member.controller;
 
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
+import com.elice.tripnote.domain.member.entity.MemberResponseDTO;
 import com.elice.tripnote.domain.member.entity.PasswordDTO;
 import com.elice.tripnote.domain.member.service.KakaoService;
 import com.elice.tripnote.domain.member.service.MemberService;
+import com.elice.tripnote.global.annotation.AdminRole;
 import com.elice.tripnote.global.annotation.MemberRole;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,8 +48,8 @@ public class MemberController implements SwaggerMemberController {
 
     @Override
     @GetMapping("/{email}")
-    public ResponseEntity<Member> getMemberByEmail(@PathVariable String email) {
-        return ResponseEntity.ok().body(memberService.getMemberByEmail(email));
+    public ResponseEntity<MemberResponseDTO> getMemberByEmail(@PathVariable String email) {
+        return ResponseEntity.ok().body(memberService.getMemberResponseDTOByEmail(email));
     }
 
     // 이메일 중복검사 (이메일이 이미 존재하면 true 반환, 사용가능하면 false 반환)
@@ -94,6 +99,13 @@ public class MemberController implements SwaggerMemberController {
     @GetMapping("/validate-password")
     public ResponseEntity<Boolean> validatePassword(@RequestHeader("Authorization") String jwt, @RequestBody PasswordDTO validatePasswordDTO) {
         return ResponseEntity.ok().body(memberService.validatePassword(validatePasswordDTO));
+    }
+
+    @Override
+    @AdminRole
+    @GetMapping("/admin/members")
+    public ResponseEntity<Page<MemberResponseDTO>> getMembers(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok().body(memberService.findMembers(pageable));
     }
 
 

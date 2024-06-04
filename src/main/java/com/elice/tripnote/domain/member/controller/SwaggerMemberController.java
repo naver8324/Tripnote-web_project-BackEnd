@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.member.controller;
 
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
+import com.elice.tripnote.domain.member.entity.MemberResponseDTO;
 import com.elice.tripnote.domain.member.entity.PasswordDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +34,7 @@ public interface SwaggerMemberController {
     @Operation(summary = "이메일로 회원 조회", description = "이메일을 기반으로 회원을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "회원 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Member.class)))
     @GetMapping("/{email}")
-    ResponseEntity<Member> getMemberByEmail(@PathVariable @Parameter(description = "이메일 주소", required = true) String email);
+    ResponseEntity<MemberResponseDTO> getMemberByEmail(@PathVariable @Parameter(description = "이메일 주소", required = true) String email);
 
 
     @Operation(summary = "이메일 중복 확인", description = "입력한 이메일이 이미 등록되어 있는지 확인합니다. (이메일이 이미 존재하면 true 반환, 사용가능하면 false 반환)")
@@ -122,4 +126,12 @@ public interface SwaggerMemberController {
     ResponseEntity<Boolean> validatePassword(@RequestHeader("Authorization") String jwt, @RequestBody @Parameter(description = "검증할 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO validatePasswordDTO);
 
 
+    @Operation(summary = "회원 목록 조회(관리자)", description = "전체 회원 목록을 페이징하여 조회합니다. (관리자 전용)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원 목록 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "관리자 권한이 없습니다.", content = @Content(mediaType = "application/json"))
+    })
+    @GetMapping("/admin/members")
+    public ResponseEntity<Page<MemberResponseDTO>> getMembers(@PageableDefault(size = 10, sort = "id") Pageable pageable);
 }
