@@ -1,6 +1,8 @@
 package com.elice.tripnote.domain.spot.entity;
 
-import com.elice.tripnote.domain.link.spotlike.entity.SpotLike;
+import com.elice.tripnote.domain.link.likeSpot.entity.LikeSpot;
+import com.elice.tripnote.domain.spot.constant.Region;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,36 +23,35 @@ public class Spot {
     private Long id;
 
     @Column(nullable = false)
-    private String location; //주소명?
-
-    @Column(nullable = false)
-    private int likes;//누가 좋아요 눌렀는지에 대해 모르므로 무한대로 증가할 수가 있다. => 유지보수
+    private String location;
 
     @Column(nullable = true)
     private String imageUrl;
 
+    @Enumerated(EnumType.STRING) // Enum 타입으로 지정
     @Column(nullable = false)
-    private String region; //지역
+    private Region region; // 변경: String -> Region 열거형으로 타입 변경
 
+    @Column(nullable = false)
+    private String address;
+
+    @Column(nullable = false)
+    private double lat;
+
+    @Column(nullable = false)
+    private double lng;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "spot")
-    private List<SpotLike> spotLikes = new ArrayList<>();
+    private List<LikeSpot> likespot = new ArrayList<>();
 
     @Builder
-    public Spot(String location, int likes, String imageUrl, String region){
+    public Spot(String location, String imageUrl, Region region, String address, double lat, double lng){
         this.location=location;
-        this.likes=likes;
         this.imageUrl=imageUrl;
         this.region=region;
+        this.address=address;
+        this.lat=lat;
+        this.lng=lng;
     }
-
-    public void increaseLikes(){
-        this.likes++;
-    }
-
-    public void decreaseLikes() {
-        if (this.likes > 0) {
-            this.likes--;
-        }
-    }
-
 }
