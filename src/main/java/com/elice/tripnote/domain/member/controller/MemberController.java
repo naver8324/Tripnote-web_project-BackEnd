@@ -96,11 +96,12 @@ public class MemberController implements SwaggerMemberController {
     // (로그인중) (내정보 변경 시) 비밀번호 검증
     @Override
     @MemberRole
-    @GetMapping("/validate-password")
+    @PostMapping("/validate-password")
     public ResponseEntity<Boolean> validatePassword(@RequestBody PasswordDTO validatePasswordDTO) {
         return ResponseEntity.ok().body(memberService.validatePassword(validatePasswordDTO));
     }
 
+    // 멤버 전체 조회
     @Override
     @AdminRole
     @GetMapping("/admin/members")
