@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.post.service;
 
 
 import com.elice.tripnote.domain.comment.service.CommentService;
+import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.link.bookmark.entity.Bookmark;
 import com.elice.tripnote.domain.link.bookmark.repository.BookmarkRepository;
 import com.elice.tripnote.domain.link.likePost.entity.LikePost;
@@ -25,6 +26,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +53,12 @@ public class PostService {
 
         return postRepository.customFindNotDeletedPosts(order, page, size);
     }
+
+    public Page<PostResponseDTO> getPostsByHashtag(List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size){
+
+        return postRepository.customFindByHashtagNotDeletedPosts(hashtagRequestDTOList, order, page, size);
+    }
+
 
     // 한 유저가 쓴 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
