@@ -51,8 +51,9 @@ public class MailController implements SwaggerMailController {
     // 비밀번호 재설정 요청
     @Override
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@RequestBody @Valid EmailCheckDTO passwordResetRequestDTO) {
-        mailService.resetPassword(passwordResetRequestDTO.getEmail(), passwordResetRequestDTO.getAuthNum());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> resetPassword(@RequestBody @Valid EmailCheckDTO passwordResetRequestDTO) {
+        String implyPassword = mailService.resetPassword(passwordResetRequestDTO.getEmail(), passwordResetRequestDTO.getAuthNum());
+        return ResponseEntity.ok().body(implyPassword);
+//        return ResponseEntity.ok().build();
     }
 }

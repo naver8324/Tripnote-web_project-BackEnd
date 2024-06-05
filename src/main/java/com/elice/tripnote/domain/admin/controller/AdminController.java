@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-public class AdminController implements SwaggerAdminController{
+public class    AdminController implements SwaggerAdminController{
 
     private final MemberService memberService;
     private final AdminService adminService;
@@ -27,6 +27,8 @@ public class AdminController implements SwaggerAdminController{
         return ResponseEntity.ok().body(memberService.findMembers(pageable));
     }
 
+    // 멤버 삭제
+    @Override
     @AdminRole
     @DeleteMapping("/delete-member")
     public ResponseEntity<Void> deleteMember(@RequestParam String email) {
