@@ -27,6 +27,7 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "해당 실행을 수행할 권한이 없습니다."),
     DELETED_BY_USER(HttpStatus.UNAUTHORIZED, "탈퇴한 아이디입니다."),
     DELETED_BY_ADMIN(HttpStatus.UNAUTHORIZED, "관리자에 의해 탈퇴된 아이디입니다."),
+    INVALID_AUTH_CODE(HttpStatus.UNAUTHORIZED, "인증 코드가 올바르지 않습니다."),
 
     //403
     UNAUTHORIZED_DELETE(HttpStatus.FORBIDDEN, "삭제할 권한이 없습니다."),
