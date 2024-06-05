@@ -57,7 +57,6 @@ public class RouteService {
     private final HashtagRepository hashtagRepository;
     private final MemberRepository memberRepository;
     private final SpotRepository spotRepository;
-    private final PostRepository postRepository;
     private final BookmarkRepository bookmarkRepository;
     private final LikePostRepository likePostRepository;
 
@@ -67,15 +66,14 @@ public class RouteService {
         //여행지 id 리스트 기반으로 uuid 만들기
         String uuid = generateUUID(requestDto.getSpotIds());
 
-        //TODO: List<Long> spotIds의 지역 알아내서 모두 같은 지역이라면 해당 값을 region에 넣기
+        Region region = findRegionOfSpots(requestDto.getSpotIds());
 
         // 만들어진 uuid 이용해서 integrated_route 객체 생성
         IntegratedRoute integratedRoute = integratedRouteRepository.findByIntegratedRoutes(uuid)
                 .orElseGet(() -> {
                     IntegratedRoute newRoute = IntegratedRoute.builder()
                             .integratedRoutes(uuid)
-                            //TODO: 나중에 여행지 주소가 어떻게 전달되는지 확인 후, 수정하기
-                            .region(Region.MULTI_REGION)
+                            .region(region)
                             .build();
                     return integratedRouteRepository.save(newRoute);
                 });
@@ -129,6 +127,7 @@ public class RouteService {
                 .routeStatus(RouteStatus.PUBLIC)
                 // expense 값이 안들어왔다면 0으로 초기화
                 .expense(requestDto.getExpense() != 0 ? requestDto.getExpense() : 0)
+                .name(requestDto.getName())
                 .build();
         route = routeRepository.save(route);
 
@@ -150,6 +149,14 @@ public class RouteService {
         }
 
         return route.getId();
+    }
+
+    private Region findRegionOfSpots(List<Long> spotIds){
+        Region region = spotRepository.getRegionByspotId(spotIds.get(0)).getRegion();
+        for (Long id : spotIds) {
+            if(region != spotRepository.getRegionByspotId(id).getRegion()) return Region.MULTI_REGION;
+        }
+        return region;
     }
 
 
@@ -281,6 +288,7 @@ public class RouteService {
         return recommendedRouteResponseDTOS;
     }
 
+    // 게시물에서 경로 표현할 때 사용?
     public List<SpotResponseDTO> getSpots(Long routeId) {
         return spotRepository.findByRouteIds(routeId);
         /*
@@ -290,7 +298,6 @@ public class RouteService {
         where rs.route_id=:integratedRouteId
          */
 
-        //TODO: spot 엔티티 업데이트 이후에 하기
         /*
         select s.location, s.경로, s.위도
         from spot s
@@ -317,19 +324,19 @@ public class RouteService {
             join route
             on post.route_id = route.id and route.integrated_route_id = :integratedRouteId
              */
-       // int like = postRepository.getLikeCount(integratedRouteId);
+    // int like = postRepository.getLikeCount(integratedRouteId);
 
             /*
             select count(*) from bookmark b
             join route r on r.id = b.route_id
             where r.id = :integratedRouteId
              */
-       // int bookmark = bookmarkRepository.getBookmarkCount(integratedRouteId);
+    // int bookmark = bookmarkRepository.getBookmarkCount(integratedRouteId);
 
-      //  return LikeBookmarkResponseDTO.builder()
-       //         .likes(like)
-      //          .bookmark(bookmark)
-       //         .build();
+    //  return LikeBookmarkResponseDTO.builder()
+    //         .likes(like)
+    //          .bookmark(bookmark)
+    //         .build();
     //}
 
     public List<RecommendedRouteResponseDTO> getRoutesThroughSpot(List<Long> hashtags, List<Long> spots) {
@@ -389,6 +396,15 @@ public class RouteService {
                 .likedAt(LocalDateTime.now())
                 .build();
         likePostRepository.save(likePost);
+
+        //기간별 좋아요 테이블에도 추가해야함.
+        // 해당 통합 경로 id가 있는 기간별 객체 가져오기
+        //TODO: 가장 최신의 객체 가져오기
+        LikeBookmarkPeriod likeBookmarkPeriod = likeBookPeriodRepository.findByIntegratedRouteId(integratedId)
+                .orElseThrow(()->{
+            throw new CustomException(ErrorCode.NO_LIKE_BOOKMARK_PERIOD);
+        });
+
     }
 
     @Transactional

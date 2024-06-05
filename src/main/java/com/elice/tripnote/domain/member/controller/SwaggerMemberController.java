@@ -121,7 +121,7 @@ public interface SwaggerMemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
     })
     @Parameters({
-            @Parameter(name = "Authorization", description = "카카오에서 받아오는 엑세스 토큰을 넣어주세요.", in = ParameterIn.HEADER)
+            @Parameter(name = "code", description = "카카오에서 받아오는 코드를 넣어주세요.")
     })
     ResponseEntity<Void> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws IOException;
 

@@ -44,6 +44,7 @@ public enum ErrorCode {
     NO_INTEGRATED_ROUTE_STATUS(HttpStatus.NOT_FOUND, "해당 지역은 존재하지 않습니다."),
     NO_LANDMARK(HttpStatus.NOT_FOUND, "존재하지 않는 랜드마크입니다."),
     NO_REGION(HttpStatus.NOT_FOUND, "존재하지 않는 지역입니다."),
+    NO_LIKE_BOOKMARK_PERIOD(HttpStatus.NOT_FOUND, "해당하는 기간별 좋아요 북마크 객체가 존재하지 않습니다."),
 
     // 409
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),

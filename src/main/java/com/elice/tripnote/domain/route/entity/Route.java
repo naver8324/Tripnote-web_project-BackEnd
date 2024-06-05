@@ -37,11 +37,12 @@ public class Route {
     private String name;
 
     @Builder
-    public Route(Member member, IntegratedRoute integratedRoute, RouteStatus routeStatus, int expense) {
+    public Route(Member member, IntegratedRoute integratedRoute, RouteStatus routeStatus, int expense, String name) {
         this.integratedRoute = integratedRoute;
         this.member = member;
         this.routeStatus = routeStatus;
         this.expense = expense;
+        this.name=name;
     }
 
     public void updateStatus(RouteStatus status) {

@@ -6,6 +6,7 @@ import com.elice.tripnote.domain.route.entity.QRoute;
 import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
 import com.elice.tripnote.domain.spot.entity.QSpot;
 import com.elice.tripnote.domain.spot.entity.Spot;
+import com.elice.tripnote.domain.spot.entity.SpotRegionDTO;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -25,19 +26,38 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
     private final QRoute route = new QRoute("r");
     private final QIntegratedRoute integratedRoute =new QIntegratedRoute("ir");
 
-    public List<SpotResponseDTO> findByRouteIds(Long integratedRouteId){
+    public List<SpotResponseDTO> findByRouteIds(Long routeId){
+         /*
+        select s.location, s.경로, s.위도
+        from spot s
+        join route_spot rs on rs.spot_id=s.id
+        where rs.route_id=:routeId
+        order by rs.sequence asc
+         */
 
         return query
                 .select(Projections.constructor(SpotResponseDTO.class,
-                        spot.id,
                         spot.location,
-                        spot.region
+                        spot.lat,
+                        spot.lng
                 ))
                 .from(spot)
                 .join(routeSpot).on(routeSpot.spot.id.eq(spot.id))
-                .where(routeSpot.route.id.eq(integratedRouteId))
+                .where(routeSpot.route.id.eq(routeId))
+                .orderBy(routeSpot.sequence.asc())
                 .fetch();
 
+
+    }
+
+    public SpotRegionDTO getRegionByspotId(Long spotId){
+        return query
+                .select(Projections.constructor(SpotRegionDTO.class,
+                        spot.region
+                ))
+                .from(spot)
+                .where(spot.id.eq(spotId))
+                .fetchOne();
 
     }
 
