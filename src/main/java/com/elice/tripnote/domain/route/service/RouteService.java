@@ -30,6 +30,10 @@ import com.elice.tripnote.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -455,7 +459,7 @@ public class RouteService {
         return routeDetailResponseDTOS;
     }
 
-    public List<RouteDetailResponseDTO> findBookmark() {
+    public Page<RouteDetailResponseDTO> findBookmark(Pageable pageable) {
         Member member = getMemberFromJwt();
         /*
         select r.id, r.name
@@ -463,28 +467,28 @@ public class RouteService {
         join bookmark b on b.route_id=r.id
         where member_id=:memberId
          */
-        List<RouteIdNameDTO> routeIdNameDTOS = routeRepository.findMarkedRoutesByMemberId(member.getId());
+        Page<RouteIdNameDTO> routeIdNameDTOS = routeRepository.findMarkedRoutesByMemberId(member.getId(), pageable);
 
-        List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
-        for (RouteIdNameDTO dto : routeIdNameDTOS) {
-            routeDetailResponseDTOS.add(RouteDetailResponseDTO.builder()
-                    .routeId(dto.getRouteId())
-                    .name(dto.getName())
-                    .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
-                    .build());
-        }
-        return routeDetailResponseDTOS;
+        List<RouteDetailResponseDTO> routeDetailResponseDTOS = routeIdNameDTOS.getContent().stream()
+                .map(dto -> RouteDetailResponseDTO.builder()
+                        .routeId(dto.getRouteId())
+                        .name(dto.getName())
+                        .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
+                        .build())
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(routeDetailResponseDTOS, pageable, routeIdNameDTOS.getTotalElements());
     }
 
 
-    public List<RouteDetailResponseDTO> findMyRoute() {
+    public Page<RouteDetailResponseDTO> findMyRoute(Pageable pageable) {
         Member member = getMemberFromJwt();
         /*
         select r.id, r.name
         from Route r
         where member_id=:memberId
          */
-        List<RouteIdNameDTO> routeIdNameDTOS = routeRepository.findRoutesByMemberId(member.getId());
+        Page<RouteIdNameDTO> routeIdNameDTOS = routeRepository.findRoutesByMemberId(member.getId(), pageable);
 
         List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
         for (RouteIdNameDTO dto : routeIdNameDTOS) {
@@ -494,7 +498,7 @@ public class RouteService {
                     .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
                     .build());
         }
-        return routeDetailResponseDTOS;
+        return new PageImpl<>(routeDetailResponseDTOS, pageable, routeIdNameDTOS.getTotalElements());
     }
 
     private Member getMemberFromJwt() {

@@ -6,6 +6,9 @@ import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.global.annotation.MemberRole;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -205,15 +208,16 @@ public class RouteController implements SwaggerRouteController {
 //         */
 //    }
 
-
     /**
      * 자신이 북마크한 경로 리스트
      * @return [경로 id, 경로 이름, 해당되는 경로의 여행지 리스트] 리스트 리턴
      */
     @MemberRole
     @GetMapping("/member/routes/bookmark")
-    public ResponseEntity<List<RouteDetailResponseDTO>> findBookmark() {
-        return ResponseEntity.ok(routeService.findBookmark());
+    public ResponseEntity<Page<RouteDetailResponseDTO>> findBookmark(@PageableDefault(page = 0, size = 3) Pageable pageable) {
+        //pageable 사용법
+        //request param으로 page, size 조절 가능
+        return ResponseEntity.ok(routeService.findBookmark(pageable));
         /*
         route {
             routeId:
@@ -231,7 +235,9 @@ public class RouteController implements SwaggerRouteController {
      */
     @MemberRole
     @GetMapping("/member/routes")
-    public ResponseEntity<List<RouteDetailResponseDTO>> findMyRoute() {
+    public ResponseEntity<Page<RouteDetailResponseDTO>> findMyRoute(@PageableDefault(page = 0, size = 3) Pageable pageable) {
+        //pageable 사용법
+        //request param으로 page, size 조절 가능
         /*
         route {
             routeId:
@@ -242,7 +248,7 @@ public class RouteController implements SwaggerRouteController {
         }
          */
         // 경로 이름 때문에 여기서 통합 경로 리턴하는 건 안될듯
-        return ResponseEntity.ok(routeService.findMyRoute());
+        return ResponseEntity.ok(routeService.findMyRoute(pageable));
     }
 
 
