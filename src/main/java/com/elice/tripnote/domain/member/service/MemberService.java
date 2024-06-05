@@ -3,14 +3,12 @@ package com.elice.tripnote.domain.member.service;
 import com.elice.tripnote.domain.admin.entity.Admin;
 import com.elice.tripnote.domain.admin.repository.AdminRepository;
 import com.elice.tripnote.domain.member.entity.*;
-import com.elice.tripnote.domain.member.exception.CustomDuplicateException;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
-import com.elice.tripnote.domain.post.exception.NoSuchUserException;
+import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -45,13 +42,13 @@ public class MemberService implements UserDetailsService {
         // 이메일 중복 검사
         if (memberRepository.existsByEmail(email)) {
             log.error("에러 발생: {}", ErrorCode.DUPLICATE_EMAIL);
-            throw new CustomDuplicateException(ErrorCode.DUPLICATE_EMAIL);
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
 
         // 닉네임 중복 검사
         if (memberRepository.existsByNickname(nickname)) {
             log.error("에러 발생: {}", ErrorCode.DUPLICATE_NICKNAME);
-            throw new CustomDuplicateException(ErrorCode.DUPLICATE_NICKNAME);
+            throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
         }
 
         Member member = Member.builder()
@@ -122,30 +119,33 @@ public class MemberService implements UserDetailsService {
 
 
 
-    // 닉네임 변경 서비스
+    // 프로필 업데이트 서비스
     @Transactional
-    public void updateNickname(String newNickname) {
+    public void updateProfile(ProfileUpdateDTO profileUpdateDTO) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Member> memberOptional = memberRepository.findByEmail(email);
 
-        // 바꿀 닉네임 중복 검사
-        if (memberRepository.existsByNickname(newNickname)) {
-            log.error("에러 발생: {}", ErrorCode.DUPLICATE_NICKNAME);
-            throw new CustomDuplicateException(ErrorCode.DUPLICATE_NICKNAME);
+        if (memberOptional.isPresent()) {
+            Member member = memberOptional.get();
+
+            if (profileUpdateDTO.getNewNickname() != null) {
+                // 바꿀 닉네임 중복 검사
+                if (memberRepository.existsByNickname(profileUpdateDTO.getNewNickname())) {
+                    log.error("에러 발생: {}", ErrorCode.DUPLICATE_NICKNAME);
+                    throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
+                }
+                member.updateNickname(profileUpdateDTO.getNewNickname());
+            }
+
+            if (profileUpdateDTO.getNewPassword() != null) {
+                member.updatePassword(bCryptPasswordEncoder.encode(profileUpdateDTO.getNewPassword()));
+            }
+
+            memberRepository.save(member);
+        } else {
+            throw new CustomException(ErrorCode.NO_MEMBER);
         }
-
-        memberRepository.updateNickname(email, newNickname);
     }
-
-
-    // 비밀번호 변경 서비스
-    @Transactional
-    public void updatePassword(PasswordDTO newPasswordDTO) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info("newPW : "+ newPasswordDTO.getPassword());
-
-        memberRepository.updatePassword(email, bCryptPasswordEncoder.encode(newPasswordDTO.getPassword()));
-    }
-
 
     // (회원이) 회원 삭제
     @Transactional
