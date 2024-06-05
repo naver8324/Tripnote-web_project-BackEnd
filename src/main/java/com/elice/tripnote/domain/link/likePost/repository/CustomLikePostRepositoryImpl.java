@@ -1,31 +1,27 @@
-package com.elice.tripnote.domain.link.bookmark.repository;
+package com.elice.tripnote.domain.link.likePost.repository;
 
 import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
-import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
+import com.elice.tripnote.domain.likebookmarkperiod.entity.QLikeBookmarkPeriod;
+import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
+import com.elice.tripnote.domain.link.uuidhashtag.entity.QUUIDHashtag;
 import com.elice.tripnote.domain.route.entity.QRoute;
+import com.elice.tripnote.domain.spot.constant.Region;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
-public class CustomBookmarkRepositoryImpl implements CustomBookmarkRepository{
+public class CustomLikePostRepositoryImpl implements CustomLikePostRepository {
     private final JPAQueryFactory query;
-    private final QBookmark bookmark = new QBookmark ("b");
-    private final QRoute route = new QRoute("r");
     private final QIntegratedRoute integratedRoute = new QIntegratedRoute("ir");
-
-    public int getBookmarkCount(Long integratedRouteId){
-        Long count = query
-                .select(bookmark.count())
-                .from(bookmark)
-                .join(route).on(route.id.eq(bookmark.route.id))
-                .where(route.id.eq(integratedRouteId))
-                .fetchOne();
-        return count != null ? count.intValue() : 0;
-    }
+    private final QRoute route = new QRoute("r");
+    private final QLikePost likePost = new QLikePost("lp");
 
     @Override
     public boolean existsByMemberIdAndIntegratedRouteId(Long memberId, Long integratedId) {
@@ -36,9 +32,9 @@ public class CustomBookmarkRepositoryImpl implements CustomBookmarkRepository{
                 .where(integratedRoute.id.eq(integratedId));
 
         return query
-                .select(bookmark.id)
-                .from(bookmark)
-                .join(route).on(bookmark.route.id.eq(route.id))
+                .select(likePost.id)
+                .from(likePost)
+                .join(route).on(likePost.route.id.eq(route.id))
                 .where(route.id.eq(minRouteId).and(route.member.id.eq(memberId)))
                 .fetchCount() > 0;
 
@@ -53,20 +49,20 @@ public class CustomBookmarkRepositoryImpl implements CustomBookmarkRepository{
             join integrated_route ir on ir.id=r.integrated_id
         )
          */
+
     }
 
     @Override
     public void deleteByMemberIdAndIntegratedRouteId(Long memberId, Long integratedId) {
-
         JPQLQuery<Long> minRouteId = JPAExpressions
                 .select(route.id.min())
                 .from(route)
                 .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
                 .where(integratedRoute.id.eq(integratedId));
 
-        query.delete(bookmark)
-                .where(bookmark.route.id.eq(minRouteId)
-                        .and(bookmark.route.member.id.eq(memberId)))
+        query.delete(likePost)
+                .where(likePost.route.id.eq(minRouteId)
+                        .and(likePost.route.member.id.eq(memberId)))
                 .execute();
         /*
         delete from like_post lp
@@ -74,5 +70,6 @@ public class CustomBookmarkRepositoryImpl implements CustomBookmarkRepository{
         where route.member_id=:memberId and route.id=:minRouteId
          */
     }
+
 
 }

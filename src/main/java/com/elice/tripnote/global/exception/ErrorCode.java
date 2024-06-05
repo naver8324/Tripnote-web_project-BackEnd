@@ -28,6 +28,11 @@ public enum ErrorCode {
     DELETED_BY_USER(HttpStatus.UNAUTHORIZED, "탈퇴한 아이디입니다."),
     DELETED_BY_ADMIN(HttpStatus.UNAUTHORIZED, "관리자에 의해 탈퇴된 아이디입니다."),
 
+    //403
+    UNAUTHORIZED_DELETE(HttpStatus.FORBIDDEN, "삭제할 권한이 없습니다."),
+    UNAUTHORIZED_UPDATE_STATUS(HttpStatus.FORBIDDEN, "상태를 변경할 권한이 없습니다."),
+    UNAUTHORIZED_UPDATE_NAME(HttpStatus.FORBIDDEN, "이름을 변경할 권한이 없습니다."),
+
     // 404
     NO_POST(HttpStatus.NOT_FOUND, "해당하는 게시글은 존재하지 않습니다."),
     NO_MEMBER(HttpStatus.NOT_FOUND, "해당하는 유저는 존재하지 않습니다."),
@@ -39,6 +44,7 @@ public enum ErrorCode {
     NO_INTEGRATED_ROUTE_STATUS(HttpStatus.NOT_FOUND, "해당 지역은 존재하지 않습니다."),
     NO_LANDMARK(HttpStatus.NOT_FOUND, "존재하지 않는 랜드마크입니다."),
     NO_REGION(HttpStatus.NOT_FOUND, "존재하지 않는 지역입니다."),
+    NO_LIKE_BOOKMARK_PERIOD(HttpStatus.NOT_FOUND, "해당하는 기간별 좋아요 북마크 객체가 존재하지 않습니다."),
 
     // 409
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
