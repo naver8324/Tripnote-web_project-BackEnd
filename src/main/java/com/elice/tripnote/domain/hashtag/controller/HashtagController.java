@@ -23,7 +23,8 @@ public class HashtagController implements SwaggerHashtagController{
 
     //전체 해시태그 조회
     @Override
-    @GetMapping("/hashtags")
+    @AdminRole
+    @GetMapping("/admin/hashtags")
     public ResponseEntity<List<HashtagDTO>> getHashtags(){
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -36,12 +37,11 @@ public class HashtagController implements SwaggerHashtagController{
     //프론트에서 isCity의 값을 받아온다
     @Override
     @GetMapping("/hashtags/isCity")
-    public ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityTrue(@RequestParam(name = "isCity") boolean isCity,
-                                                                            @RequestParam(name = "isDelete") boolean isDelete){
+    public ResponseEntity<List<HashtagResponseDTO>> getHashtagsByIsCityTrue(@RequestParam(name = "isCity") boolean isCity){
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(hashtagRepository.findByIsCityAndIsDelete(isCity, isDelete));
+                .body(hashtagRepository.findByIsCityAndIsDelete(isCity, false));
     }
 
     //해시태그 생성
