@@ -77,15 +77,17 @@ public class PostController implements SwaggerPostController {
     @Override
     @MemberRole
     @PostMapping("/member/posts")
-    public ResponseEntity<PostResponseDTO> savePost(@RequestBody PostRequestDTO postDTO, @RequestParam(name="routeId") Long routeId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(postService.savePost(postDTO, routeId));
+    public ResponseEntity<PostDetailResponseDTO> savePost(@RequestBody PostRequestDTO postDTO, @RequestParam(name="routeId") Long routeId) {
+        Long postId = postService.savePost(postDTO, routeId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(postService.getPost(postId));
     }
 
     @Override
     @MemberRole
     @PatchMapping("/member/posts/{postId}")
-    public ResponseEntity<PostResponseDTO> updatePost(@RequestBody PostRequestDTO postDTO, @PathVariable(name="postId") Long postId) {
-        return ResponseEntity.status(HttpStatus.OK).body(postService.updatePost(postDTO, postId));
+    public ResponseEntity<PostDetailResponseDTO> updatePost(@RequestBody PostRequestDTO postDTO, @PathVariable(name="postId") Long postId) {
+        postService.updatePost(postDTO, postId);
+        return ResponseEntity.status(HttpStatus.OK).body(postService.getPost(postId));
     }
 
     @Override

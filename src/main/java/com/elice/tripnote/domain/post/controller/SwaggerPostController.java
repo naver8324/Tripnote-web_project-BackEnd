@@ -121,7 +121,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="routeId", description = "경로 번호", example = "1126"),
     })
-    ResponseEntity<PostResponseDTO> savePost(PostRequestDTO postDTO, Long routeId);
+    ResponseEntity<PostDetailResponseDTO> savePost(PostRequestDTO postDTO, Long routeId);
 
 
 
@@ -134,7 +134,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1356"),
     })
-    ResponseEntity<PostResponseDTO> updatePost(PostRequestDTO postDTO, Long postId);
+    ResponseEntity<PostDetailResponseDTO> updatePost(PostRequestDTO postDTO, Long postId);
 
 
 
