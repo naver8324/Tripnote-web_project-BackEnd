@@ -40,7 +40,7 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
                 )
                 .groupBy(ir.id)
                 //.having(uh.hashtag.id.countDistinct().eq((long) hashtags.size()))
-                .orderBy(lbp.likes.desc())
+                .orderBy(lbp.likes.sum().desc())
                 .limit(5)
                 .fetch();
         /*
@@ -125,8 +125,8 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
                                 .and(lbp.startAt.eq(maxStartAtSubquery))
                 )
                 .groupBy(ir.id)
-                .orderBy(lbp.likes.desc())
-                .limit(5)
+                .orderBy(lbp.likes.sum().desc())
+                .limit(3)
                 .fetch();
 
 

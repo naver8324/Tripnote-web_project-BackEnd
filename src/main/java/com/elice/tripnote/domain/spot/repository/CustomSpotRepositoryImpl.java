@@ -72,12 +72,12 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
     }
 
     public List<Spot> findSpotsByIntegratedRouteIdInOrder(Long integratedRouteId){
+        // integratedRouteId와 같은 통합 경로 id를 가지는 아무 routeId 구하기
         JPQLQuery<Long> subquery = JPAExpressions
-                .select(route.id)
+                .select(route.id.min())
                 .from(route)
                 .join(integratedRoute).on(route.integratedRoute.id.eq(integratedRoute.id))
-                .where(route.integratedRoute.id.eq(integratedRouteId))
-                .limit(1);
+                .where(route.integratedRoute.id.eq(integratedRouteId));
 
         return query
                 .select(spot)
@@ -87,6 +87,6 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
                 .where(routeSpot.route.id.eq(subquery))
                 .orderBy(routeSpot.sequence.asc())
                 .fetch();
-
     }
+
 }
