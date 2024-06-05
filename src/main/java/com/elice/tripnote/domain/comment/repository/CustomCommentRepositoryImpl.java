@@ -27,11 +27,39 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
     private final QMember member = QMember.member;
 
 
-    public Page<CommentResponseDTO> customFindNotDeletedCommentsByPostId(Long postId, int page, int size){
+
+
+
+
+
+    public CommentResponseDTO customFindNotDeletedComment(Long commentId){
+
+
+
+        CommentResponseDTO commentResponseDTO = query
+                .select(Projections.constructor(CommentResponseDTO.class,
+                        member.nickname,
+                        comment.content,
+                        comment.createdAt,
+                        comment.report,
+                        comment.isDeleted
+                ))
+                .from(comment)
+                .join(comment.member, member)
+                .where(comment.id.eq(commentId)
+                        .and(comment.isDeleted.isFalse()))
+                .fetchFirst();
+
+        return commentResponseDTO;
+    }
+
+
+
+    public Page<CommentResponseDTO> customFindNotDeletedCommentsByPostId(Long postId, int page, int size) {
 
         page = page > 0 ? page - 1 : 0;
 
-        Long totalCount =(long) query
+        Long totalCount = (long) query
                 .from(comment)
                 .where(comment.post.id.eq(postId)
                         .and(comment.isDeleted.isFalse()))
@@ -40,11 +68,11 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         List<CommentResponseDTO> commentResponseDTOs = query
                 .select(Projections.constructor(CommentResponseDTO.class,
-                                member.nickname,
-                                comment.content,
-                                comment.createdAt,
-                                comment.report,
-                                comment.isDeleted
+                        member.nickname,
+                        comment.content,
+                        comment.createdAt,
+                        comment.report,
+                        comment.isDeleted
                 ))
                 .from(comment)
                 .join(comment.member, member)

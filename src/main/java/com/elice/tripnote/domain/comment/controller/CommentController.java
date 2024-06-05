@@ -45,6 +45,7 @@ public class CommentController implements SwaggerCommentController {
     @MemberRole
     @PostMapping("/member/comments")
     public ResponseEntity<CommentResponseDTO> saveComment(@RequestBody CommentRequestDTO commentDTO, @RequestParam(name="postId") Long postId) {
+        commentService.saveComment(commentDTO, postId);
         return ResponseEntity.status(HttpStatus.CREATED).body(commentService.saveComment(commentDTO, postId));
     }
 
