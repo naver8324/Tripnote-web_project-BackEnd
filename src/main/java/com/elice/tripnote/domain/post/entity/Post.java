@@ -77,17 +77,6 @@ public class Post extends BaseTimeEntity {
     private List<Bookmark> bookmarks = new ArrayList<>();
 
 
-    public PostResponseDTO toDTO() {
-
-        return PostResponseDTO.builder()
-                .id(id)
-                .title(title)
-                .content(content)
-                .isDeleted(isDeleted)
-                .build();
-
-    }
-
     public void update(PostRequestDTO postDTO) {
         title = postDTO.getTitle();
         content = postDTO.getContent();

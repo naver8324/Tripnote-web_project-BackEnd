@@ -129,7 +129,7 @@ public class PostService {
     // 게시글을 저장하는 메서드입니다.
     // TO DO: presigned URL 사용 예정.
     @Transactional
-    public PostResponseDTO savePost(PostRequestDTO postDTO, Long routeId){
+    public Long savePost(PostRequestDTO postDTO, Long routeId){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
@@ -149,11 +149,11 @@ public class PostService {
 
 //        post를 먼저 저장하고 add를 저장해야 EntityNotFoundException이 발생하지 않는다.
 
-        postRepository.save(post);
+        Post newPost = postRepository.save(post);
 //        route.getPost().add(post);
-        member.getPosts().add(post);
+        member.getPosts().add(newPost);
 
-        return post.toDTO();
+        return newPost.getId();
 
 
     }
@@ -162,7 +162,7 @@ public class PostService {
 
     // 게시글을 수정하는 메서드입니다.
     @Transactional
-    public PostResponseDTO updatePost(PostRequestDTO postDTO, Long postId){
+    public void updatePost(PostRequestDTO postDTO, Long postId){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -173,7 +173,6 @@ public class PostService {
 
         post.update(postDTO);
 
-        return post.toDTO();
     }
 
 
