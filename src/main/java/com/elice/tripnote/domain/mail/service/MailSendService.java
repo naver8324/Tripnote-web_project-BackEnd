@@ -1,23 +1,30 @@
 package com.elice.tripnote.domain.mail.service;
 
+import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class MailSendService {
 
-    @Autowired
-    private JavaMailSender mailSender;
-    @Autowired
-    private  RedisUtil redisUtil;
+    private final JavaMailSender mailSender;
+    private final RedisUtil redisUtil;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final MemberRepository memberRepository;
     private int authNumber;
 
 
@@ -41,7 +48,7 @@ public class MailSendService {
     }
 
 
-    public void joinEmail(String toMail) {
+    public String joinEmail(String toMail) {
         makeRandomNumber();
         String setFrom = "tripnote10@gmail.com";
         String title = "Tripnote 회원가입 인증코드가 도착했습니다."; // 이메일 제목
@@ -53,6 +60,8 @@ public class MailSendService {
         mailSend(setFrom, toMail, title, content);
 
         redisUtil.setDataExpire(String.valueOf(authNumber), toMail, 180); // 유효시간 3분으로 설정
+        log.info("인증 코드 : " + authNumber);
+        return Integer.toString(authNumber);
     }
 
     //이메일을 전송합니다.
@@ -72,4 +81,41 @@ public class MailSendService {
 
     }
 
+    // 비밀번호 재설정 로직
+    @Transactional
+    public void resetPassword(String email, String authNum) {
+        // 인증 번호 확인
+        if (!CheckAuthNum(email, authNum)) {
+            throw new CustomException(ErrorCode.INVALID_AUTH_CODE);
+        }
+
+        // 이메일 존재 여부 확인
+        if (!memberRepository.existsByEmail(email)) {
+            throw new CustomException(ErrorCode.NO_MEMBER);
+        }
+
+        // 임시 비밀번호 생성
+        String tempPassword = generateTempPassword();
+        String newPassword = bCryptPasswordEncoder.encode(tempPassword);
+
+        // DB에 임시 비밀번호 업데이트
+        memberRepository.updatePassword(email, newPassword);
+
+        // 임시 비밀번호 이메일 전송
+        String setFrom = "tripnote10@gmail.com";
+        String title = "Tripnote 임시 비밀번호가 발급되었습니다.";
+        String content =
+                "Tripnote를 방문해주셔서 감사합니다." +
+                        "<br><br>" +
+                        "임시 비밀번호는 <b>" + tempPassword + "</b> 입니다." +
+                        "<br>" +
+                        "로그인 후 비밀번호를 변경해 주세요.";
+        mailSend(setFrom, email, title, content);
+    }
+
+    // 임시 비밀번호 생성 (UUID 사용)
+    private String generateTempPassword() {
+        String tempPassword = UUID.randomUUID().toString().replace("-", "");
+        return tempPassword.substring(0, 10);
+    }
 }

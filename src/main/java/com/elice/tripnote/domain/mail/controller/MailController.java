@@ -23,12 +23,22 @@ public class MailController implements SwaggerMailController {
     private final MailSendService mailService;
 
     // 메일 인증 코드 전송
+//    @Override
+//    @PostMapping("/sendmail")
+//    public ResponseEntity<Void> mailSend(@RequestBody @Valid EmailRequestDTO emailDto) {
+//        log.info("이메일 인증 이메일 :" + emailDto.getEmail());
+//        mailService.joinEmail(emailDto.getEmail());
+//        return ResponseEntity.ok().build();
+//    }
+
+    //TODO: (프론트 테스트 끝나면 위에 코드 주석해제 후 현재 메소드 지우기, joinEmail 메소드 리턴값 지우기)
+    // 메일 인증 코드 전송
     @Override
     @PostMapping("/sendmail")
-    public ResponseEntity<Void> mailSend(@RequestBody @Valid EmailRequestDTO emailDto) {
+    public ResponseEntity<String> mailSend(@RequestBody @Valid EmailRequestDTO emailDto) {
         log.info("이메일 인증 이메일 :" + emailDto.getEmail());
-        mailService.joinEmail(emailDto.getEmail());
-        return ResponseEntity.ok().build();
+
+        return ResponseEntity.ok().body(mailService.joinEmail(emailDto.getEmail()));
     }
 
     // 메일 인증 코드 확인
@@ -36,5 +46,13 @@ public class MailController implements SwaggerMailController {
     @PostMapping("/checkmail")
     public ResponseEntity<Boolean> mailCheck(@RequestBody @Valid EmailCheckDTO emailCheckDto){
         return ResponseEntity.ok().body(mailService.CheckAuthNum(emailCheckDto.getEmail(),emailCheckDto.getAuthNum()));
+    }
+
+    // 비밀번호 재설정 요청
+    @Override
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody @Valid EmailCheckDTO passwordResetRequestDTO) {
+        mailService.resetPassword(passwordResetRequestDTO.getEmail(), passwordResetRequestDTO.getAuthNum());
+        return ResponseEntity.ok().build();
     }
 }
