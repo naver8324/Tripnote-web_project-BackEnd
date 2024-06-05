@@ -1,9 +1,14 @@
 package com.elice.tripnote.domain.spot.repository;
 
+import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
 import com.elice.tripnote.domain.link.routespot.entity.QRouteSpot;
+import com.elice.tripnote.domain.route.entity.QRoute;
 import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
 import com.elice.tripnote.domain.spot.entity.QSpot;
+import com.elice.tripnote.domain.spot.entity.Spot;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -17,6 +22,8 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
 
     private final QSpot spot = new QSpot("s");
     private final QRouteSpot routeSpot = new QRouteSpot("rs");
+    private final QRoute route = new QRoute("r");
+    private final QIntegratedRoute integratedRoute =new QIntegratedRoute("ir");
 
     public List<SpotResponseDTO> findByRouteIds(Long integratedRouteId){
 
@@ -29,6 +36,36 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
                 .from(spot)
                 .join(routeSpot).on(routeSpot.spot.id.eq(spot.id))
                 .where(routeSpot.route.id.eq(integratedRouteId))
+                .fetch();
+
+
+    }
+
+    public List<Spot> findSpotsByRouteIdInOrder(Long routeId){
+        return query
+                .select(spot)
+                .from(spot)
+                .join(routeSpot).on(routeSpot.spot.id.eq(spot.id))
+                .where(routeSpot.route.id.eq(routeId))
+                .orderBy(routeSpot.sequence.asc())
+                .fetch();
+    }
+
+    public List<Spot> findSpotsByIntegratedRouteIdInOrder(Long integratedRouteId){
+        JPQLQuery<Long> subquery = JPAExpressions
+                .select(route.id)
+                .from(route)
+                .join(integratedRoute).on(route.integratedRoute.id.eq(integratedRoute.id))
+                .where(route.integratedRoute.id.eq(integratedRouteId))
+                .limit(1);
+
+        return query
+                .select(spot)
+                .from(spot)
+                .join(routeSpot).on(routeSpot.spot.id.eq(spot.id))
+                .join(route).on(routeSpot.route.id.eq(route.id))
+                .where(routeSpot.route.id.eq(subquery))
+                .orderBy(routeSpot.sequence.asc())
                 .fetch();
 
     }

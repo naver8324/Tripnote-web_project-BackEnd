@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long>, CustomBookmarkRepository {
     Bookmark findByPostIdAndMemberId(Long postId, Long memberId);
-    Bookmark findByRouteIdAndMemberId(Long routeId, Long memberId);
 
+    Bookmark findByRouteIdAndMemberId(Long routeId, Long memberId);
 }

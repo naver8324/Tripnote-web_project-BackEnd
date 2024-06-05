@@ -25,6 +25,11 @@ public enum ErrorCode {
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "해당 실행을 수행할 권한이 없습니다."),
 
+    //403
+    UNAUTHORIZED_DELETE(HttpStatus.FORBIDDEN, "삭제할 권한이 없습니다."),
+    UNAUTHORIZED_UPDATE_STATUS(HttpStatus.FORBIDDEN, "상태를 변경할 권한이 없습니다."),
+    UNAUTHORIZED_UPDATE_NAME(HttpStatus.FORBIDDEN, "이름을 변경할 권한이 없습니다."),
+
     // 404
     NO_POST(HttpStatus.NOT_FOUND, "해당하는 게시글은 존재하지 않습니다."),
     NO_MEMBER(HttpStatus.NOT_FOUND, "해당하는 유저는 존재하지 않습니다."),
