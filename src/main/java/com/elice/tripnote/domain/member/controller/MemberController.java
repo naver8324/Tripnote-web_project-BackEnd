@@ -57,15 +57,14 @@ public class MemberController implements SwaggerMemberController {
         return ResponseEntity.ok().body(memberService.checkNicknameDuplicate(nickname));
     }
 
-
     // (로그인중) 프로필 업데이트 (닉네임 및 비밀번호)
+    @Override
     @MemberRole
     @PatchMapping("/update-profile")
     public ResponseEntity<Void> updateProfile(@RequestBody ProfileUpdateDTO profileUpdateDTO) {
         memberService.updateProfile(profileUpdateDTO);
         return ResponseEntity.ok().build();
     }
-
 
     // (로그인중) 회원 삭제
     @Override
