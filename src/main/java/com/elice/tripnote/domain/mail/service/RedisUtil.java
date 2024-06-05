@@ -1,4 +1,4 @@
-package com.elice.tripnote.domain.main.service;
+package com.elice.tripnote.domain.mail.service;
 
 
 import lombok.RequiredArgsConstructor;

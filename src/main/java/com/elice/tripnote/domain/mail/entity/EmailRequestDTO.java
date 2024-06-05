@@ -1,4 +1,4 @@
-package com.elice.tripnote.domain.main.entity;
+package com.elice.tripnote.domain.mail.entity;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;

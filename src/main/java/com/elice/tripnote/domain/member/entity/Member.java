@@ -78,10 +78,16 @@ public class Member {
         this.status = this.status == null ? Status.valueOf("ACTIVE") : this.status;
     }
 
-    // 회원 삭제 메서드
+    // (멤버 자신이) 회원 삭제 메서드
     public void deleteByUser() {
         this.deletedAt = LocalDateTime.now();
         this.status = Status.DELETED_BY_USER;
+    }
+
+    // (관리자가) 회원 삭제 메서드
+    public void deleteByAdmin() {
+        this.deletedAt = LocalDateTime.now();
+        this.status = Status.DELETED_BY_ADMIN;
     }
 
     public void updateStatusACTIVE(){
