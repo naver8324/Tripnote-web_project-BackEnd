@@ -61,6 +61,8 @@ public class HashtagService {
 
         hashtag.delete();
 
+        hashtagRepository.save(hashtag);
+
     }
 
     //해시태그명 중복 체크
