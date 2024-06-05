@@ -1,8 +1,6 @@
 package com.elice.tripnote.domain.post.controller;
 
 
-import com.elice.tripnote.domain.comment.entity.CommentRequestDTO;
-import com.elice.tripnote.domain.comment.entity.CommentResponseDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostRequestDTO;
@@ -73,7 +71,7 @@ public interface SwaggerPostController {
             @Parameter(name="page", description = "페이지 번호", example = "5"),
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
-    ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithLikes(int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithLikes(int page, int size);
 
 
     @Operation(summary="북마크 게시글 조회 - 유저", description= "유저가 북마크한 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
@@ -85,7 +83,7 @@ public interface SwaggerPostController {
             @Parameter(name="page", description = "페이지 번호", example = "5"),
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
-    ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithMark(int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithMark(int page, int size);
 
 
     @Operation(summary="게시글 조회 - 관리자", description= "게시글을 조회할 때 사용하는 api입니다. 삭제된 게시글도 조회 가능합니다.")

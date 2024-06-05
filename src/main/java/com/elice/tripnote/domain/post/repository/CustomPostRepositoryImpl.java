@@ -18,6 +18,7 @@ import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -77,6 +78,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(integratedRoute.uuidHashtags, uuidHashtags)
                 .join(uuidHashtags.hashtag, hashtag)
                 .where(post.isDeleted.isFalse())
+                .distinct()
                 .orderBy(orderSpecifier)
                 .offset(page * size)
                 .limit(size)
@@ -113,6 +115,8 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(integratedRoute.uuidHashtags, uuidHashtags)
                 .join(uuidHashtags.hashtag, hashtag)
                 .on(hashtag.name.in(hashtagRequestDTOList.stream().map(HashtagRequestDTO::getName).collect(Collectors.toList())))
+                .where(post.isDeleted.isFalse())
+                .distinct()
                 .fetchFirst();
 
         OrderSpecifier orderSpecifier = post.id.desc();
@@ -130,6 +134,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(uuidHashtags.hashtag, hashtag)
                 .on(hashtag.name.in(hashtagRequestDTOList.stream().map(HashtagRequestDTO::getName).collect(Collectors.toList())))
                 .where(post.isDeleted.isFalse())
+                .distinct()
                 .orderBy(orderSpecifier)
                 .offset(page * size)
                 .limit(size)
@@ -174,6 +179,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(route.integratedRoute, integratedRoute)
                 .join(integratedRoute.uuidHashtags, uuidHashtags)
                 .join(uuidHashtags.hashtag, hashtag)
+                .distinct()
                 .orderBy(post.id.desc())
                 .offset(page * size)
                 .limit(size)
@@ -222,6 +228,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(post.member, member)
                 .on(post.member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
+                .distinct()
                 .orderBy(post.id.desc())
                 .offset(page * size)
                 .limit(size)
@@ -244,6 +251,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(likePost.member, member)
                 .on(member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
+                .distinct()
                 .fetchFirst();
 
         List<PostResponseDTO> postResponseDTOs = query
@@ -261,6 +269,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(likePost.member, member)
                 .on(member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
+                .distinct()
                 .orderBy(post.id.desc())
                 .offset(page * size)
                 .limit(size)
@@ -285,6 +294,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(bookmark.member, member)
                 .on(member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
+                .distinct()
                 .fetch().size();
 
         List<PostResponseDTO> postResponseDTOs = query
@@ -302,6 +312,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(bookmark.member, member)
                 .on(member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
+                .distinct()
                 .orderBy(post.id.desc())
                 .offset(page * size)
                 .limit(size)
