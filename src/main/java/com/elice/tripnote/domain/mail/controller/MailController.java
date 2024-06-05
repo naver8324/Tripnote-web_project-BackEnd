@@ -1,9 +1,9 @@
-package com.elice.tripnote.domain.main.controller;
+package com.elice.tripnote.domain.mail.controller;
 
 
-import com.elice.tripnote.domain.main.entity.EmailCheckDTO;
-import com.elice.tripnote.domain.main.entity.EmailRequestDTO;
-import com.elice.tripnote.domain.main.service.MailSendService;
+import com.elice.tripnote.domain.mail.entity.EmailCheckDTO;
+import com.elice.tripnote.domain.mail.entity.EmailRequestDTO;
+import com.elice.tripnote.domain.mail.service.MailSendService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 

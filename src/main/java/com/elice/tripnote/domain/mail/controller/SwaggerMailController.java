@@ -1,7 +1,7 @@
-package com.elice.tripnote.domain.main.controller;
+package com.elice.tripnote.domain.mail.controller;
 
-import com.elice.tripnote.domain.main.entity.EmailCheckDTO;
-import com.elice.tripnote.domain.main.entity.EmailRequestDTO;
+import com.elice.tripnote.domain.mail.entity.EmailCheckDTO;
+import com.elice.tripnote.domain.mail.entity.EmailRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
