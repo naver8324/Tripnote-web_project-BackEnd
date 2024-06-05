@@ -68,7 +68,7 @@ public class Comment extends BaseTimeEntity {
 
     public CommentResponseDTO toDTO() {
 
-        return CommentResponseDTO.builder().id(id).content(content).report(report).isDeleted(isDeleted).build();
+        return CommentResponseDTO.builder().content(content).report(report).isDeleted(isDeleted).build();
 
     }
 }

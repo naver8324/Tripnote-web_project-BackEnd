@@ -9,6 +9,9 @@ import com.elice.tripnote.domain.post.exception.NoSuchUserException;
 import com.elice.tripnote.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -62,13 +66,15 @@ public class MemberService implements UserDetailsService {
 
     // 이메일로 멤버 조회 서비스
     @Transactional(readOnly = true)
-    public Member getMemberByEmail(String email) {
-        return memberRepository.findByEmail(email)
+    public MemberResponseDTO getMemberResponseDTOByEmail(String email) {
+        Member member =  memberRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     UsernameNotFoundException ex = new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email);
                     log.error("에러 발생: {}", ex.getMessage(), ex);
                     return ex;
                 });
+
+        return member.toDto();
     }
 
 
@@ -114,14 +120,6 @@ public class MemberService implements UserDetailsService {
         }
     }
 
-//        return memberRepository.findByEmail(email)
-//                .map(MemberDetailsDTO::new)
-//                .orElseThrow(() -> {
-//                    UsernameNotFoundException ex = new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email);
-//                    log.error("에러 발생: {}", ex.getMessage(), ex);
-//                    return ex;
-//                });
-//    }
 
 
     // 닉네임 변경 서비스
@@ -177,4 +175,25 @@ public class MemberService implements UserDetailsService {
         return isPasswordMatch;
     }
 
+    // 전체 멤버 조회 서비스
+    public Page<MemberResponseDTO> findMembers(Pageable pageable) {
+        Page<Member> members = memberRepository.findAll(pageable);
+        return members.map(Member::toDto);
+    }
+
+
+    // 로그인중인 멤버 정보 조회 서비스
+    @Transactional(readOnly = true)
+    public MemberResponseDTO getMemberResponseDTO() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Member member =  memberRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    UsernameNotFoundException ex = new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다. 이메일: " + email);
+                    log.error("에러 발생: {}", ex.getMessage(), ex);
+                    return ex;
+                });
+
+        return member.toDto();
+    }
 }

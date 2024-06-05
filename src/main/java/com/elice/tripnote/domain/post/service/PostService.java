@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.post.service;
 
 
 import com.elice.tripnote.domain.comment.service.CommentService;
+import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.link.bookmark.entity.Bookmark;
 import com.elice.tripnote.domain.link.bookmark.repository.BookmarkRepository;
 import com.elice.tripnote.domain.link.likePost.entity.LikePost;
@@ -26,6 +27,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -46,10 +49,16 @@ public class PostService {
 
     // 전체 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getPosts(int page, int size){
+    public Page<PostResponseDTO> getPosts(String order, int page, int size){
 
-        return postRepository.customFindNotDeletedPosts(page, size);
+        return postRepository.customFindNotDeletedPosts(order, page, size);
     }
+
+    public Page<PostResponseDTO> getPostsByHashtag(List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size){
+
+        return postRepository.customFindByHashtagNotDeletedPosts(hashtagRequestDTOList, order, page, size);
+    }
+
 
     // 한 유저가 쓴 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
@@ -120,7 +129,7 @@ public class PostService {
     // 게시글을 저장하는 메서드입니다.
     // TO DO: presigned URL 사용 예정.
     @Transactional
-    public PostResponseDTO savePost(PostRequestDTO postDTO, Long routeId){
+    public Long savePost(PostRequestDTO postDTO, Long routeId){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
@@ -140,11 +149,11 @@ public class PostService {
 
 //        post를 먼저 저장하고 add를 저장해야 EntityNotFoundException이 발생하지 않는다.
 
-        postRepository.save(post);
+        Post newPost = postRepository.save(post);
 //        route.getPost().add(post);
-        member.getPosts().add(post);
+        member.getPosts().add(newPost);
 
-        return post.toDTO();
+        return newPost.getId();
 
 
     }
@@ -153,7 +162,7 @@ public class PostService {
 
     // 게시글을 수정하는 메서드입니다.
     @Transactional
-    public PostResponseDTO updatePost(PostRequestDTO postDTO, Long postId){
+    public void updatePost(PostRequestDTO postDTO, Long postId){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -164,7 +173,6 @@ public class PostService {
 
         post.update(postDTO);
 
-        return post.toDTO();
     }
 
 

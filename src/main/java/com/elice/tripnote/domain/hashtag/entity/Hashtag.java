@@ -41,8 +41,10 @@ public class Hashtag {
         this.isCity = hashtagRequestDTO.isCity();
     }
 
+    //true -> false, false -> true
+    //삭제된 해시태그를 복구할 수 있게
     public void delete(){
-        this.isDelete = true;
+        this.isDelete = !this.isDelete;
     }
 
     public HashtagResponseDTO toResponseDTO() {

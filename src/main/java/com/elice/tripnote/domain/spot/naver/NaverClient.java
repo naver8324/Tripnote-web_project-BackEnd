@@ -1,17 +1,14 @@
 package com.elice.tripnote.domain.spot.naver;
 
-import com.elice.tripnote.domain.spot.dto.SpotRequestDTO;
-import com.elice.tripnote.domain.spot.dto.SpotResponseDTO;
+
 import com.elice.tripnote.domain.spot.naver.dto.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
 
 @Component
 public class NaverClient {
@@ -97,4 +94,7 @@ public class NaverClient {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         return new RestTemplate().exchange(url, HttpMethod.GET, entity, ReverseGeocodeRes.class).getBody();
     }
+
+
+
 }

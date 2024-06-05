@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.hashtag.repository;
 
+import com.elice.tripnote.domain.hashtag.entity.HashtagDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagResponseDTO;
 import com.elice.tripnote.domain.hashtag.entity.QHashtag;
 import com.querydsl.core.types.Projections;
@@ -29,6 +30,19 @@ public class HashtagCustomRepositoryImpl implements HashtagCustomRepository {
                 .from(hashtag)
                 .where(hashtag.isCity.eq(isCity)
                         .and(hashtag.isDelete.eq(isDelete)))
+                .fetch();
+    }
+
+    public List<HashtagDTO> customFindAll(){
+
+        return query
+                .select(Projections.constructor(HashtagDTO.class,
+                        hashtag.id,
+                        hashtag.name,
+                        hashtag.isCity,
+                        hashtag.isDelete
+                ))
+                .from(hashtag)
                 .fetch();
     }
 

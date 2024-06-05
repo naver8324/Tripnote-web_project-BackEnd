@@ -3,6 +3,7 @@ package com.elice.tripnote.domain.member.entity;
 import com.elice.tripnote.domain.link.bookmark.entity.Bookmark;
 import com.elice.tripnote.domain.comment.entity.Comment;
 import com.elice.tripnote.domain.link.likePost.entity.LikePost;
+import com.elice.tripnote.domain.link.likeSpot.entity.LikeSpot;
 import com.elice.tripnote.domain.post.entity.Post;
 import com.elice.tripnote.domain.route.entity.Route;
 import jakarta.persistence.*;
@@ -34,6 +35,9 @@ public class Member {
     @Column(name = "oauth_id")
     private Long oauthId;
 
+    @Column(name = "oauth_type")
+    private String oauthType;
+
     @Column(nullable = false, length = 20, unique = true)
     private String nickname;
 
@@ -64,6 +68,11 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<Route> routes = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "member")
+    private List<LikeSpot> likeSpots = new ArrayList<>();
+
+
     @PrePersist
     private void prePersist() {
         this.status = this.status == null ? Status.valueOf("ACTIVE") : this.status;
@@ -77,5 +86,18 @@ public class Member {
 
     public void updateStatusACTIVE(){
         this.status=Status.ACTIVE;
+    }
+
+    public MemberResponseDTO toDto() {
+        return MemberResponseDTO.builder()
+                .id(this.id)
+                .email(this.email)
+                .password(this.password)
+                .oauthId(this.oauthId)
+                .oauthType(this.oauthType)
+                .nickname(this.nickname)
+                .deletedAt(this.deletedAt)
+                .status(this.status)
+                .build();
     }
 }

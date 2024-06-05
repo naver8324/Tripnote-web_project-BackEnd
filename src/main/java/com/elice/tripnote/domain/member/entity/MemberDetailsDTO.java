@@ -12,15 +12,18 @@ public class MemberDetailsDTO implements UserDetails {
 
     private final Member member;
     private final Admin admin;
+    private final Status status; // 회원 상태 필드
 
     public MemberDetailsDTO(Member member) {
         this.member = member;
         this.admin = null;
+        this.status = member.getStatus();
     }
 
     public MemberDetailsDTO(Admin admin) {
         this.member = null;
         this.admin = admin;
+        this.status = null;
     }
 
     @Override
@@ -83,5 +86,9 @@ public class MemberDetailsDTO implements UserDetails {
             return member.getStatus() == Status.ACTIVE;
         }
         return true;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 }

@@ -18,12 +18,15 @@ public enum ErrorCode {
     REDIRECT_URI_MISMATCH(HttpStatus.BAD_REQUEST, "인가 코드 요청시 사용한 redirect uri와 액세스 토큰 요청 시 사용한 redirect uri가 다릅니다."),
 
     // 401
+    UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "접근 권한이 없습니다."),
     TOKEN_MISSING_OR_INVALID(HttpStatus.UNAUTHORIZED, "토큰이 없거나 적합하지 않습니다."),
     KAKAO_TOKEN_MISSING(HttpStatus.UNAUTHORIZED, "카카오 엑세스 토큰이 없습니다."),
     KAKAO_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "카카오 엑세스 토큰이 적합하지 않습니다."),
     NOT_EXIST_APP_KEY(HttpStatus.UNAUTHORIZED, "잘못된 앱 키 타입을 사용하거나 앱 키에 오타가 있는 것 같습니다."),
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "해당 실행을 수행할 권한이 없습니다."),
+    DELETED_BY_USER(HttpStatus.UNAUTHORIZED, "탈퇴한 아이디입니다."),
+    DELETED_BY_ADMIN(HttpStatus.UNAUTHORIZED, "관리자에 의해 탈퇴된 아이디입니다."),
 
     //403
     UNAUTHORIZED_DELETE(HttpStatus.FORBIDDEN, "삭제할 권한이 없습니다."),
@@ -48,7 +51,8 @@ public enum ErrorCode {
     DUPLICATE_NAME(HttpStatus.CONFLICT, "이미 존재하는 해시태그명입니다."),
 
     // 500
-    SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 응답 오류입니다.");
+    SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 응답 오류입니다."),
+    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송에 실패했습니다.");
 
 
     private final HttpStatus httpStatus;
