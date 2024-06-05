@@ -35,7 +35,6 @@ public class RouteController implements SwaggerRouteController {
 
     /**
      * 경로 비공개
-     *
      * @return 비공개 처리된 경로 id
      */
     @Override
@@ -191,20 +190,20 @@ public class RouteController implements SwaggerRouteController {
      * @return [경로 id, 경로 이름, 해당되는 경로의 여행지 리스트] 리스트 리턴
      */
     //TODO: 필요없음 삭제하기
-    @MemberRole
-    @GetMapping("/member/routes/like")
-    public ResponseEntity<List<RouteDetailResponseDTO>> findLike() {
-        return ResponseEntity.ok(routeService.findLike());
-        /*
-        route {
-            routeId:
-            name : string
-            spots : [
-            spot,spot,spot (순서 정리된채로)
-            ]
-        }
-         */
-    }
+//    @MemberRole
+//    @GetMapping("/member/routes/like")
+//    public ResponseEntity<List<RouteDetailResponseDTO>> findLike() {
+//        return ResponseEntity.ok(routeService.findLike());
+//        /*
+//        route {
+//            routeId:
+//            name : string
+//            spots : [
+//            spot,spot,spot (순서 정리된채로)
+//            ]
+//        }
+//         */
+//    }
 
 
     /**

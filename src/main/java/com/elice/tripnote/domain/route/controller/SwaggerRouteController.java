@@ -1,8 +1,6 @@
 package com.elice.tripnote.domain.route.controller;
 
-import com.elice.tripnote.domain.route.entity.RecommendedRouteResponseDTO;
-import com.elice.tripnote.domain.route.entity.SaveRequestDTO;
-import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
+import com.elice.tripnote.domain.route.entity.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -12,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public interface SwaggerRouteController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",
                     content = {@Content(schema = @Schema(implementation = Long.class))}),
-            @ApiResponse(responseCode = "404", description = "해당 member ID가 존재하지 않습니다."),
+            @ApiResponse(responseCode = "404", description = "해당 memberID 또는 spot ID가 존재하지 않습니다."),
     })
     ResponseEntity<Long> save(SaveRequestDTO requestDto);
 
@@ -36,7 +36,8 @@ public interface SwaggerRouteController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",
                     content = {@Content(schema = @Schema(implementation = Long.class))}),
-            @ApiResponse(responseCode = "404", description = "해당 Route Id가 존재하지 않습니다."),
+            @ApiResponse(responseCode = "403", description = "해당 route를 비공개할 수 있는 권한이 없습니다."),
+            @ApiResponse(responseCode = "404", description = "해당 memberID 또는 Route Id가 존재하지 않습니다."),
     })
     ResponseEntity<Long> setRouteToPrivate(Long routeId);
 
@@ -47,7 +48,8 @@ public interface SwaggerRouteController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",
                     content = {@Content(schema = @Schema(implementation = Long.class))}),
-            @ApiResponse(responseCode = "404", description = "해당 Route Id가 존재하지 않습니다."),
+            @ApiResponse(responseCode = "403", description = "해당 route를 비공개할 수 있는 권한이 없습니다."),
+            @ApiResponse(responseCode = "404", description = "해당 member ID 또는 Route Id가 존재하지 않습니다."),
     })
     ResponseEntity<Long> setRouteToPublic(Long routeId);
 
@@ -58,40 +60,22 @@ public interface SwaggerRouteController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",
                     content = {@Content(schema = @Schema(implementation = Long.class))}),
-            @ApiResponse(responseCode = "404", description = "해당 Route Id가 존재하지 않습니다."),
+            @ApiResponse(responseCode = "403", description = "해당 route를 삭제할 수 있는 권한이 없습니다."),
+            @ApiResponse(responseCode = "404", description = "해당 member ID 또는Route Id가 존재하지 않습니다."),
     })
     ResponseEntity<Long> deleteRoute(Long routeId);
 
     @Operation(summary = "지역 기반 경로 추천(회원)", description = "지역을 입력받아서 해당 지역 안을 여행하는 경로 id 리스트를 반환받을 수 있다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "해당 member ID가 존재하지 않습니다."),
     })
     @Parameters(value = {
             @Parameter(name = "region", required = true, description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 뛰어쓰기 없이 '여러지역'이라는 값을 넣으면 된다.\n" +
                     "특별시/광역시 - 서울특별시, 인천광역시, 부산광역시, 대구광역시, 울산광역시, 광주광역시, 대전광역시, 세종특별자치시\n" +
                     "도단위 - 경기도, 강원특별자치도, 충청북도, 충청남도, 경상북도, 경상남도, 전라북도, 전라남도, 제주특별자치도"),
-            @Parameter(name = "hashtags", required = false, description = "해시태그 리스트"),
     })
     ResponseEntity<List<RecommendedRouteResponseDTO>> getRegion(String region);
-
-    @Operation(summary = "특정 경로에 포함된 여행지 리스트를 알 수 있음", description = "특정 경로 id를 이용해서 해당 경로에 포함된 여행지들을 리스트로 반환받을 수 있다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
-    })
-    @Parameters(value = {
-            @Parameter(name = "routeId", required = true, description = "경로 번호"),
-    })
-    ResponseEntity<List<SpotResponseDTO>> getSpots(Long integratedRouteId);
-
-    @Operation(summary = "여행지 기반 경로 추천(비회원)", description = "특정 여행지 id를 이용해서 해당 여행지를 지나가는 경로 id 리스트를 반환받을 수 있다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
-    })
-    @Parameters(value = {
-            @Parameter(name = "hashtags", required = false, description = "해시태그 리스트"),
-            @Parameter(name = "spots", required = true, description = "여행지 리스트"),
-    })
-    ResponseEntity<List<RecommendedRouteResponseDTO>> getRoutesThroughSpot(List<Long> spots);
 
     @Operation(summary = "지역 기반 경로 추천(비회원)", description = "지역을 입력받아서 해당 지역 안을 여행하는 경로 id 리스트를 반환받을 수 있다.")
     @ApiResponses(value = {
@@ -101,16 +85,78 @@ public interface SwaggerRouteController {
             @Parameter(name = "region", required = true, description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 뛰어쓰기 없이 '여러지역'이라는 값을 넣으면 된다.\n" +
                     "특별시/광역시 - 서울특별시, 인천광역시, 부산광역시, 대구광역시, 울산광역시, 광주광역시, 대전광역시, 세종특별자치시\n" +
                     "도단위 - 경기도, 강원특별자치도, 충청북도, 충청남도, 경상북도, 경상남도, 전라북도, 전라남도, 제주특별자치도"),
-            @Parameter(name = "hashtags", required = false, description = "해시태그 리스트"),
     })
     ResponseEntity<List<RecommendedRouteResponseDTO>> getRegionGuest(String region);
+
+    @Operation(summary = "여행지 기반 경로 추천(회원)", description = "특정 여행지 id를 이용해서 해당 여행지를 지나가는 경로 id 리스트를 반환받을 수 있다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "해당 member ID가 존재하지 않습니다."),
+    })
+    @Parameters(value = {
+            @Parameter(name = "spots", required = true, description = "여행지 리스트"),
+    })
+    ResponseEntity<List<RecommendedRouteResponseDTO>> getRoutesThroughSpot(List<Long> spots);
+
+
     @Operation(summary = "여행지 기반 경로 추천(비회원)", description = "특정 여행지 id를 이용해서 해당 여행지를 지나가는 경로 id 리스트를 반환받을 수 있다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
     })
     @Parameters(value = {
-            @Parameter(name = "hashtags", required = false, description = "해시태그 리스트"),
             @Parameter(name = "spots", required = true, description = "여행지 리스트"),
     })
     ResponseEntity<List<RecommendedRouteResponseDTO>> getRoutesThroughSpotGuest(List<Long> spots);
+
+    @Operation(summary = "특정 경로에 포함된 여행지 리스트를 알 수 있음(jwt 토큰 필요없음)", description = "특정 경로 id를 이용해서 해당 경로에 포함된 여행지들을 리스트로 반환받을 수 있다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameters(value = {
+            @Parameter(name = "routeId", required = true, description = "경로 번호"),
+    })
+    ResponseEntity<List<SpotResponseDTO>> getSpots(Long integratedRouteId);
+
+    @Operation(summary = "좋아요 추가/취소", description = "좋아요가 눌리지 않은 상태에서 이 api를 호출하면 -> 좋아요 추가\n좋아요가 눌린 상태에서 이 api 호출 -> 좋아요 취소")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "해당 member ID 또는 입력된 경로 id와 연결된 like_bookmark_period 객체가 존재하지 않습니다."),
+    })
+    @Parameters(value = {
+            @Parameter(name = "integratedId", required = true, description = "좋아요를 누르고 싶은 경로 id"),
+    })
+    ResponseEntity<Void> addOrRemoveLike(Long integratedId);
+    @Operation(summary = "북마크 추가/취소", description = "북마크가 눌리지 않은 상태에서 이 api를 호출하면 -> 북마크 추가\n북마크가 눌린 상태에서 이 api 호출 -> 북마크 취소")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "해당 member ID 또는 입력된 경로 id와 연결된 like_bookmark_period 객체가 존재하지 않습니다."),
+    })
+    @Parameters(value = {
+            @Parameter(name = "integratedId", required = true, description = "북마크를 누르고 싶은 경로 id"),
+    })
+    ResponseEntity<Void> addOrRemoveBookmark(Long integratedId);
+    @Operation(summary = "내가 북마크 누른 경로 리스트", description = "자신이 누른 북마크 경로를 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "해당 member ID가 존재하지 않습니다."),
+    })
+    ResponseEntity<List<RouteDetailResponseDTO>> findBookmark();
+    @Operation(summary = "내가 생성한 경로 리스트", description = "자신이 만든 경로를 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "해당 member ID가 존재하지 않습니다."),
+    })
+    ResponseEntity<List<RouteDetailResponseDTO>> findMyRoute();
+
+    @Operation(summary = "경로 이름 수정", description = "경로의 이름을 수정합니다.")
+    @Parameters({
+            @Parameter(name = "requestDto", required = true, description = "경로 id, 새로운 경로 이름")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    content = {@Content(schema = @Schema(implementation = Long.class))}),
+            @ApiResponse(responseCode = "403", description = "해당 경로의 이름을 수정할 수 있는 권한이 없습니다."),
+            @ApiResponse(responseCode = "404", description = "해당 memberID가 존재하지 않습니다."),
+    })
+    ResponseEntity<Void> updateName(@RequestBody UpdateRouteNameRequestDTO requestDto);
 }

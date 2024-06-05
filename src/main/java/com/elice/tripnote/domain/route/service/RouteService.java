@@ -240,7 +240,9 @@ public class RouteService {
 
         log.info("{}번 경로가 삭제됩니다.", routeId);
         Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new NoSuchRouteException());
+                .orElseThrow(() -> {
+                    throw new CustomException(ErrorCode.NO_ROUTE);
+                });
 
         // 해당 경로가 자신의 것이 맞는지 확인
         if (member.getId() != route.getMember().getId()) throw new CustomException(ErrorCode.UNAUTHORIZED_DELETE);
@@ -261,15 +263,12 @@ public class RouteService {
 
     private List<RecommendedRouteResponseDTO> getRegion(Region region, boolean isMember, Member member) {
 
-        log.info("1번");
         List<Long> integratedIds = integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region);
 
-        log.info("2번");
         // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
         List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
 
         for (Long irId : integratedIds) {
-            log.info("3번 현재 통합 경로 id -> {}", irId);
             recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
                     .routeId(irId)
                     .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
@@ -425,6 +424,7 @@ public class RouteService {
         Route route = routeRepository.findByIdAndMemberId(dto.getRouteId(), member.getId());
         if (route == null) throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_NAME);
         route.updateRouteName(dto.getName());
+        routeRepository.save(route);
     }
 
     public List<RouteDetailResponseDTO> findLike() {
