@@ -73,7 +73,7 @@ public class PostService {
 
     // 한 유저가 좋아요 한 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getCommentsByMemberWithLikes(int page, int size){
+    public Page<PostResponseDTO> getPostsByMemberWithLikes(int page, int size){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
@@ -85,7 +85,7 @@ public class PostService {
 
     // 한 유저가 북마크 한 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getCommentsByMemberWithMark(int page, int size){
+    public Page<PostResponseDTO> getPostsByMemberWithMark(int page, int size){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);

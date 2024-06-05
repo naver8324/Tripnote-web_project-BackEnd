@@ -1,7 +1,6 @@
 package com.elice.tripnote.domain.post.controller;
 
 
-import com.elice.tripnote.domain.comment.service.CommentService;
 import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostRequestDTO;
@@ -15,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -49,15 +47,15 @@ public class PostController implements SwaggerPostController {
     @Override
     @MemberRole
     @GetMapping("/member/posts/likes")
-    public ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithLikes(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getCommentsByMemberWithLikes(page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithLikes(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(postService.getPostsByMemberWithLikes(page, size));
     }
 
     @Override
     @MemberRole
     @GetMapping("/member/posts/mark")
-    public ResponseEntity<Page<PostResponseDTO>> getCommentsByMemberWithMark(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getCommentsByMemberWithMark(page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithMark(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(postService.getPostsByMemberWithMark(page, size));
     }
 
     @Override
