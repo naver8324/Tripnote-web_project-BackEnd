@@ -94,6 +94,17 @@ public class Member {
         this.status=Status.ACTIVE;
     }
 
+    // 닉네임 업데이트 메서드
+    public void updateNickname(String newNickname) {
+        this.nickname = newNickname;
+    }
+
+    // 비밀번호 업데이트 메서드
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+
     public MemberResponseDTO toDto() {
         return MemberResponseDTO.builder()
                 .id(this.id)

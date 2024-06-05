@@ -39,5 +39,5 @@ public interface SwaggerMailController {
     @Operation(summary = "비밀번호 재설정 요청", description = "이메일로 비밀번호 재설정을 요청합니다.")
     @ApiResponse(responseCode = "200", description = "비밀번호 재설정에 성공하였습니다.")
     @PostMapping("/reset-password")
-    ResponseEntity<Void> resetPassword(@RequestBody @Parameter(description = "비밀번호 재설정 요청 DTO", required = true) EmailCheckDTO passwordResetRequestDTO);
+    ResponseEntity<String> resetPassword(@RequestBody @Parameter(description = "비밀번호 재설정 요청 DTO", required = true) EmailCheckDTO passwordResetRequestDTO);
 }

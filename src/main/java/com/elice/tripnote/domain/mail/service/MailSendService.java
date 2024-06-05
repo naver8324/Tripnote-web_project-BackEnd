@@ -83,7 +83,7 @@ public class MailSendService {
 
     // 비밀번호 재설정 로직
     @Transactional
-    public void resetPassword(String email, String authNum) {
+    public String resetPassword(String email, String authNum) {
         // 인증 번호 확인
         if (!CheckAuthNum(email, authNum)) {
             throw new CustomException(ErrorCode.INVALID_AUTH_CODE);
@@ -111,6 +111,7 @@ public class MailSendService {
                         "<br>" +
                         "로그인 후 비밀번호를 변경해 주세요.";
         mailSend(setFrom, email, title, content);
+        return tempPassword;
     }
 
     // 임시 비밀번호 생성 (UUID 사용)

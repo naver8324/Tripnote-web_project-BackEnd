@@ -25,10 +25,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Long> findIdByEmail(@Param("email") String email);
 
     @Modifying
-    @Query("UPDATE Member m SET m.nickname = :newNickname WHERE m.email = :email")
-    void updateNickname(@Param("email") String email, @Param("newNickname") String newNickname);
-
-    @Modifying
     @Query("UPDATE Member m SET m.password = :newPassword WHERE m.email = :email")
     void updatePassword(@Param("email") String email, @Param("newPassword") String newPassword);
 

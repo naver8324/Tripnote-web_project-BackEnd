@@ -1,9 +1,6 @@
 package com.elice.tripnote.domain.member.controller;
 
-import com.elice.tripnote.domain.member.entity.Member;
-import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
-import com.elice.tripnote.domain.member.entity.MemberResponseDTO;
-import com.elice.tripnote.domain.member.entity.PasswordDTO;
+import com.elice.tripnote.domain.member.entity.*;
 import com.elice.tripnote.domain.member.service.KakaoService;
 import com.elice.tripnote.domain.member.service.MemberService;
 import com.elice.tripnote.global.annotation.AdminRole;
@@ -60,21 +57,12 @@ public class MemberController implements SwaggerMemberController {
         return ResponseEntity.ok().body(memberService.checkNicknameDuplicate(nickname));
     }
 
-    // (로그인중) 닉네임 변경
+    // (로그인중) 프로필 업데이트 (닉네임 및 비밀번호)
     @Override
     @MemberRole
-    @PatchMapping("/update-nickname")
-    public ResponseEntity<Void> updateNickname(@RequestParam String newNickname) {
-        memberService.updateNickname(newNickname);
-        return ResponseEntity.ok().build();
-    }
-
-    // (로그인중) 비밀번호 변경 (비밀번호는 노출을 피해야 하기 때문에 RequestBody 형식으로 보냄)
-    @Override
-    @MemberRole
-    @PatchMapping("/update-password")
-    public ResponseEntity<Void> updatePassword(@RequestBody PasswordDTO newPasswordDTO) {
-        memberService.updatePassword(newPasswordDTO);
+    @PatchMapping("/update-profile")
+    public ResponseEntity<Void> updateProfile(@RequestBody ProfileUpdateDTO profileUpdateDTO) {
+        memberService.updateProfile(profileUpdateDTO);
         return ResponseEntity.ok().build();
     }
 
