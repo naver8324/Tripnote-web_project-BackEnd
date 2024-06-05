@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="like_bookmark_period")
+@Table(name = "like_bookmark_period")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class LikeBookmarkPeriod {
@@ -19,7 +19,7 @@ public class LikeBookmarkPeriod {
     @Column(name = "id")
     Long id;
 
-//    @Column(name = "uuid_id", nullable = false)
+    //    @Column(name = "uuid_id", nullable = false)
 //    Long uuid_id;
     @ManyToOne
     @JoinColumn(name = "integerated_route_id", nullable = false)
@@ -38,11 +38,19 @@ public class LikeBookmarkPeriod {
     LocalDateTime endAt;
 
     @Builder
-    public LikeBookmarkPeriod(IntegratedRoute integratedRoute, Integer likes, Integer bookmark){
-        this.integratedRoute=integratedRoute;
-        this.likes=likes;
-        this.bookmark=bookmark;
+    public LikeBookmarkPeriod(IntegratedRoute integratedRoute, Integer likes, Integer bookmark) {
+        this.integratedRoute = integratedRoute;
+        this.likes = likes;
+        this.bookmark = bookmark;
         this.startAt = LocalDateTime.now();
-        this.endAt=null;
+        this.endAt = null;
+    }
+
+    public void updateLike(int newLike) {
+        this.likes = newLike;
+    }
+
+    public void updateBookmark(int newBookmark) {
+        this.bookmark = newBookmark;
     }
 }

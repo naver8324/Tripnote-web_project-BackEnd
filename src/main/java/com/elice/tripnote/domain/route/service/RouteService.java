@@ -63,6 +63,7 @@ public class RouteService {
     @Transactional
     public Long save(SaveRequestDTO requestDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("유저 이메일: {}", email);
         //여행지 id 리스트 기반으로 uuid 만들기
         String uuid = generateUUID(requestDto.getSpotIds());
 
@@ -151,10 +152,10 @@ public class RouteService {
         return route.getId();
     }
 
-    private Region findRegionOfSpots(List<Long> spotIds){
+    private Region findRegionOfSpots(List<Long> spotIds) {
         Region region = spotRepository.getRegionByspotId(spotIds.get(0)).getRegion();
         for (Long id : spotIds) {
-            if(region != spotRepository.getRegionByspotId(id).getRegion()) return Region.MULTI_REGION;
+            if (region != spotRepository.getRegionByspotId(id).getRegion()) return Region.MULTI_REGION;
         }
         return region;
     }
@@ -239,7 +240,9 @@ public class RouteService {
 
         log.info("{}번 경로가 삭제됩니다.", routeId);
         Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new NoSuchRouteException());
+                .orElseThrow(() -> {
+                    throw new CustomException(ErrorCode.NO_ROUTE);
+                });
 
         // 해당 경로가 자신의 것이 맞는지 확인
         if (member.getId() != route.getMember().getId()) throw new CustomException(ErrorCode.UNAUTHORIZED_DELETE);
@@ -249,20 +252,29 @@ public class RouteService {
         return route.getId();
     }
 
-    public List<RecommendedRouteResponseDTO> getRegion(Region region, List<Long> hashtags) {
+    public List<RecommendedRouteResponseDTO> getRegionMember(Region region){
         Member member = getMemberFromJwt();
-        List<Long> integratedIds = integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region);
+        return getRegion(region,true, member);
+    }
 
+    public List<RecommendedRouteResponseDTO> getRegionGuest(Region region){
+        return getRegion(region,false, null);
+    }
+
+    private List<RecommendedRouteResponseDTO> getRegion(Region region, boolean isMember, Member member) {
+
+        List<Long> integratedIds = integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region);
 
         // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
         List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
+
         for (Long irId : integratedIds) {
             recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
                     .routeId(irId)
                     .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
                     .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
-                    .likedAt(likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId)) // 자신이 이 경로에 좋아요를 눌렀는지
-                    .markedAt(bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId)) // 자신이 이 경로에 북마크를 눌렀는지
+                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
+                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
                     .build());
         }
 
@@ -288,58 +300,23 @@ public class RouteService {
         return recommendedRouteResponseDTOS;
     }
 
+
+
     // 게시물에서 경로 표현할 때 사용?
     public List<SpotResponseDTO> getSpots(Long routeId) {
         return spotRepository.findByRouteIds(routeId);
-        /*
-        select s.id, s.location, s.region
-        from spot s
-        join route_spot rs on rs.spot_id=s.id
-        where rs.route_id=:integratedRouteId
-         */
-
-        /*
-        select s.location, s.경로, s.위도
-        from spot s
-        join route_spot rs on rs.spot_id=s.id
-        where rs.route_id=:routeId
-        order by rs.sequence asc
-         */
-
-        /*
-    {
-      spots: [스팟 이름, 경도 , 위도]
     }
 
-     */
+    public List<RecommendedRouteResponseDTO> getRoutesThroughSpotMember(List<Long> spots){
+        Member member = getMemberFromJwt();
+        return getRoutesThroughSpot(spots,true, member);
     }
 
+    public List<RecommendedRouteResponseDTO> getRoutesThroughSpotGuest(List<Long> spots){
+        return getRoutesThroughSpot(spots,false, null);
+    }
 
-//    public LikeBookmarkResponseDTO getLikeBookmark(Long integratedRouteId) {
-//        // 해당 통합 경로 id를 가지고 있는 모든 route들의 좋아요 수 합치기
-//        // 만약 게시물이 있으면 더하고, 없으면 패스
-
-            /*
-            select sum(post.likes) from post
-            join route
-            on post.route_id = route.id and route.integrated_route_id = :integratedRouteId
-             */
-    // int like = postRepository.getLikeCount(integratedRouteId);
-
-            /*
-            select count(*) from bookmark b
-            join route r on r.id = b.route_id
-            where r.id = :integratedRouteId
-             */
-    // int bookmark = bookmarkRepository.getBookmarkCount(integratedRouteId);
-
-    //  return LikeBookmarkResponseDTO.builder()
-    //         .likes(like)
-    //          .bookmark(bookmark)
-    //         .build();
-    //}
-
-    public List<RecommendedRouteResponseDTO> getRoutesThroughSpot(List<Long> hashtags, List<Long> spots) {
+    private List<RecommendedRouteResponseDTO> getRoutesThroughSpot(List<Long> spots, boolean isMember, Member member) {
 
         /*
         1. 통합 경로의 여행지에 spots가 모두 포함되는거만 필터링
@@ -351,9 +328,6 @@ public class RouteService {
         // 먼저 경로 중, spots가 모두 포함되는 거 찾기
         // 그리고 같은 통합 경로 id를 가진 애들끼리 묶어서 통합 경로 id 리턴 (ids로)
 
-        log.info("여행지 id: {}", spots);
-
-        Member member = getMemberFromJwt();
         // 해당하는 여행지들이 모두 있는 통합 경로 id 리턴
         //TODO: findIntegratedRouteIdsBySpots, findIntegratedRoute 하나로 합치기
         List<Long> integratedIds = routeRepository.findIntegratedRouteIdsBySpots(spots);
@@ -363,12 +337,13 @@ public class RouteService {
         // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
         List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
         for (Long irId : integratedIds) {
+            log.info("현재 통합 경로 id -> {}", irId);
             recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
                     .routeId(irId)
                     .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
                     .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
-                    .likedAt(likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId)) // 자신이 이 경로에 좋아요를 눌렀는지
-                    .markedAt(bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId)) // 자신이 이 경로에 북마크를 눌렀는지
+                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
+                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
                     .build());
         }
         return recommendedRouteResponseDTOS;
@@ -379,9 +354,16 @@ public class RouteService {
     public void addOrRemoveLike(Long integratedId) {
         Member member = getMemberFromJwt();
 
+        //TODO: 가장 최신의 객체 가져오기
+        LikeBookmarkPeriod likeBookmarkPeriod = likeBookPeriodRepository.findByIntegratedRouteId(integratedId)
+                .orElseThrow(() -> {
+                    throw new CustomException(ErrorCode.NO_LIKE_BOOKMARK_PERIOD);
+                });
+
         // 해당 통합 경로의 route 중에서 가장 작은 id값을 가진 경로 확인하기
         // 해당 경로랑 member 조인해서 검색 후, 없다면 아래 로직 있다면 없애기
         if (likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedId)) {
+            likeBookmarkPeriod.updateLike(likeBookmarkPeriod.getLikes() - 1);
             likePostRepository.deleteByMemberIdAndIntegratedRouteId(member.getId(), integratedId);
             return;
         }
@@ -397,13 +379,8 @@ public class RouteService {
                 .build();
         likePostRepository.save(likePost);
 
-        //기간별 좋아요 테이블에도 추가해야함.
-        // 해당 통합 경로 id가 있는 기간별 객체 가져오기
-        //TODO: 가장 최신의 객체 가져오기
-        LikeBookmarkPeriod likeBookmarkPeriod = likeBookPeriodRepository.findByIntegratedRouteId(integratedId)
-                .orElseThrow(()->{
-            throw new CustomException(ErrorCode.NO_LIKE_BOOKMARK_PERIOD);
-        });
+        likeBookmarkPeriod.updateLike(likeBookmarkPeriod.getLikes() + 1);
+        likeBookPeriodRepository.save(likeBookmarkPeriod);
 
     }
 
@@ -411,8 +388,15 @@ public class RouteService {
     public void addOrRemoveBookmark(Long integratedId) {
         Member member = getMemberFromJwt();
 
+        //TODO: 가장 최신의 객체 가져오기
+        LikeBookmarkPeriod likeBookmarkPeriod = likeBookPeriodRepository.findByIntegratedRouteId(integratedId)
+                .orElseThrow(() -> {
+                    throw new CustomException(ErrorCode.NO_LIKE_BOOKMARK_PERIOD);
+                });
+
         //member랑 route 조인해서 검색 후, 없다면 아래 로직 있다면 없애기
         if (bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedId)) {
+            likeBookmarkPeriod.updateLike(likeBookmarkPeriod.getBookmark() - 1);
             bookmarkRepository.deleteByMemberIdAndIntegratedRouteId(member.getId(), integratedId);
             return;
         }
@@ -429,6 +413,9 @@ public class RouteService {
                 .markedAt(LocalDateTime.now())
                 .build();
         bookmarkRepository.save(bookmark);
+
+        likeBookmarkPeriod.updateLike(likeBookmarkPeriod.getBookmark() + 1);
+        likeBookPeriodRepository.save(likeBookmarkPeriod);
     }
 
     @Transactional
@@ -437,6 +424,7 @@ public class RouteService {
         Route route = routeRepository.findByIdAndMemberId(dto.getRouteId(), member.getId());
         if (route == null) throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_NAME);
         route.updateRouteName(dto.getName());
+        routeRepository.save(route);
     }
 
     public List<RouteDetailResponseDTO> findLike() {

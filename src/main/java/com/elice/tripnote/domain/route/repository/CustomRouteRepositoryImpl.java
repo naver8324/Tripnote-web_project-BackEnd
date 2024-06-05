@@ -54,8 +54,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 ))
                 .from(route)
                 .join(likePost).on(likePost.route.id.eq(route.id))
-                .where(likePost.member.id.eq(memberId)
-                        .and(route.id.eq(memberId)))
+                .where(likePost.member.id.eq(memberId))
                 .fetch();
     }
 
@@ -67,8 +66,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 ))
                 .from(route)
                 .join(bookmark).on(bookmark.route.id.eq(route.id))
-                .where(bookmark.member.id.eq(memberId)
-                        .and(route.id.eq(memberId)))
+                .where(bookmark.member.id.eq(memberId))
                 .fetch();
     }
 
@@ -79,7 +77,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                         route.name
                 ))
                 .from(route)
-                .where(route.id.eq(memberId))
+                .where(route.member.id.eq(memberId))
                 .fetch();
     }
 
@@ -93,7 +91,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
         group by ir.id
 
          */
-        return query
+        Integer likeCount = query
                 .select(likePost.id.count().intValue())
                 .from(route)
                 .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
@@ -101,6 +99,8 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .where(integratedRoute.id.eq(integratedRouteId))
                 .groupBy(integratedRoute.id)
                 .fetchOne();
+
+        return likeCount != null ? likeCount : 0;
     }
 
     public Route getMinRouteByIntegratedId(Long integratedId) {
