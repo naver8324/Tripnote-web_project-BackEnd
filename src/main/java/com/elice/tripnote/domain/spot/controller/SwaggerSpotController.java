@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.spot.controller;
 
+import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.domain.spot.dto.SpotDTO;
 import com.elice.tripnote.domain.spot.dto.SpotRequestDTO;
 import com.elice.tripnote.domain.spot.dto.SpotResponseDTO;
@@ -32,7 +33,7 @@ public interface SwaggerSpotController {
                     content = {@Content(schema = @Schema(implementation = Spot.class))}),
             @ApiResponse(responseCode = "404", description = "해당 지역 혹은 여행지가 존재하지 않습니다.")
     })
-    ResponseEntity<?> getSpots(String region, String location);
+    ResponseEntity<?> getSpots(Region region, String location);
 
 
     @Operation(summary = "DB에 저장된 여행지 조회", description = "기본키를 통해 여행지를 조회합니다.")
@@ -55,7 +56,7 @@ public interface SwaggerSpotController {
                     content = {@Content(schema = @Schema(implementation = SpotResponseDTO.class))}),
             @ApiResponse(responseCode = "404", description = "경로 생성 시 적절한 값 생성 실패")
     })
-    public ResponseEntity<List<SpotResponseDTO>> getSpotForRoute(@RequestBody SpotRequestDTO requestDTO);
+    ResponseEntity<List<Spot>> getSpotForRoute(@RequestBody SpotRequestDTO requestDTO);
 //
 //    @Operation(summary = "경로 생성 페이지", description = "특정 지역 선택 후 해당 지역 내 여행지 목록 조회")
 //    @Parameters({

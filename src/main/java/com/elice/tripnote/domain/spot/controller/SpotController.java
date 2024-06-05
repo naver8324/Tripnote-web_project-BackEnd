@@ -1,6 +1,7 @@
 package com.elice.tripnote.domain.spot.controller;
 
 
+import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.domain.spot.dto.SpotDTO;
 import com.elice.tripnote.domain.spot.dto.SpotRequestDTO;
 import com.elice.tripnote.domain.spot.dto.SpotResponseDTO;
@@ -28,11 +29,12 @@ public class SpotController implements SwaggerSpotController{
 
     @Override
     @GetMapping
-    public ResponseEntity<?> getSpots(@RequestParam(required = true, name="region") String region,
+    public ResponseEntity<?> getSpots(@RequestParam(required = true, name="region") Region region,
                                       @RequestParam(required = false, name = "location") String location) {
         try{
             if(location ==null)
                 return ResponseEntity.ok(spotService.getByRegion(region));
+            //return ResponseEntity.ok(spotService.getByRegionAndLocation(region,location));
             return ResponseEntity.ok(spotService.getByRegionAndLocation(region,location));
         }catch(LandmarkNotFoundException | RegionNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -53,14 +55,13 @@ public class SpotController implements SwaggerSpotController{
 
     @Override
     @PostMapping
-    public ResponseEntity<List<SpotResponseDTO>> getSpotForRoute(@RequestBody SpotRequestDTO requestDTO) {
-        List<Long> spotIDs = requestDTO.getSpotId();
-        if (spotIDs == null || spotIDs.isEmpty()) {
-            return ResponseEntity.badRequest().build(); // 필수 파라미터가 없는 경우 400 Bad Request 반환
+    public ResponseEntity<List<Spot>> getSpotForRoute(@RequestBody SpotRequestDTO requestDTO) {
+        try{
+            List<Long> spotIDs = requestDTO.getSpotId();
+            return ResponseEntity.ok().body(spotService.getSpotsByIds(spotIDs));
+        }catch (LandmarkNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-
-        // 클라이언트가 선택한 Spot의 ID를 기반으로 해당 Spot들을 조회하는 메서드 호출
-        return ResponseEntity.ok().body(spotService.getSpotsByIds(spotIDs));
     }
 
 //    @Override

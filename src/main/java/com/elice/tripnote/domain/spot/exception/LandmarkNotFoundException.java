@@ -1,11 +1,15 @@
 package com.elice.tripnote.domain.spot.exception;
 
+import com.elice.tripnote.global.exception.ErrorCode;
 import com.elice.tripnote.global.exception.NotFoundException;
+import lombok.Getter;
 
-public class LandmarkNotFoundException extends NotFoundException {
-    private final static String message = "존재하지 않는 랜드마크입니다.";
+@Getter
+public class LandmarkNotFoundException extends RuntimeException {
+    private final ErrorCode errorCode;
 
-    public LandmarkNotFoundException(){
-        super(message);
+    public LandmarkNotFoundException(ErrorCode errorCode){
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
     }
 }
