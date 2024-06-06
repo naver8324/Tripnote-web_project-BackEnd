@@ -24,7 +24,7 @@ public interface SwaggerHashtagController {
     @Operation(summary = "해시태그 전체 조회", description = "해시태그의 모든 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공")
     @Parameters(value = {
-            @Parameter(name="page", description = "페이지", example = "0"),
+            @Parameter(name="page", description = "페이지", example = "1"),
             @Parameter(name="size", description = "페이지 별로 보여줄 리스트 개수", example = "10"),
             @Parameter(name="sort", description = "정렬방법", example = "id")
     })

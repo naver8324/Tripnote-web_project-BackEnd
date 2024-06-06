@@ -10,5 +10,5 @@ import java.util.List;
 public interface HashtagCustomRepository {
 
     List<HashtagResponseDTO> findByIsCityAndIsDelete(boolean isCity, boolean isDelete);
-    Page<HashtagDTO> customFindAll(Pageable pageable);
+    Page<HashtagDTO> customFindAll(int page, int size, String sort);
 }

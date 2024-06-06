@@ -35,7 +35,7 @@ public class HashtagController implements SwaggerHashtagController{
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(hashtagRepository.customFindAll(pageable));
+                .body(hashtagRepository.customFindAll(page, size, sort));
     }
 
 
