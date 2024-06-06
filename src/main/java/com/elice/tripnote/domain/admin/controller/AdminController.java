@@ -35,4 +35,12 @@ public class    AdminController implements SwaggerAdminController{
         adminService.deleteMember(email);
         return ResponseEntity.ok().build();
     }
+
+    @Override
+    @AdminRole
+    @DeleteMapping("/restore-member")
+    public ResponseEntity<Void> restoreMember(@RequestParam String email) {
+        adminService.restoreMember(email);
+        return ResponseEntity.ok().build();
+    }
 }
