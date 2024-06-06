@@ -6,6 +6,7 @@ import com.elice.tripnote.domain.post.entity.ImageResponseDTO;
 import com.elice.tripnote.global.annotation.MemberRole;
 import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +42,7 @@ public class ImageController implements SwaggerImageController {
     @Override
     @MemberRole
     @PutMapping("/api/member/images")
-    public ResponseEntity<ImageResponseDTO> createPresignedImageUrl(@RequestBody ImageRequestDTO imageDTO){
+    public ResponseEntity<ImageResponseDTO> createPresignedImageUrl(@Valid @RequestBody ImageRequestDTO imageDTO){
 
 
         // file size 10MB 이하로 제한

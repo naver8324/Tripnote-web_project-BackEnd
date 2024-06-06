@@ -8,6 +8,7 @@ import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.service.PostService;
 import com.elice.tripnote.global.annotation.AdminRole;
 import com.elice.tripnote.global.annotation.MemberRole;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,7 @@ public class PostController implements SwaggerPostController {
 
     @Override
     @PostMapping("/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@RequestBody List<HashtagRequestDTO> hashtagRequestDTOList, @RequestParam(name="order", required = false, defaultValue = "") String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@Valid @RequestBody List<HashtagRequestDTO> hashtagRequestDTOList, @RequestParam(name="order", required = false, defaultValue = "") String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(postService.getPostsByHashtag(hashtagRequestDTOList, order, page, size));
     }
 
@@ -75,7 +76,7 @@ public class PostController implements SwaggerPostController {
     @Override
     @MemberRole
     @PostMapping("/member/posts")
-    public ResponseEntity<PostDetailResponseDTO> savePost(@RequestBody PostRequestDTO postDTO, @RequestParam(name="routeId") Long routeId) {
+    public ResponseEntity<PostDetailResponseDTO> savePost(@Valid @RequestBody PostRequestDTO postDTO, @RequestParam(name="routeId") Long routeId) {
         Long postId = postService.savePost(postDTO, routeId);
         return ResponseEntity.status(HttpStatus.CREATED).body(postService.getPost(postId));
     }
@@ -83,7 +84,7 @@ public class PostController implements SwaggerPostController {
     @Override
     @MemberRole
     @PatchMapping("/member/posts/{postId}")
-    public ResponseEntity<PostDetailResponseDTO> updatePost(@RequestBody PostRequestDTO postDTO, @PathVariable(name="postId") Long postId) {
+    public ResponseEntity<PostDetailResponseDTO> updatePost(@Valid @RequestBody PostRequestDTO postDTO, @PathVariable(name="postId") Long postId) {
         postService.updatePost(postDTO, postId);
         return ResponseEntity.status(HttpStatus.OK).body(postService.getPost(postId));
     }
