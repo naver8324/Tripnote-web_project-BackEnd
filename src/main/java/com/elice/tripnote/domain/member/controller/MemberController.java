@@ -6,7 +6,9 @@ import com.elice.tripnote.domain.member.entity.PasswordDTO;
 import com.elice.tripnote.domain.member.entity.ProfileUpdateDTO;
 import com.elice.tripnote.domain.member.service.KakaoService;
 import com.elice.tripnote.domain.member.service.MemberService;
+import com.elice.tripnote.domain.member.service.TokenBlacklistService;
 import com.elice.tripnote.global.annotation.MemberRole;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class MemberController implements SwaggerMemberController {
 
     private final MemberService memberService;
     private final KakaoService kakaoService;
+    private final TokenBlacklistService tokenBlacklistService;
 
 
     // 회원가입
@@ -89,6 +92,19 @@ public class MemberController implements SwaggerMemberController {
     @GetMapping
     public ResponseEntity<MemberResponseDTO> getMemberByToken() {
         return ResponseEntity.ok().body(memberService.getMemberResponseDTO());
+    }
+
+
+    // 로그아웃
+    @Override
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // Remove "Bearer " prefix
+            tokenBlacklistService.addTokenToBlacklist(token);
+        }
+        return ResponseEntity.ok().build();
     }
 
 
