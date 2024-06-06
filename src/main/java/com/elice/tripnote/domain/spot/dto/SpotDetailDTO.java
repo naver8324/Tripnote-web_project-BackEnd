@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.spot.dto;
 
+import com.elice.tripnote.domain.spot.entity.Spot;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,6 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SpotDetailDTO {
-    private SpotDTO spot;
-    private Map<Long, Double> nextSpots;
+    private Spot spot;
+    private Map<Spot, Double> nextSpots;
 }
