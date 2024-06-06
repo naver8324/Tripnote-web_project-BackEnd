@@ -3,6 +3,7 @@ package com.elice.tripnote.global.interceptor;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.entity.MemberDetailsDTO;
 import com.elice.tripnote.domain.member.entity.Status;
+import com.elice.tripnote.domain.member.service.TokenBlacklistService;
 import com.elice.tripnote.global.annotation.MemberRole;
 import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
@@ -26,6 +27,7 @@ import java.util.Objects;
 public class MemberInterceptor implements HandlerInterceptor {
 
     private final JWTUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -37,6 +39,12 @@ public class MemberInterceptor implements HandlerInterceptor {
 
             // JWT 토큰 가져오기
             String token = extractToken(request);
+
+            // 토큰 블랙리스트 검증 (로그아웃된 토큰)
+            if (tokenBlacklistService.isTokenBlacklisted(token)) {
+                log.error("블랙리스트에 등록된 토큰입니다.");
+                throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+            }
 
             // 토큰 소멸 시간 검증
             if (jwtUtil.isExpired(token)) {

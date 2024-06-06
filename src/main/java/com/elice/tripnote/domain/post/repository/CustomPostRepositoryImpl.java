@@ -22,8 +22,10 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.query.criteria.JpaSubQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -145,8 +147,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         List<String> hashtagNames = hashtagRequestDTOList.stream().map(HashtagRequestDTO::getName).toList();
 
-        //Problems: VERY PROBLEMATIC.
-        long totalCount = query
+        JPQLQuery<Long> subQuery = JPAExpressions
                 .select(post.id)
                 .from(post)
                 .join(post.member, member)
@@ -157,8 +158,13 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .on(hashtag.name.in(hashtagNames))
                 .where(post.isDeleted.isFalse())
                 .groupBy(post.id)
-                .having(hashtag.count().eq((long) hashtagRequestDTOList.size()))
-                .fetchCount();
+                .having(hashtag.count().eq((long) hashtagRequestDTOList.size()));
+
+        long totalCount = query
+                .select(post.count())
+                .from(post)
+                .where(post.id.in(subQuery))
+                .fetchFirst();
 
         OrderSpecifier orderSpecifier = post.id.desc();
 
@@ -375,7 +381,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     }
 
 
-    public PostDetailResponseDTO customFindPost(Long postId){
+    public PostDetailResponseDTO customFindPost(Long postId, Long memberId){
 
 
         List<PostDetailResponseDTO> result =query
@@ -386,8 +392,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(integratedRoute.uuidHashtags, uuidHashtags)
                 .join(uuidHashtags.hashtag, hashtag)
                 .leftJoin(post.likePosts, likePost)
+                .on(likePost.member.id.eq(memberId))
                 .leftJoin(post.bookmarks, bookmark)
+                .on(bookmark.member.id.eq(memberId))
                 .leftJoin(post.reportPosts, reportPost)
+                .on(reportPost.member.id.eq(memberId))
                 .where(post.id.eq(postId)
                         .and(post.isDeleted.isFalse()))
                 .transform(groupBy(post.id).list(Projections.constructor(PostDetailResponseDTO.class,
