@@ -6,6 +6,10 @@ import com.elice.tripnote.domain.hashtag.entity.QHashtag;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,9 +37,9 @@ public class HashtagCustomRepositoryImpl implements HashtagCustomRepository {
                 .fetch();
     }
 
-    public List<HashtagDTO> customFindAll(){
+    public Page<HashtagDTO> customFindAll(Pageable pageable){
 
-        return query
+        List<HashtagDTO> hashtagDTOS = query
                 .select(Projections.constructor(HashtagDTO.class,
                         hashtag.id,
                         hashtag.name,
@@ -44,6 +48,8 @@ public class HashtagCustomRepositoryImpl implements HashtagCustomRepository {
                 ))
                 .from(hashtag)
                 .fetch();
+
+        return new PageImpl<>(hashtagDTOS);
     }
 
 }

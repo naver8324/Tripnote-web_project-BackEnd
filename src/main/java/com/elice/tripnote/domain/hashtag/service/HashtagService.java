@@ -55,13 +55,15 @@ public class HashtagService {
 
     //해시태그 삭제 ( isDelete = true 로 변경 )
     @Transactional
-    public void deleteHashtag(Long id){
+    public boolean deleteHashtag(Long id){
 
         Hashtag hashtag = hashtagRepository.getById(id);
 
         hashtag.delete();
 
-        hashtagRepository.save(hashtag);
+        Hashtag deleteHashtag = hashtagRepository.save(hashtag);
+
+        return deleteHashtag.isDelete();
 
     }
 
