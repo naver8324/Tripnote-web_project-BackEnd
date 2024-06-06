@@ -21,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -111,7 +112,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     //로그인 실패시 실행하는 메소드
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-        response.setStatus(401);
-        log.info("login failed");
+        String errorMessage = "로그인에 실패했습니다. ";
+
+        if (failed instanceof AuthenticationServiceException) {
+            errorMessage += "인증 요청 본문을 파싱하는 데 실패했습니다.";
+        } else {
+            errorMessage += "유효하지 않은 이메일 또는 비밀번호입니다.";
+        }
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        log.error("Login failed: {}", errorMessage);
+        // 클라이언트에게 실패 이유를 반환합니다.
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            out.print("{\"error\":\"" + errorMessage + "\"}");
+        } catch (IOException e) {
+            log.error("Failed to send error message to client", e);
+        }
     }
 }

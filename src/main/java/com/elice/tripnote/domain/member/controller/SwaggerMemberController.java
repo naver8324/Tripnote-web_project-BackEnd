@@ -1,9 +1,6 @@
 package com.elice.tripnote.domain.member.controller;
 
-import com.elice.tripnote.domain.member.entity.Member;
-import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
-import com.elice.tripnote.domain.member.entity.MemberResponseDTO;
-import com.elice.tripnote.domain.member.entity.PasswordDTO;
+import com.elice.tripnote.domain.member.entity.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -31,10 +28,10 @@ public interface SwaggerMemberController {
     ResponseEntity<Void> signup(@RequestBody MemberRequestDTO memberRequestDTO);
 
 
-    @Operation(summary = "이메일로 회원 조회", description = "이메일을 기반으로 회원을 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "회원 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Member.class)))
-    @GetMapping("/{email}")
-    ResponseEntity<MemberResponseDTO> getMemberByEmail(@PathVariable @Parameter(description = "이메일 주소", required = true) String email);
+//    @Operation(summary = "이메일로 회원 조회", description = "이메일을 기반으로 회원을 조회합니다.")
+//    @ApiResponse(responseCode = "200", description = "회원 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Member.class)))
+//    @GetMapping("/{email}")
+//    ResponseEntity<MemberResponseDTO> getMemberByEmail(@PathVariable @Parameter(description = "이메일 주소", required = true) String email);
 
 
     @Operation(summary = "이메일 중복 확인", description = "입력한 이메일이 이미 등록되어 있는지 확인합니다. (이메일이 이미 존재하면 true 반환, 사용가능하면 false 반환)")
@@ -50,28 +47,14 @@ public interface SwaggerMemberController {
 
 
 
-    @Operation(summary = "닉네임 변경", description = "(로그인중) 회원의 닉네임을 변경합니다.")
+    @Operation(summary = "프로필 업데이트", description = "회원의 닉네임 및 비밀번호를 업데이트합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "닉네임 변경에 성공하였습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "프로필 업데이트에 성공하였습니다."),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "409", description = "이미 사용 중인 닉네임입니다.", content = @Content(mediaType = "application/json"))
+            @ApiResponse(responseCode = "404", description = "해당 이메일을 가진 회원이 없습니다.", content = @Content(mediaType = "application/json"))
     })
-    @PatchMapping("/update-nickname")
-    public ResponseEntity<Void> updateNickname(@RequestParam @Parameter(description = "새 닉네임", required = true) String newNickname);
-
-
-    @Operation(summary = "비밀번호 변경", description = "(로그인중) 회원의 비밀번호를 변경합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "비밀번호 변경에 성공하였습니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "409", description = "현재 비밀번호가 일치하지 않습니다.", content = @Content(mediaType = "application/json"))
-    })
-    @PatchMapping("/update-password")
-    ResponseEntity<Void> updatePassword(@RequestBody @Parameter(description = "새 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO newPasswordDTO);
+    @PatchMapping("/update-profile")
+    ResponseEntity<Void> updateProfile(@RequestBody ProfileUpdateDTO profileUpdateDTO);
 
 
     @Operation(summary = "회원 삭제", description = "(로그인중) 회원을 삭제합니다.")
@@ -95,15 +78,6 @@ public interface SwaggerMemberController {
     ResponseEntity<Boolean> validatePassword(@RequestBody @Parameter(description = "검증할 비밀번호(json형식으로 key는 password)", required = true) PasswordDTO validatePasswordDTO);
 
 
-
-    @Operation(summary = "회원 목록 조회(관리자)", description = "전체 회원 목록을 페이징하여 조회합니다. (관리자 전용)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원 목록 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "403", description = "관리자 권한이 없습니다.", content = @Content(mediaType = "application/json"))
-    })
-    @GetMapping("/admin/members")
-    public ResponseEntity<Page<MemberResponseDTO>> getMembers(@PageableDefault(size = 10, sort = "id") Pageable pageable);
 
 
     @Operation(summary = "로그인중인 회원 조회", description = "토큰 기반으로 회원을 조회합니다.")

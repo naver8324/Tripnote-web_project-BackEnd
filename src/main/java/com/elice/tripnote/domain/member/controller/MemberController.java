@@ -1,14 +1,12 @@
 package com.elice.tripnote.domain.member.controller;
 
-import com.elice.tripnote.domain.member.entity.Member;
-import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
-import com.elice.tripnote.domain.member.entity.MemberResponseDTO;
-import com.elice.tripnote.domain.member.entity.PasswordDTO;
+import com.elice.tripnote.domain.member.entity.*;
 import com.elice.tripnote.domain.member.service.KakaoService;
 import com.elice.tripnote.domain.member.service.MemberService;
 import com.elice.tripnote.global.annotation.AdminRole;
 import com.elice.tripnote.global.annotation.MemberRole;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,26 +29,19 @@ public class MemberController implements SwaggerMemberController {
     private final KakaoService kakaoService;
 
 
-    @MemberRole
-    @GetMapping("/test1")
-    public String test2() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return email + " | completed test1.";
-    }
-
     // 회원가입
     @Override
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody MemberRequestDTO memberRequestDTO) {
+    public ResponseEntity<Void> signup(@RequestBody @Valid MemberRequestDTO memberRequestDTO) {
         memberService.signup(memberRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @Override
-    @GetMapping("/{email}")
-    public ResponseEntity<MemberResponseDTO> getMemberByEmail(@PathVariable String email) {
-        return ResponseEntity.ok().body(memberService.getMemberResponseDTOByEmail(email));
-    }
+//    @Override
+//    @GetMapping
+//    public ResponseEntity<MemberResponseDTO> getMemberByEmail(@RequestParam String email) {
+//        return ResponseEntity.ok().body(memberService.getMemberResponseDTOByEmail(email));
+//    }
 
     // 이메일 중복검사 (이메일이 이미 존재하면 true 반환, 사용가능하면 false 반환)
     @Override
@@ -66,21 +57,12 @@ public class MemberController implements SwaggerMemberController {
         return ResponseEntity.ok().body(memberService.checkNicknameDuplicate(nickname));
     }
 
-    // (로그인중) 닉네임 변경
+    // (로그인중) 프로필 업데이트 (닉네임 및 비밀번호)
     @Override
     @MemberRole
-    @PatchMapping("/update-nickname")
-    public ResponseEntity<Void> updateNickname(@RequestParam String newNickname) {
-        memberService.updateNickname(newNickname);
-        return ResponseEntity.ok().build();
-    }
-
-    // (로그인중) 비밀번호 변경 (비밀번호는 노출을 피해야 하기 때문에 RequestBody 형식으로 보냄)
-    @Override
-    @MemberRole
-    @PatchMapping("/update-password")
-    public ResponseEntity<Void> updatePassword(@RequestBody PasswordDTO newPasswordDTO) {
-        memberService.updatePassword(newPasswordDTO);
+    @PatchMapping("/update-profile")
+    public ResponseEntity<Void> updateProfile(@RequestBody ProfileUpdateDTO profileUpdateDTO) {
+        memberService.updateProfile(profileUpdateDTO);
         return ResponseEntity.ok().build();
     }
 
@@ -101,18 +83,12 @@ public class MemberController implements SwaggerMemberController {
         return ResponseEntity.ok().body(memberService.validatePassword(validatePasswordDTO));
     }
 
-    // 멤버 전체 조회
-    @Override
-    @AdminRole
-    @GetMapping("/admin/members")
-    public ResponseEntity<Page<MemberResponseDTO>> getMembers(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        return ResponseEntity.ok().body(memberService.findMembers(pageable));
-    }
+
 
     // 로그인중인 회원 정보 리턴
     @Override
     @MemberRole
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<MemberResponseDTO> getMemberByToken() {
         return ResponseEntity.ok().body(memberService.getMemberResponseDTO());
     }

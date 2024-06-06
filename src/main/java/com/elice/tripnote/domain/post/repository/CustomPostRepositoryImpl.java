@@ -318,7 +318,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     public PostDetailResponseDTO customFindPost(Long postId){
 
 
-        return query
+        List<PostDetailResponseDTO> result =query
                 .from(post)
                 .join(post.member, member)
                 .join(post.route, route)
@@ -349,9 +349,12 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                                         hashtag.isCity)
                                 )
                         )
-                )).get(0);
+                ));
 
-
+        if(result.isEmpty()){
+            return null;
+        }
+        return result.get(0);
 
     }
 
