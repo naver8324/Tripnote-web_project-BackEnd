@@ -1,6 +1,7 @@
 package com.elice.tripnote.domain.post.repository;
 
 
+import com.elice.tripnote.domain.hashtag.entity.Hashtag;
 import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagResponseDTO;
 import com.elice.tripnote.domain.hashtag.entity.QHashtag;
@@ -18,6 +19,7 @@ import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -69,7 +71,8 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
             orderSpecifier = post.likes.desc();
         }
 
-        List<PostResponseDTO> postResponseDTOs = query
+        List<Long> postIds = query
+                .select(post.id)
                 .from(post)
                 .join(post.member, member)
                 .join(post.route, route)
@@ -80,6 +83,17 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .orderBy(orderSpecifier)
                 .offset(page * size)
                 .limit(size)
+                .fetch();
+
+        List<PostResponseDTO> postResponseDTOs = query
+                .from(post)
+                .join(post.member, member)
+                .on(post.id.in(postIds))
+                .join(post.route, route)
+                .join(route.integratedRoute, integratedRoute)
+                .join(integratedRoute.uuidHashtags, uuidHashtags)
+                .join(uuidHashtags.hashtag, hashtag)
+                .orderBy(orderSpecifier)
                 .transform(groupBy(post.id).list(Projections.constructor(PostResponseDTO.class,
                                 post.id,
                                 post.title,
@@ -94,6 +108,34 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                                 )
                         )
                 ));
+
+
+//
+//        List<PostResponseDTO> postResponseDTOs = query
+//                .from(post)
+//                .join(post.member, member)
+//                .join(post.route, route)
+//                .join(route.integratedRoute, integratedRoute)
+//                .join(integratedRoute.uuidHashtags, uuidHashtags)
+//                .join(uuidHashtags.hashtag, hashtag)
+//                .where(post.isDeleted.isFalse())
+//                .orderBy(orderSpecifier)
+//                .offset(page * size)
+//                .limit(size)
+//                .transform(groupBy(post.id).list(Projections.constructor(PostResponseDTO.class,
+//                                post.id,
+//                                post.title,
+//                                post.content,
+//                                post.isDeleted,
+//                                post.createdAt,
+//                                member.nickname,
+//                                list(Projections.constructor(HashtagResponseDTO.class,
+//                                        hashtag.id,
+//                                        hashtag.name,
+//                                        hashtag.isCity)
+//                                )
+//                        )
+//                ));
 
         PageRequest pageRequest = PageRequest.of(page, size);
 
@@ -114,6 +156,8 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(uuidHashtags.hashtag, hashtag)
                 .on(hashtag.name.in(hashtagRequestDTOList.stream().map(HashtagRequestDTO::getName).collect(Collectors.toList())))
                 .where(post.isDeleted.isFalse())
+                .groupBy(post.id)
+                .having(hashtag.count().eq((long) hashtagRequestDTOList.size()))
                 .fetchFirst();
 
         OrderSpecifier orderSpecifier = post.id.desc();
@@ -132,6 +176,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .on(hashtag.name.in(hashtagRequestDTOList.stream().map(HashtagRequestDTO::getName).collect(Collectors.toList())))
                 .where(post.isDeleted.isFalse())
                 .orderBy(orderSpecifier)
+                .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)
                 .transform(groupBy(post.id).list(Projections.constructor(PostResponseDTO.class,
@@ -175,7 +220,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(route.integratedRoute, integratedRoute)
                 .join(integratedRoute.uuidHashtags, uuidHashtags)
                 .join(uuidHashtags.hashtag, hashtag)
-                .orderBy(post.id.desc())
+                .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)
                 .transform(groupBy(post.id).list(Projections.constructor(PostResponseDTO.class,
@@ -223,7 +268,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(post.member, member)
                 .on(post.member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
-                .orderBy(post.id.desc())
+                .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)
                 .fetch();
@@ -262,7 +307,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(likePost.member, member)
                 .on(member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
-                .orderBy(post.id.desc())
+                .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)
                 .fetch();
@@ -303,7 +348,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(bookmark.member, member)
                 .on(member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
-                .orderBy(post.id.desc())
+                .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)
                 .fetch();

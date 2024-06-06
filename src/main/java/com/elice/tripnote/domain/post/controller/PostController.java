@@ -25,13 +25,13 @@ public class PostController implements SwaggerPostController {
 
     @Override
     @GetMapping("/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPosts(@RequestParam(name="order", required = false) String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+    public ResponseEntity<Page<PostResponseDTO>> getPosts(@RequestParam(name="order", required = false, defaultValue = "") String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(postService.getPosts(order, page, size));
     }
 
     @Override
     @PostMapping("/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@RequestBody List<HashtagRequestDTO> hashtagRequestDTOList, @RequestParam(name="order", required = false) String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@RequestBody List<HashtagRequestDTO> hashtagRequestDTOList, @RequestParam(name="order", required = false, defaultValue = "") String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
         return ResponseEntity.ok().body(postService.getPostsByHashtag(hashtagRequestDTOList, order, page, size));
     }
 
