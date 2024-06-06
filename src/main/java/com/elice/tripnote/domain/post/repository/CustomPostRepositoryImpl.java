@@ -145,8 +145,9 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         List<String> hashtagNames = hashtagRequestDTOList.stream().map(HashtagRequestDTO::getName).toList();
 
+        //Problems: VERY PROBLEMATIC.
         long totalCount = query
-                .select(post.count())
+                .select(post.id)
                 .from(post)
                 .join(post.member, member)
                 .join(post.route, route)
@@ -157,7 +158,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .where(post.isDeleted.isFalse())
                 .groupBy(post.id)
                 .having(hashtag.count().eq((long) hashtagRequestDTOList.size()))
-                .fetchFirst();
+                .fetchCount();
 
         OrderSpecifier orderSpecifier = post.id.desc();
 
