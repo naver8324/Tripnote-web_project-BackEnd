@@ -13,19 +13,18 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 
 import static com.elice.tripnote.global.exception.ErrorCode.*;
 
@@ -42,8 +41,27 @@ public class KakaoService {
 
     @Value("${kakao.secret}")
     private String secretKey;
+    private final String redirectURI = "http://34.64.39.102:8080/api/member/kakao/login";
+    //http://localhost:8080
+    //http://34.64.39.102:8080
 
     private final MemberRepository memberRepository;
+
+    public ResponseEntity<Void> getAuthorizationCode(){
+        // URL에 쿼리 파라미터 추가
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl("https://kauth.kakao.com/oauth/authorize")
+                .queryParam("response_type", "code")
+                .queryParam("client_id", clientKey)
+                .queryParam("redirect_uri", redirectURI);
+
+        // 리다이렉트 URL 생성
+        URI redirectUrl = uriBuilder.build().toUri();
+
+        // 302 리다이렉트 응답 생성
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setLocation(redirectUrl);
+        return new ResponseEntity<>(httpHeaders, HttpStatus.FOUND);
+    }
 
     //카카오 엑세스 토큰 얻기
     public String getAccessToken(String code) throws IOException {
@@ -114,26 +132,32 @@ public class KakaoService {
         KakaoInfoDTO dto = findProfile(accessToken);
 
         log.info("로그인 하는 유저의 카카오 아이디: {}", dto.getKakaoId());
-        Member member = memberRepository.findByOauthId(dto.getKakaoId()).orElseGet(
+        Member member = memberRepository.findByOauthIdOrEmail(dto.getKakaoId(), dto.getEmail()).orElseGet(
                 () -> {
 //            //회원이 아닌 경우
 //            //회원가입 진행(이메일, 닉네임 제외 모두)
+                    log.info("회원 가입을 진행합니다.");
                     //이메일, 닉네임 중복 검사는 따로
                     Member newMember = Member.builder()
                             .oauthId(dto.getKakaoId())
                             .email(dto.getEmail())
                             .nickname(dto.getNickName())
+                            .oauthType("kakao")
                             .status(Status.ACTIVE) // 회원가입시 활동 상태로
                             .build();
                     return memberRepository.save(newMember);
                 });
-
+        if(member.getOauthId() == null) {
+            log.info("기존 회원 정보와 카카오 회원 정보를 연동시킵니다.");
+            member.addKakaoInfo(dto.getKakaoId());
+        }
         if (member.getStatus() != Status.ACTIVE) { //탈퇴한 경우
             log.info("유저가 탈퇴한 상태입니다.");
             member.updateStatusACTIVE();
             memberRepository.save(member);
 //            throw new CustomException(NO_MEMBER);
         }
+        log.info("로그인이 완료되었습니다.");
 
     }
 
@@ -240,10 +264,6 @@ public class KakaoService {
     @Transactional
     public Long unlink() throws IOException {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        User user = userService.findUser(Long.valueOf(userId));
-//        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-//            throw new CustomException(NO_MEMBER);
-//        });
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
             throw new CustomException(NO_MEMBER);
         });

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
@@ -69,7 +70,7 @@ public interface SwaggerCommentController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1356"),
     })
-    ResponseEntity<CommentResponseDTO> saveComment(CommentRequestDTO commentDTO, Long postId);
+    ResponseEntity<CommentResponseDTO> saveComment(@Valid CommentRequestDTO commentDTO, Long postId);
 
 
 
@@ -82,7 +83,7 @@ public interface SwaggerCommentController {
     @Parameters(value = {
             @Parameter(name="commentId", description = "댓글 번호", example = "1356"),
     })
-    ResponseEntity<CommentResponseDTO> updateComment(CommentRequestDTO commentDTO, Long commentId);
+    ResponseEntity<CommentResponseDTO> updateComment(@Valid CommentRequestDTO commentDTO, Long commentId);
 
 
     @Operation(summary="게시글 댓글 신고 - 유저", description= "댓글을 신고할 때 사용하는 api입니다. 다시 누르면 신고를 해제합니다.")
