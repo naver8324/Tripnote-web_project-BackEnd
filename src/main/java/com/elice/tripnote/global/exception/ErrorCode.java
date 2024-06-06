@@ -41,11 +41,14 @@ public enum ErrorCode {
     NO_ROUTE(HttpStatus.NOT_FOUND, "해당하는 경로가 존재하지 않습니다."),
     NOT_FOUND_ALGORITHM(HttpStatus.NOT_FOUND, "SHA-1 알고리즘을 찾을 수 없습니다."),
     NO_USER(HttpStatus.NOT_FOUND, "해당하는 유저는 존재하지 않습니다."),
+    NO_EMAIL(HttpStatus.NOT_FOUND, "해당하는 이메일은 존재하지 않습니다."),
     NO_COMMENT(HttpStatus.NOT_FOUND, "해당하는 댓글은 존재하지 않습니다."),
     NO_INTEGRATED_ROUTE_STATUS(HttpStatus.NOT_FOUND, "해당 지역은 존재하지 않습니다."),
     NO_LANDMARK(HttpStatus.NOT_FOUND, "존재하지 않는 랜드마크입니다."),
     NO_REGION(HttpStatus.NOT_FOUND, "존재하지 않는 지역입니다."),
     NO_LIKE_BOOKMARK_PERIOD(HttpStatus.NOT_FOUND, "해당하는 기간별 좋아요 북마크 객체가 존재하지 않습니다."),
+    MEMBER_ALREADY_DELETED(HttpStatus.NOT_FOUND, "이미 삭제된 회원입니다."),
+    MEMBER_ALREADY_RESTORED(HttpStatus.NOT_FOUND, "이미 복구된 회원입니다."),
 
     // 409
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),

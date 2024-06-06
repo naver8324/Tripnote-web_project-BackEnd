@@ -90,6 +90,12 @@ public class Member {
         this.status = Status.DELETED_BY_ADMIN;
     }
 
+    // (관리자가) 회원 복구 메서드
+    public void restoreByAdmin() {
+        this.deletedAt = null;
+        this.status = Status.ACTIVE;
+    }
+
     public void updateStatusACTIVE(){
         this.status=Status.ACTIVE;
     }
