@@ -34,29 +34,15 @@ public class RouteController implements SwaggerRouteController {
     }
 
 
-    //TODO: 경로 공개/비공개 하나로 합치기
-
     /**
-     * 경로 비공개
-     * @return 비공개 처리된 경로 id
+     * 경로 공개/비공개
+     * @return 공개 여부를 변경하려는 경로 id
      */
     @Override
     @MemberRole
-    @PatchMapping("/member/routes/private/{routeId}")
-    public ResponseEntity<Long> setRouteToPrivate(@PathVariable("routeId") Long routeId) {
-        return ResponseEntity.ok(routeService.setRouteToPrivate(routeId));
-    }
-
-    /**
-     * 경로 공개
-     *
-     * @return 공개 처리된 경로 id
-     */
-    @Override
-    @MemberRole
-    @PatchMapping("/member/routes/public/{routeId}")
-    public ResponseEntity<Long> setRouteToPublic(@PathVariable("routeId") Long routeId) {
-        return ResponseEntity.ok(routeService.setRouteToPublic(routeId));
+    @PatchMapping("/member/routes/status/{routeId}")
+    public ResponseEntity<Long> setRouteStatus(@PathVariable("routeId") Long routeId) {
+        return ResponseEntity.ok(routeService.setRouteToStatus(routeId));
     }
 
     /**

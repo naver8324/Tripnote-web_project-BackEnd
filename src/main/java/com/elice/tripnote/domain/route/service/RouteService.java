@@ -191,11 +191,8 @@ public class RouteService {
     }
 
     @Transactional
-    public Long setRouteToPrivate(Long routeId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
-            throw new CustomException(ErrorCode.NO_MEMBER);
-        });
+    public Long setRouteToStatus(Long routeId) {
+        Member member = getMemberFromJwt();
 
         Route route = routeRepository.findById(routeId)
                 .orElseThrow(() -> {
@@ -205,30 +202,14 @@ public class RouteService {
         // 해당 경로가 자신의 것이 맞는지 확인
         if (member.getId() != route.getMember().getId())
             throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_STATUS);
+        if(route.getRouteStatus() == RouteStatus.PUBLIC) route.updateStatus(RouteStatus.PRIVATE);
+        else if(route.getRouteStatus() == RouteStatus.PRIVATE) route.updateStatus(RouteStatus.PUBLIC);
+        else {
+            log.warn("삭제된 경로입니다. 경로 번호: {}", routeId);
+            throw new CustomException(ErrorCode.NO_ROUTE);
+        }
 
-        route.updateStatus(RouteStatus.PRIVATE);
-        route = routeRepository.save(route);
-        return route.getId();
-    }
-
-    @Transactional
-    public Long setRouteToPublic(Long routeId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
-            throw new CustomException(ErrorCode.NO_MEMBER);
-        });
-
-        Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> {
-                    throw new CustomException(ErrorCode.NO_ROUTE);
-                });
-
-        // 해당 경로가 자신의 것이 맞는지 확인
-        if (member.getId() != route.getMember().getId())
-            throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_STATUS);
-        route.updateStatus(RouteStatus.PUBLIC);
-        route = routeRepository.save(route);
-        return route.getId();
+        return routeRepository.save(route).getId();
     }
 
     @Transactional
