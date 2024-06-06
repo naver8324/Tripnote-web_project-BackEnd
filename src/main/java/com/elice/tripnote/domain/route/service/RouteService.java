@@ -17,7 +17,6 @@ import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagReposito
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.domain.route.entity.*;
-import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.constant.Region;
@@ -187,7 +186,7 @@ public class RouteService {
 
             return new UUID(msb, lsb).toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new AlgorithmNotFoundException();
+            throw new CustomException(ErrorCode.NOT_FOUND_ALGORITHM);
         }
     }
 

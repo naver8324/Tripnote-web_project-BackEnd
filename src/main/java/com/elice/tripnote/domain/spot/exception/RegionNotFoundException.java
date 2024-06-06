@@ -1,7 +1,6 @@
 package com.elice.tripnote.domain.spot.exception;
 
 import com.elice.tripnote.global.exception.ErrorCode;
-import com.elice.tripnote.global.exception.NotFoundException;
 import lombok.Getter;
 
 @Getter
