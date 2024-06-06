@@ -107,10 +107,13 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
     }
     @Transactional
     public SpotDetailDTO getSpotDetails(Long id) {
-        SpotDTO spotDTO = searchById(id);
-        Map<Long, Double> nextSpots = calculateNextSpot(id);
+        Spot spot = spotRepository.findById(id).orElse(null);
+        if(spot == null){
+            throw new CustomException(ErrorCode.NO_LANDMARK);
+        }
+        Map<Spot, Double> nextSpots = calculateNextSpot(id);
 
-        return new SpotDetailDTO(spotDTO, nextSpots);
+        return new SpotDetailDTO(spot, nextSpots);
     }
     @Transactional
     public SpotDTO searchById(Long id) {
@@ -120,19 +123,26 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
     }
 
     @Transactional
-    public Map<Long, Double> calculateNextSpot(Long id){
-        Map<Long, Double> map = new HashMap<>();
+    public Map<Spot, Double> calculateNextSpot(Long id){
+        Map<Spot, Double> map = new HashMap<>();
         List<RouteSpot> routeSpots = routespotRepository.findBySpotId(id);
         double total = routeSpots.size()*1.0;
         for(RouteSpot rs : routeSpots){
-            map.put(rs.getNextSpotId(), map.getOrDefault(rs.getNextSpotId(),0.0)+1);
+            Spot nextSpot = spotRepository.findById(rs.getNextSpotId()).orElse(null);
+            if(nextSpot==null){
+                continue;
+            }
+            map.put(nextSpot, map.getOrDefault(nextSpot,0.0)+1.0);
         }
         if(map.size()<3){
             return null;
         }
-        Map<Long, Double> top3Map = map.entrySet()
+        for(Spot key : map.keySet()){
+            map.put(key, map.get(key) / total);
+        }
+        Map<Spot, Double> top3Map = map.entrySet()
                 .stream()
-                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
+                .sorted(Map.Entry.<Spot, Double>comparingByValue().reversed())
                 .limit(3)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
