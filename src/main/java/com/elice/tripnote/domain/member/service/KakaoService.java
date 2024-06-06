@@ -132,7 +132,7 @@ public class KakaoService {
         KakaoInfoDTO dto = findProfile(accessToken);
 
         log.info("로그인 하는 유저의 카카오 아이디: {}", dto.getKakaoId());
-        Member member = memberRepository.findByOauthId(dto.getKakaoId()).orElseGet(
+        Member member = memberRepository.findByOauthIdOrEmail(dto.getKakaoId(), dto.getEmail()).orElseGet(
                 () -> {
 //            //회원이 아닌 경우
 //            //회원가입 진행(이메일, 닉네임 제외 모두)
@@ -142,11 +142,15 @@ public class KakaoService {
                             .oauthId(dto.getKakaoId())
                             .email(dto.getEmail())
                             .nickname(dto.getNickName())
+                            .oauthType("kakao")
                             .status(Status.ACTIVE) // 회원가입시 활동 상태로
                             .build();
                     return memberRepository.save(newMember);
                 });
-
+        if(member.getOauthId() == null) {
+            log.info("기존 회원 정보와 카카오 회원 정보를 연동시킵니다.");
+            member.addKakaoInfo(dto.getKakaoId());
+        }
         if (member.getStatus() != Status.ACTIVE) { //탈퇴한 경우
             log.info("유저가 탈퇴한 상태입니다.");
             member.updateStatusACTIVE();
@@ -260,10 +264,6 @@ public class KakaoService {
     @Transactional
     public Long unlink() throws IOException {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        User user = userService.findUser(Long.valueOf(userId));
-//        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-//            throw new CustomException(NO_MEMBER);
-//        });
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
             throw new CustomException(NO_MEMBER);
         });

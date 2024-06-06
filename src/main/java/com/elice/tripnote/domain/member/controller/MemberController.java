@@ -97,7 +97,6 @@ public class MemberController implements SwaggerMemberController {
      */
     @GetMapping("/kakao")
     public ResponseEntity<Void> kakao(){
-//        return kakaoService.getCode();
         return kakaoService.getAuthorizationCode();
     }
 
@@ -158,6 +157,7 @@ public class MemberController implements SwaggerMemberController {
      * @return
      * @throws IOException
      */
+    //TODO: 추후 https:// 도메인으로 kakao dev에 등록 필요
     @Override
     @GetMapping("/kakao/disconnect")
     public ResponseEntity<Long> kakaoDisconnect(

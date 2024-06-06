@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class RouteIdNameDTO {
+public class RouteIdNameResponseDTO {
     private Long routeId;
     private String name;
 }
