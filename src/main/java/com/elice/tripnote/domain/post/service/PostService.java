@@ -113,7 +113,7 @@ public class PostService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
 
-        PostDetailResponseDTO postDTO = postRepository.customFindPost(postId);
+        PostDetailResponseDTO postDTO = postRepository.customFindPost(postId, member.getId());
         if(postDTO == null){
             CustomException ex = new CustomException(ErrorCode.NO_POST);
             log.error("에러 발생: {}", ex.getMessage(), ex);

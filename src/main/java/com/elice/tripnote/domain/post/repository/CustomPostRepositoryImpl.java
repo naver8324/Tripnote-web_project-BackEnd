@@ -381,7 +381,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     }
 
 
-    public PostDetailResponseDTO customFindPost(Long postId){
+    public PostDetailResponseDTO customFindPost(Long postId, Long memberId){
 
 
         List<PostDetailResponseDTO> result =query
@@ -392,8 +392,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(integratedRoute.uuidHashtags, uuidHashtags)
                 .join(uuidHashtags.hashtag, hashtag)
                 .leftJoin(post.likePosts, likePost)
+                .on(likePost.member.id.eq(memberId))
                 .leftJoin(post.bookmarks, bookmark)
+                .on(bookmark.member.id.eq(memberId))
                 .leftJoin(post.reportPosts, reportPost)
+                .on(reportPost.member.id.eq(memberId))
                 .where(post.id.eq(postId)
                         .and(post.isDeleted.isFalse()))
                 .transform(groupBy(post.id).list(Projections.constructor(PostDetailResponseDTO.class,
