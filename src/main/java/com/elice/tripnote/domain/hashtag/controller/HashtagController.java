@@ -1,6 +1,5 @@
 package com.elice.tripnote.domain.hashtag.controller;
 
-import com.elice.tripnote.domain.hashtag.entity.Hashtag;
 import com.elice.tripnote.domain.hashtag.entity.HashtagDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagResponseDTO;
@@ -11,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +26,7 @@ public class HashtagController implements SwaggerHashtagController{
 
     //전체 해시태그 조회
     @Override
+    @AdminRole
     @GetMapping("/admin/hashtags")
     public ResponseEntity<Page<HashtagDTO>> getHashtags(@RequestParam(name = "page", defaultValue = "0") int page,
                                                         @RequestParam(name = "size", defaultValue = "10") int size,
