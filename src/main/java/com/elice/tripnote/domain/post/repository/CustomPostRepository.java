@@ -14,7 +14,7 @@ public interface CustomPostRepository {
     Page<PostResponseDTO> customFindByHashtagNotDeletedPosts(List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size);
 
     Page<PostResponseDTO> customFindPosts(int page, int size);
-    PostDetailResponseDTO customFindPost(Long postId);
+    PostDetailResponseDTO customFindPost(Long postId, Long memberId);
 
     Page<PostResponseDTO> customFindNotDeletedPostsByMemberId(Long memberId, int page, int size);
     Page<PostResponseDTO> customFindNotDeletedPostsWithLikesByMemberId(Long memberId, int page, int size);
