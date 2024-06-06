@@ -1,7 +1,7 @@
 package com.elice.tripnote.domain.spot.controller;
 
 import com.elice.tripnote.domain.spot.constant.Region;
-import com.elice.tripnote.domain.spot.dto.SpotDTO;
+import com.elice.tripnote.domain.spot.dto.SpotDetailDTO;
 import com.elice.tripnote.domain.spot.dto.SpotRequestDTO;
 import com.elice.tripnote.domain.spot.dto.SpotResponseDTO;
 import com.elice.tripnote.domain.spot.entity.Spot;
@@ -14,9 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -45,7 +43,17 @@ public interface SwaggerSpotController {
                     content = {@Content(schema = @Schema(implementation = Spot.class))}),
             @ApiResponse(responseCode = "404", description = "해당 여행지가 존재하지 않습니다.")
     })
-    ResponseEntity<SpotDTO> getSpotById(Long id);
+    ResponseEntity<SpotDetailDTO> getSpotById(Long id);
+//    @Operation(summary = "DB에 저장된 여행지 조회", description = "기본키를 통해 여행지를 조회합니다.")
+//    @Parameters({
+//            @Parameter(name = "id", description = "Spot 테이블의 기본키")
+//    })
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "성공",
+//                    content = {@Content(schema = @Schema(implementation = Spot.class))}),
+//            @ApiResponse(responseCode = "404", description = "해당 여행지가 존재하지 않습니다.")
+//    })
+//    ResponseEntity<SpotDTO> getSpotById(Long id);
 
     @Operation(summary = "클라이언트 spot 선택", description = "클라이언트가 경로 만들 때 선택한 여행지가 id를 통해 list 생성")
     @Parameters({

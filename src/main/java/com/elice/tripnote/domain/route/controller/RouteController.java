@@ -6,6 +6,9 @@ import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.global.annotation.MemberRole;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,29 +34,15 @@ public class RouteController implements SwaggerRouteController {
     }
 
 
-    //TODO: 경로 공개/비공개 하나로 합치기
-
     /**
-     * 경로 비공개
-     * @return 비공개 처리된 경로 id
+     * 경로 공개/비공개
+     * @return 공개 여부를 변경하려는 경로 id
      */
     @Override
     @MemberRole
-    @PatchMapping("/member/routes/private/{routeId}")
-    public ResponseEntity<Long> setRouteToPrivate(@PathVariable("routeId") Long routeId) {
-        return ResponseEntity.ok(routeService.setRouteToPrivate(routeId));
-    }
-
-    /**
-     * 경로 공개
-     *
-     * @return 공개 처리된 경로 id
-     */
-    @Override
-    @MemberRole
-    @PatchMapping("/member/routes/public/{routeId}")
-    public ResponseEntity<Long> setRouteToPublic(@PathVariable("routeId") Long routeId) {
-        return ResponseEntity.ok(routeService.setRouteToPublic(routeId));
+    @PatchMapping("/member/routes/status/{routeId}")
+    public ResponseEntity<Long> setRouteStatus(@PathVariable("routeId") Long routeId) {
+        return ResponseEntity.ok(routeService.setRouteToStatus(routeId));
     }
 
     /**
@@ -81,7 +70,7 @@ public class RouteController implements SwaggerRouteController {
                                                                        @RequestParam(value = "hashtags", required = false) List<Long> hashtags*/) {
         //TODO: 경로에 해시태그 안붙이기
 //        if (hashtags == null) hashtags = Collections.emptyList();
-        Region status = Region.fromString(region);
+        Region status = Region.englishToRegion(region);
         return ResponseEntity.ok(routeService.getRegionMember(status));
         /*
         아래 값 5개
@@ -102,7 +91,7 @@ public class RouteController implements SwaggerRouteController {
     @Override
     @GetMapping("/guest/routes/region")
     public ResponseEntity<List<RecommendedRouteResponseDTO>> getRegionGuest(@RequestParam("region") String region) {
-        Region status = Region.fromString(region);
+        Region status = Region.englishToRegion(region);
         return ResponseEntity.ok(routeService.getRegionGuest(status));
 
     }
@@ -205,15 +194,16 @@ public class RouteController implements SwaggerRouteController {
 //         */
 //    }
 
-
     /**
      * 자신이 북마크한 경로 리스트
      * @return [경로 id, 경로 이름, 해당되는 경로의 여행지 리스트] 리스트 리턴
      */
     @MemberRole
     @GetMapping("/member/routes/bookmark")
-    public ResponseEntity<List<RouteDetailResponseDTO>> findBookmark() {
-        return ResponseEntity.ok(routeService.findBookmark());
+    public ResponseEntity<Page<RouteDetailResponseDTO>> findBookmark(@PageableDefault(page = 0, size = 3) Pageable pageable) {
+        //pageable 사용법
+        //request param으로 page, size 조절 가능
+        return ResponseEntity.ok(routeService.findBookmark(pageable));
         /*
         route {
             routeId:
@@ -231,7 +221,9 @@ public class RouteController implements SwaggerRouteController {
      */
     @MemberRole
     @GetMapping("/member/routes")
-    public ResponseEntity<List<RouteDetailResponseDTO>> findMyRoute() {
+    public ResponseEntity<Page<RouteDetailResponseDTO>> findMyRoute(@PageableDefault(page = 0, size = 3) Pageable pageable) {
+        //pageable 사용법
+        //request param으로 page, size 조절 가능
         /*
         route {
             routeId:
@@ -242,7 +234,7 @@ public class RouteController implements SwaggerRouteController {
         }
          */
         // 경로 이름 때문에 여기서 통합 경로 리턴하는 건 안될듯
-        return ResponseEntity.ok(routeService.findMyRoute());
+        return ResponseEntity.ok(routeService.findMyRoute(pageable));
     }
 
 

@@ -16,10 +16,7 @@ import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagRepository;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
-import com.elice.tripnote.domain.post.exception.NoSuchRouteException;
-import com.elice.tripnote.domain.post.repository.PostRepository;
 import com.elice.tripnote.domain.route.entity.*;
-import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.constant.Region;
@@ -30,6 +27,9 @@ import com.elice.tripnote.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -155,7 +155,7 @@ public class RouteService {
     private Region findRegionOfSpots(List<Long> spotIds) {
         Region region = spotRepository.getRegionByspotId(spotIds.get(0)).getRegion();
         for (Long id : spotIds) {
-            if (region != spotRepository.getRegionByspotId(id).getRegion()) return Region.MULTI_REGION;
+            if (region != spotRepository.getRegionByspotId(id).getRegion()) return Region.MIXED_REGION;
         }
         return region;
     }
@@ -186,16 +186,13 @@ public class RouteService {
 
             return new UUID(msb, lsb).toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new AlgorithmNotFoundException();
+            throw new CustomException(ErrorCode.NOT_FOUND_ALGORITHM);
         }
     }
 
     @Transactional
-    public Long setRouteToPrivate(Long routeId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
-            throw new CustomException(ErrorCode.NO_MEMBER);
-        });
+    public Long setRouteToStatus(Long routeId) {
+        Member member = getMemberFromJwt();
 
         Route route = routeRepository.findById(routeId)
                 .orElseThrow(() -> {
@@ -205,30 +202,14 @@ public class RouteService {
         // 해당 경로가 자신의 것이 맞는지 확인
         if (member.getId() != route.getMember().getId())
             throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_STATUS);
+        if(route.getRouteStatus() == RouteStatus.PUBLIC) route.updateStatus(RouteStatus.PRIVATE);
+        else if(route.getRouteStatus() == RouteStatus.PRIVATE) route.updateStatus(RouteStatus.PUBLIC);
+        else {
+            log.warn("삭제된 경로입니다. 경로 번호: {}", routeId);
+            throw new CustomException(ErrorCode.NO_ROUTE);
+        }
 
-        route.updateStatus(RouteStatus.PRIVATE);
-        route = routeRepository.save(route);
-        return route.getId();
-    }
-
-    @Transactional
-    public Long setRouteToPublic(Long routeId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
-            throw new CustomException(ErrorCode.NO_MEMBER);
-        });
-
-        Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> {
-                    throw new CustomException(ErrorCode.NO_ROUTE);
-                });
-
-        // 해당 경로가 자신의 것이 맞는지 확인
-        if (member.getId() != route.getMember().getId())
-            throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_STATUS);
-        route.updateStatus(RouteStatus.PUBLIC);
-        route = routeRepository.save(route);
-        return route.getId();
+        return routeRepository.save(route).getId();
     }
 
     @Transactional
@@ -435,10 +416,10 @@ public class RouteService {
         join like_post lp on lp.route_id=r.id
         where member_id=:memberId
          */
-        List<RouteIdNameDTO> routeIdNameDTOS = routeRepository.findLikedRoutesByMemberId(member.getId());
+        List<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findLikedRoutesByMemberId(member.getId());
 
         List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
-        for (RouteIdNameDTO dto : routeIdNameDTOS) {
+        for (RouteIdNameResponseDTO dto : routeIdNameDTOS) {
             routeDetailResponseDTOS.add(RouteDetailResponseDTO.builder()
                     .routeId(dto.getRouteId())
                     .name(dto.getName())
@@ -455,7 +436,7 @@ public class RouteService {
         return routeDetailResponseDTOS;
     }
 
-    public List<RouteDetailResponseDTO> findBookmark() {
+    public Page<RouteDetailResponseDTO> findBookmark(Pageable pageable) {
         Member member = getMemberFromJwt();
         /*
         select r.id, r.name
@@ -463,38 +444,38 @@ public class RouteService {
         join bookmark b on b.route_id=r.id
         where member_id=:memberId
          */
-        List<RouteIdNameDTO> routeIdNameDTOS = routeRepository.findMarkedRoutesByMemberId(member.getId());
+        Page<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findMarkedRoutesByMemberId(member.getId(), pageable);
 
-        List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
-        for (RouteIdNameDTO dto : routeIdNameDTOS) {
-            routeDetailResponseDTOS.add(RouteDetailResponseDTO.builder()
-                    .routeId(dto.getRouteId())
-                    .name(dto.getName())
-                    .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
-                    .build());
-        }
-        return routeDetailResponseDTOS;
+        List<RouteDetailResponseDTO> routeDetailResponseDTOS = routeIdNameDTOS.getContent().stream()
+                .map(dto -> RouteDetailResponseDTO.builder()
+                        .routeId(dto.getRouteId())
+                        .name(dto.getName())
+                        .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
+                        .build())
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(routeDetailResponseDTOS, pageable, routeIdNameDTOS.getTotalElements());
     }
 
 
-    public List<RouteDetailResponseDTO> findMyRoute() {
+    public Page<RouteDetailResponseDTO> findMyRoute(Pageable pageable) {
         Member member = getMemberFromJwt();
         /*
         select r.id, r.name
         from Route r
         where member_id=:memberId
          */
-        List<RouteIdNameDTO> routeIdNameDTOS = routeRepository.findRoutesByMemberId(member.getId());
+        Page<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findRoutesByMemberId(member.getId(), pageable);
 
         List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
-        for (RouteIdNameDTO dto : routeIdNameDTOS) {
+        for (RouteIdNameResponseDTO dto : routeIdNameDTOS) {
             routeDetailResponseDTOS.add(RouteDetailResponseDTO.builder()
                     .routeId(dto.getRouteId())
                     .name(dto.getName())
                     .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
                     .build());
         }
-        return routeDetailResponseDTOS;
+        return new PageImpl<>(routeDetailResponseDTOS, pageable, routeIdNameDTOS.getTotalElements());
     }
 
     private Member getMemberFromJwt() {

@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
@@ -46,7 +47,7 @@ public interface SwaggerPostController {
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
 
-    ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@Valid List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size);
 
 
     @Operation(summary="게시글 조회 - 유저", description= "유저가 자기가 쓴 모든 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
@@ -119,7 +120,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="routeId", description = "경로 번호", example = "1126"),
     })
-    ResponseEntity<PostDetailResponseDTO> savePost(PostRequestDTO postDTO, Long routeId);
+    ResponseEntity<PostDetailResponseDTO> savePost(@Valid PostRequestDTO postDTO, Long routeId);
 
 
 
@@ -132,7 +133,7 @@ public interface SwaggerPostController {
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1356"),
     })
-    ResponseEntity<PostDetailResponseDTO> updatePost(PostRequestDTO postDTO, Long postId);
+    ResponseEntity<PostDetailResponseDTO> updatePost(@Valid PostRequestDTO postDTO, Long postId);
 
 
 

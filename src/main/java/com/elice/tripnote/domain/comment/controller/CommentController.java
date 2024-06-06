@@ -6,6 +6,7 @@ import com.elice.tripnote.domain.comment.entity.CommentResponseDTO;
 import com.elice.tripnote.domain.comment.service.CommentService;
 import com.elice.tripnote.global.annotation.AdminRole;
 import com.elice.tripnote.global.annotation.MemberRole;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class CommentController implements SwaggerCommentController {
     @Override
     @MemberRole
     @PostMapping("/member/comments")
-    public ResponseEntity<CommentResponseDTO> saveComment(@RequestBody CommentRequestDTO commentDTO, @RequestParam(name="postId") Long postId) {
+    public ResponseEntity<CommentResponseDTO> saveComment(@Valid @RequestBody CommentRequestDTO commentDTO, @RequestParam(name="postId") Long postId) {
         commentService.saveComment(commentDTO, postId);
         return ResponseEntity.status(HttpStatus.CREATED).body(commentService.saveComment(commentDTO, postId));
     }
@@ -52,7 +53,7 @@ public class CommentController implements SwaggerCommentController {
     @Override
     @MemberRole
     @PatchMapping("/member/comments/{commentId}")
-    public ResponseEntity<CommentResponseDTO> updateComment(@RequestBody CommentRequestDTO commentDTO, @PathVariable(name="commentId") Long commentId) {
+    public ResponseEntity<CommentResponseDTO> updateComment(@Valid @RequestBody CommentRequestDTO commentDTO, @PathVariable(name="commentId") Long commentId) {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.updateComment(commentDTO, commentId));
     }
 

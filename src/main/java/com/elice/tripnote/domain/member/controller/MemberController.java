@@ -1,6 +1,9 @@
 package com.elice.tripnote.domain.member.controller;
 
-import com.elice.tripnote.domain.member.entity.*;
+import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
+import com.elice.tripnote.domain.member.entity.MemberResponseDTO;
+import com.elice.tripnote.domain.member.entity.PasswordDTO;
+import com.elice.tripnote.domain.member.entity.ProfileUpdateDTO;
 import com.elice.tripnote.domain.member.service.KakaoService;
 import com.elice.tripnote.domain.member.service.MemberService;
 import com.elice.tripnote.domain.member.service.TokenBlacklistService;
@@ -11,12 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -113,7 +112,10 @@ public class MemberController implements SwaggerMemberController {
     /*
     카카오 로그인 api
      */
-
+    @GetMapping("/kakao")
+    public ResponseEntity<Void> kakao(){
+        return kakaoService.getAuthorizationCode();
+    }
 
     /**
      * 카카오 로그인 api
@@ -172,6 +174,7 @@ public class MemberController implements SwaggerMemberController {
      * @return
      * @throws IOException
      */
+    //TODO: 추후 https:// 도메인으로 kakao dev에 등록 필요
     @Override
     @GetMapping("/kakao/disconnect")
     public ResponseEntity<Long> kakaoDisconnect(

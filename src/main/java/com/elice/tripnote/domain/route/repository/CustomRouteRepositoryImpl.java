@@ -6,12 +6,16 @@ import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
 import com.elice.tripnote.domain.link.routespot.entity.QRouteSpot;
 import com.elice.tripnote.domain.route.entity.QRoute;
 import com.elice.tripnote.domain.route.entity.Route;
-import com.elice.tripnote.domain.route.entity.RouteIdNameDTO;
+import com.elice.tripnote.domain.route.entity.RouteIdNameResponseDTO;
+import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -46,9 +50,9 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .fetch();
     }
 
-    public List<RouteIdNameDTO> findLikedRoutesByMemberId(Long memberId) {
+    public List<RouteIdNameResponseDTO> findLikedRoutesByMemberId(Long memberId) {
         return query
-                .select(Projections.constructor(RouteIdNameDTO.class,
+                .select(Projections.constructor(RouteIdNameResponseDTO.class,
                         route.id,
                         route.name
                 ))
@@ -58,27 +62,63 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .fetch();
     }
 
-    public List<RouteIdNameDTO> findMarkedRoutesByMemberId(Long memberId) {
-        return query
-                .select(Projections.constructor(RouteIdNameDTO.class,
+//    public Page<RouteIdNameDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable) {
+//
+//        return query
+//                .select(Projections.constructor(RouteIdNameDTO.class,
+//                        route.id,
+//                        route.name
+//                ))
+//                .from(route)
+//                .join(bookmark).on(bookmark.route.id.eq(route.id))
+//                .where(bookmark.member.id.eq(memberId))
+//                .orderBy(route.id.asc())
+//                .fetch();
+//
+//
+//    }
+
+    public Page<RouteIdNameResponseDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable) {
+
+        QueryResults<RouteIdNameResponseDTO> queryResults = query
+                .select(Projections.constructor(RouteIdNameResponseDTO.class,
                         route.id,
                         route.name
                 ))
                 .from(route)
                 .join(bookmark).on(bookmark.route.id.eq(route.id))
                 .where(bookmark.member.id.eq(memberId))
-                .fetch();
+                .orderBy(route.id.asc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        return new PageImpl<>(queryResults.getResults(), pageable, queryResults.getTotal());
     }
 
-    public List<RouteIdNameDTO> findRoutesByMemberId(Long memberId) {
-        return query
-                .select(Projections.constructor(RouteIdNameDTO.class,
+
+    public Page<RouteIdNameResponseDTO> findRoutesByMemberId(Long memberId, Pageable pageable) {
+//        return query
+//                .select(Projections.constructor(RouteIdNameDTO.class,
+//                        route.id,
+//                        route.name
+//                ))
+//                .from(route)
+//                .where(route.member.id.eq(memberId))
+//                .fetch();
+
+        QueryResults<RouteIdNameResponseDTO> results = query
+                .select(Projections.constructor(RouteIdNameResponseDTO.class,
                         route.id,
                         route.name
                 ))
                 .from(route)
                 .where(route.member.id.eq(memberId))
-                .fetch();
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        return new PageImpl<>(results.getResults(), pageable, results.getTotal());
     }
 
     public int getIntegratedRouteLikeCounts(Long integratedRouteId) {
