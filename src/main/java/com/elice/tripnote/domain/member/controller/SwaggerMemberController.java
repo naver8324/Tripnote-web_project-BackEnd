@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -84,6 +85,16 @@ public interface SwaggerMemberController {
     @ApiResponse(responseCode = "200", description = "회원 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Member.class)))
     @GetMapping
     ResponseEntity<MemberResponseDTO> getMemberByToken();
+
+
+    @Operation(summary = "로그아웃", description = "현재 로그인된 사용자를 로그아웃합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그아웃에 성공했습니다."),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다.", content = @Content),
+            @ApiResponse(responseCode = "500", description = "서버 에러 발생", content = @Content)
+    })
+    @PostMapping("/logout")
+    ResponseEntity<Void> logout(HttpServletRequest request);
 
 
 
