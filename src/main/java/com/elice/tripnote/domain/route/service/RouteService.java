@@ -16,8 +16,6 @@ import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagRepository;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
-import com.elice.tripnote.domain.post.exception.NoSuchRouteException;
-import com.elice.tripnote.domain.post.repository.PostRepository;
 import com.elice.tripnote.domain.route.entity.*;
 import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
@@ -32,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -159,7 +156,7 @@ public class RouteService {
     private Region findRegionOfSpots(List<Long> spotIds) {
         Region region = spotRepository.getRegionByspotId(spotIds.get(0)).getRegion();
         for (Long id : spotIds) {
-            if (region != spotRepository.getRegionByspotId(id).getRegion()) return Region.MULTI_REGION;
+            if (region != spotRepository.getRegionByspotId(id).getRegion()) return Region.MIXED_REGION;
         }
         return region;
     }

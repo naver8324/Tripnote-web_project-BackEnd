@@ -84,7 +84,7 @@ public class RouteController implements SwaggerRouteController {
                                                                        @RequestParam(value = "hashtags", required = false) List<Long> hashtags*/) {
         //TODO: 경로에 해시태그 안붙이기
 //        if (hashtags == null) hashtags = Collections.emptyList();
-        Region status = Region.fromString(region);
+        Region status = Region.englishToRegion(region);
         return ResponseEntity.ok(routeService.getRegionMember(status));
         /*
         아래 값 5개
@@ -105,7 +105,7 @@ public class RouteController implements SwaggerRouteController {
     @Override
     @GetMapping("/guest/routes/region")
     public ResponseEntity<List<RecommendedRouteResponseDTO>> getRegionGuest(@RequestParam("region") String region) {
-        Region status = Region.fromString(region);
+        Region status = Region.englishToRegion(region);
         return ResponseEntity.ok(routeService.getRegionGuest(status));
 
     }

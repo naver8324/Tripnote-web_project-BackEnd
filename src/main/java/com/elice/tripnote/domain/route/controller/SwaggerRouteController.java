@@ -73,9 +73,10 @@ public interface SwaggerRouteController {
             @ApiResponse(responseCode = "404", description = "해당 member ID가 존재하지 않습니다."),
     })
     @Parameters(value = {
-            @Parameter(name = "region", required = true, description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 뛰어쓰기 없이 '여러지역'이라는 값을 넣으면 된다.\n" +
-                    "특별시/광역시 - 서울특별시, 인천광역시, 부산광역시, 대구광역시, 울산광역시, 광주광역시, 대전광역시, 세종특별자치시\n" +
-                    "도단위 - 경기도, 강원특별자치도, 충청북도, 충청남도, 경상북도, 경상남도, 전라북도, 전라남도, 제주특별자치도"),
+            @Parameter(name = "region", required = true, description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 'mix'라는 값을 넣으면 된다.\n" +
+                    "특별시/광역시 - seoul(서울), incheon(인천), busan(부산), daegu(대구), ulsan(울산), gwangju(광주), daejeon(대전), sejong(세종시)\n" +
+                    "도단위 - gyeonggi(경기도), gangwon(강원도), chungbuk(충청북도), chungnam(충청남도), gyeongbuk(경상북도), gyeongnam(경상남도), jeonbuk(전라북도), jeonnam(전라남도), jeju(제주도)"
+            ),
     })
     ResponseEntity<List<RecommendedRouteResponseDTO>> getRegion(String region);
 
@@ -84,9 +85,10 @@ public interface SwaggerRouteController {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
     })
     @Parameters(value = {
-            @Parameter(name = "region", required = true, description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 뛰어쓰기 없이 '여러지역'이라는 값을 넣으면 된다.\n" +
-                    "특별시/광역시 - 서울특별시, 인천광역시, 부산광역시, 대구광역시, 울산광역시, 광주광역시, 대전광역시, 세종특별자치시\n" +
-                    "도단위 - 경기도, 강원특별자치도, 충청북도, 충청남도, 경상북도, 경상남도, 전라북도, 전라남도, 제주특별자치도"),
+            @Parameter(name = "region", required = true, description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 'mix'라는 값을 넣으면 된다.\n" +
+                    "특별시/광역시 - seoul(서울), incheon(인천), busan(부산), daegu(대구), ulsan(울산), gwangju(광주), daejeon(대전), sejong(세종시)\n" +
+                    "도단위 - gyeonggi(경기도), gangwon(강원도), chungbuk(충청북도), chungnam(충청남도), gyeongbuk(경상북도), gyeongnam(경상남도), jeonbuk(전라북도), jeonnam(전라남도), jeju(제주도)"
+            ),
     })
     ResponseEntity<List<RecommendedRouteResponseDTO>> getRegionGuest(String region);
 

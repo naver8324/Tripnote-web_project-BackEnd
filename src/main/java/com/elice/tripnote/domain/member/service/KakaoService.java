@@ -260,10 +260,6 @@ public class KakaoService {
     @Transactional
     public Long unlink() throws IOException {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        User user = userService.findUser(Long.valueOf(userId));
-//        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-//            throw new CustomException(NO_MEMBER);
-//        });
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
             throw new CustomException(NO_MEMBER);
         });
