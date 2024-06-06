@@ -33,6 +33,21 @@ public class PostController implements SwaggerPostController {
     @Override
     @PostMapping("/posts")
     public ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@Valid @RequestBody List<HashtagRequestDTO> hashtagRequestDTOList, @RequestParam(name="order", required = false, defaultValue = "") String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+
+        if(hashtagRequestDTOList == null){
+            return ResponseEntity.ok().body(postService.getPosts(order, page, size));
+
+        }
+        if(hashtagRequestDTOList.isEmpty()){
+            return ResponseEntity.ok().body(postService.getPosts(order, page, size));
+        }
+        for (HashtagRequestDTO hashtagRequestDTO : hashtagRequestDTOList) {
+            if(hashtagRequestDTO.getName().equals("전체")){
+                return ResponseEntity.ok().body(postService.getPosts(order, page, size));
+
+            }
+        }
+
         return ResponseEntity.ok().body(postService.getPostsByHashtag(hashtagRequestDTOList, order, page, size));
     }
 
