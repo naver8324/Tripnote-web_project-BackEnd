@@ -1,6 +1,6 @@
 package com.elice.tripnote.domain.spot.constant;
 
-import com.elice.tripnote.domain.spot.exception.RegionNotFoundException;
+import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
 
 public enum Region {
@@ -29,7 +29,7 @@ public enum Region {
                 return region;
             }
         }
-        throw new RegionNotFoundException(ErrorCode.NO_REGION);
+        throw new CustomException(ErrorCode.NO_REGION);
     }
 
     public static Region englishToRegion(String englishName) {
@@ -38,6 +38,6 @@ public enum Region {
                 return region;
             }
         }
-        throw new RegionNotFoundException(ErrorCode.NO_REGION);
+        throw new CustomException(ErrorCode.NO_REGION);
     }
 }
