@@ -103,6 +103,10 @@ public class Member {
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }
+    public void addKakaoInfo(Long kakaoId){
+        this.oauthId=kakaoId;
+        this.oauthType="kakao";
+    }
 
 
     public MemberResponseDTO toDto() {

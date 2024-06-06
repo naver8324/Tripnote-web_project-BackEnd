@@ -90,7 +90,13 @@ public interface SwaggerMemberController {
     /*
     카카오 로그인 api
      */
-    @Operation(summary = "카카오 로그인 API")
+    @Operation(summary = "카카오 로그인 API(인가 코드 요청해서 kakao/login으로 리다이렉트)")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
+    })
+    ResponseEntity<Void> kakao();
+
+    @Operation(summary = "카카오 로그인을 리다이렉트 받는 api")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
     })
