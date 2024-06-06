@@ -74,11 +74,6 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         List<Long> postIds = query
                 .select(post.id)
                 .from(post)
-                .join(post.member, member)
-                .join(post.route, route)
-                .join(route.integratedRoute, integratedRoute)
-                .join(integratedRoute.uuidHashtags, uuidHashtags)
-                .join(uuidHashtags.hashtag, hashtag)
                 .where(post.isDeleted.isFalse())
                 .orderBy(orderSpecifier)
                 .offset(page * size)
