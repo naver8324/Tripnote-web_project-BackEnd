@@ -416,10 +416,10 @@ public class RouteService {
         join like_post lp on lp.route_id=r.id
         where member_id=:memberId
          */
-        List<RouteIdNameDTO> routeIdNameDTOS = routeRepository.findLikedRoutesByMemberId(member.getId());
+        List<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findLikedRoutesByMemberId(member.getId());
 
         List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
-        for (RouteIdNameDTO dto : routeIdNameDTOS) {
+        for (RouteIdNameResponseDTO dto : routeIdNameDTOS) {
             routeDetailResponseDTOS.add(RouteDetailResponseDTO.builder()
                     .routeId(dto.getRouteId())
                     .name(dto.getName())
@@ -444,7 +444,7 @@ public class RouteService {
         join bookmark b on b.route_id=r.id
         where member_id=:memberId
          */
-        Page<RouteIdNameDTO> routeIdNameDTOS = routeRepository.findMarkedRoutesByMemberId(member.getId(), pageable);
+        Page<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findMarkedRoutesByMemberId(member.getId(), pageable);
 
         List<RouteDetailResponseDTO> routeDetailResponseDTOS = routeIdNameDTOS.getContent().stream()
                 .map(dto -> RouteDetailResponseDTO.builder()
@@ -465,10 +465,10 @@ public class RouteService {
         from Route r
         where member_id=:memberId
          */
-        Page<RouteIdNameDTO> routeIdNameDTOS = routeRepository.findRoutesByMemberId(member.getId(), pageable);
+        Page<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findRoutesByMemberId(member.getId(), pageable);
 
         List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
-        for (RouteIdNameDTO dto : routeIdNameDTOS) {
+        for (RouteIdNameResponseDTO dto : routeIdNameDTOS) {
             routeDetailResponseDTOS.add(RouteDetailResponseDTO.builder()
                     .routeId(dto.getRouteId())
                     .name(dto.getName())

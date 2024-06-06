@@ -4,20 +4,17 @@ import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
 import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
 import com.elice.tripnote.domain.link.routespot.entity.QRouteSpot;
-import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.route.entity.QRoute;
 import com.elice.tripnote.domain.route.entity.Route;
-import com.elice.tripnote.domain.route.entity.RouteIdNameDTO;
+import com.elice.tripnote.domain.route.entity.RouteIdNameResponseDTO;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -53,9 +50,9 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .fetch();
     }
 
-    public List<RouteIdNameDTO> findLikedRoutesByMemberId(Long memberId) {
+    public List<RouteIdNameResponseDTO> findLikedRoutesByMemberId(Long memberId) {
         return query
-                .select(Projections.constructor(RouteIdNameDTO.class,
+                .select(Projections.constructor(RouteIdNameResponseDTO.class,
                         route.id,
                         route.name
                 ))
@@ -81,10 +78,10 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
 //
 //    }
 
-    public Page<RouteIdNameDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable) {
+    public Page<RouteIdNameResponseDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable) {
 
-        QueryResults<RouteIdNameDTO> queryResults = query
-                .select(Projections.constructor(RouteIdNameDTO.class,
+        QueryResults<RouteIdNameResponseDTO> queryResults = query
+                .select(Projections.constructor(RouteIdNameResponseDTO.class,
                         route.id,
                         route.name
                 ))
@@ -100,7 +97,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     }
 
 
-    public Page<RouteIdNameDTO> findRoutesByMemberId(Long memberId, Pageable pageable) {
+    public Page<RouteIdNameResponseDTO> findRoutesByMemberId(Long memberId, Pageable pageable) {
 //        return query
 //                .select(Projections.constructor(RouteIdNameDTO.class,
 //                        route.id,
@@ -110,8 +107,8 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
 //                .where(route.member.id.eq(memberId))
 //                .fetch();
 
-        QueryResults<RouteIdNameDTO> results = query
-                .select(Projections.constructor(RouteIdNameDTO.class,
+        QueryResults<RouteIdNameResponseDTO> results = query
+                .select(Projections.constructor(RouteIdNameResponseDTO.class,
                         route.id,
                         route.name
                 ))
