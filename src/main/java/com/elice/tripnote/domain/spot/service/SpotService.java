@@ -64,6 +64,10 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
             spotList.add(existingSpot);
         }
     }
+    if(spotList.isEmpty()){
+        log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
+        throw new LandmarkNotFoundException(ErrorCode.NO_LANDMARK);
+    }
     return spotList;
 }
 
@@ -116,7 +120,7 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
 
         if (searchLocalRes.getTotal() > 0) {
             var localItemOptional = searchLocalRes.getItems().stream()
-                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집"))
+                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명"))
                     .findFirst();
 
             if (localItemOptional.isPresent()) {
@@ -189,7 +193,7 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
         var searchLocalRes = naverClient.searchLocal(searchLocalReq);
         if (searchLocalRes.getTotal() > 0) {
             return searchLocalRes.getItems().stream()
-                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집"))
+                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명"))
                     .limit(5)
                     .map(localItem -> {
                         var imageQuery = localItem.getTitle().replaceAll("<[^>]*>", "");
