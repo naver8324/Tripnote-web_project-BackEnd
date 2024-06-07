@@ -57,26 +57,15 @@ public class CommentService {
 
 
     // 관리자가 모든 댓글을 불러올 때 사용하는 메서드. 삭제된 댓글도 불러옵니다.
-    public Page<CommentResponseDTO> getCommentsAll(int page, int size){
+    public Page<CommentResponseDTO> getCommentsAll(Long memberId, int page, int size){
 
 
 
-        return commentRepository.customFindComments(page, size);
-
-
-    }
-
-    // 관리자가 한 유저의 전체 댓글을 불러올 때 사용하는 메서드. 삭제된 댓글도 불러옵니다.
-    public Page<CommentResponseDTO> getCommentsByMemberId(Long memberId, int page, int size){
-
-
-        Member member = memberOrElseThrowsException(memberId);
-
-        return commentRepository.customFindCommentsByMemberId(memberId, page, size);
-
+        return commentRepository.customFindComments(memberId, page, size);
 
 
     }
+
 
 
     // 댓글을 저장하는 메서드입니다.

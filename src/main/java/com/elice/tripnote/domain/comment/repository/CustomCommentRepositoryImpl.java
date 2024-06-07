@@ -60,11 +60,12 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         page = page > 0 ? page - 1 : 0;
 
-        Long totalCount = (long) query
+        Long totalCount = query
+                .select(comment.count())
                 .from(comment)
                 .where(comment.post.id.eq(postId)
                         .and(comment.isDeleted.isFalse()))
-                .fetch().size();
+                .fetchFirst();
 
 
         List<CommentResponseDTO> commentResponseDTOs = query
@@ -91,13 +92,15 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
     }
 
 
-    public Page<CommentResponseDTO> customFindComments(int page, int size){
+    public Page<CommentResponseDTO> customFindComments(Long memberId,int page, int size){
 
         page = page > 0 ? page - 1 : 0;
 
-        Long totalCount =(long) query
+        Long totalCount =query
+                .select(comment.count())
                 .from(comment)
-                .fetch().size();
+                .where(memberId != null ? member.id.eq(memberId) : null)
+                .fetchFirst();
 
 
         List<CommentResponseDTO> commentResponseDTOs = query
@@ -111,7 +114,8 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
                 ))
                 .from(comment)
                 .join(comment.member, member)
-                .orderBy(comment.id.asc())
+                .where(memberId != null ? member.id.eq(memberId) : null)
+                .orderBy(comment.id.desc())
                 .offset(page * size)
                 .limit(size)
                 .fetch();
@@ -121,38 +125,6 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
         return new PageImpl<>(commentResponseDTOs, pageRequest, totalCount);
     }
 
-
-    public Page<CommentResponseDTO> customFindCommentsByMemberId(Long memberId, int page, int size){
-
-        page = page > 0 ? page - 1 : 0;
-
-        Long totalCount = (long) query
-                .from(comment)
-                .where(comment.member.id.eq(memberId))
-                .fetch().size();
-
-
-        List<CommentResponseDTO> commentResponseDTOs = query
-                .select(Projections.constructor(CommentResponseDTO.class,
-                        comment.id,
-                        member.nickname,
-                        comment.content,
-                        comment.createdAt,
-                        comment.report,
-                        comment.isDeleted
-                ))
-                .from(comment)
-                .join(comment.member, member)
-                .where(comment.member.id.eq(memberId))
-                .orderBy(comment.id.asc())
-                .offset(page * size)
-                .limit(size)
-                .fetch();
-
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        return new PageImpl<>(commentResponseDTOs, pageRequest, totalCount);
-    }
 
 
     public void customDeleteCommentsByPostId(Long postId){

@@ -77,8 +77,8 @@ public class PostController implements SwaggerPostController {
     @Override
     @AdminRole
     @GetMapping("/admin/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsAll(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getPostsAll(page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPostsAll(@RequestParam(name="memberId", required = false) Long memberId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(postService.getPostsAll(memberId, page, size));
     }
 
     @Override
