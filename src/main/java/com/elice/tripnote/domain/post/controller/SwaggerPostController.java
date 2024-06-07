@@ -87,16 +87,17 @@ public interface SwaggerPostController {
     ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithMark(int page, int size);
 
 
-    @Operation(summary="게시글 조회 - 관리자", description= "게시글을 조회할 때 사용하는 api입니다. 삭제된 게시글도 조회 가능합니다.")
+    @Operation(summary="게시글 조회 - 관리자", description= "게시글을 조회할 때 사용하는 api입니다. 삭제된 게시글도 조회 가능합니다. 유저 번호가 없으면 전체 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "게시글 조회에 성공하였습니다.",  content = @Content(mediaType = "application/json")),
     })
     @Parameters(value = {
+            @Parameter(name="memberId", description = "유저 번호", example = "1"),
             @Parameter(name="page", description = "페이지 번호", example = "5"),
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
 
-    ResponseEntity<Page<PostResponseDTO>> getPostsAll(int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsAll(Long memberId, int page, int size);
 
 
 

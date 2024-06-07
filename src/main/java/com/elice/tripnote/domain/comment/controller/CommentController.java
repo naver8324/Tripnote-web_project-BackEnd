@@ -30,17 +30,11 @@ public class CommentController implements SwaggerCommentController {
     @Override
     @AdminRole
     @GetMapping("/admin/comments")
-    public ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(commentService.getCommentsAll(page, size));
+    public ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(@RequestParam(name="memberId", required = false) Long memberId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        return ResponseEntity.ok().body(commentService.getCommentsAll(memberId, page, size));
     }
 
 
-    @Override
-    @AdminRole
-    @GetMapping("/admin/comments/members/{memberId}")
-    public ResponseEntity<Page<CommentResponseDTO>> getCommentsByMemberId( @PathVariable(name = "memberId") Long memberId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(commentService.getCommentsByMemberId(memberId, page, size));
-    }
 
     @Override
     @MemberRole

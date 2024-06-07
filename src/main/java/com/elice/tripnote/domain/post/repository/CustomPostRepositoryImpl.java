@@ -23,6 +23,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.query.criteria.JpaSubQuery;
@@ -224,41 +225,34 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
 
 
-    public Page<PostResponseDTO> customFindPosts(int page, int size){
+    public Page<PostResponseDTO> customFindPosts(Long memberId, int page, int size){
 
         page = page > 0 ? page - 1 : 0;
 
         long totalCount =query
                 .select(post.count())
                 .from(post)
+                .join(post.member, member)
+                .where(memberId != null ? member.id.eq(memberId) : null)
                 .fetchFirst();
 
 
         List<PostResponseDTO> postResponseDTOs = query
+                .select(Projections.constructor(PostResponseDTO.class,
+                        post.id,
+                        post.title,
+                        post.content,
+                        post.isDeleted,
+                        post.createdAt,
+                        member.nickname
+                ))
                 .from(post)
                 .join(post.member, member)
-                .join(post.route, route)
-                .join(route.integratedRoute, integratedRoute)
-                .join(integratedRoute.uuidHashtags, uuidHashtags)
-                .join(uuidHashtags.hashtag, hashtag)
+                .where(memberId != null ? member.id.eq(memberId) : null)
                 .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)
-                .transform(groupBy(post.id).list(Projections.constructor(PostResponseDTO.class,
-                                post.id,
-                                post.title,
-                                post.content,
-                                post.isDeleted,
-                                post.createdAt,
-                                member.nickname,
-                                list(Projections.constructor(HashtagResponseDTO.class,
-                                        hashtag.id,
-                                        hashtag.name,
-                                        hashtag.isCity)
-                                )
-                        )
-                ));
-
+                .fetch();
         PageRequest pageRequest = PageRequest.of(page, size);
 
         return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);

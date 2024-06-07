@@ -37,29 +37,19 @@ public interface SwaggerCommentController {
     ResponseEntity<Page<CommentResponseDTO>> getCommentsByPostId(Long postId, int page, int size);
 
 
-    @Operation(summary="게시글 댓글 조회 - 관리자", description= "관리자가 모든 댓글을 조회할 때 사용하는 api입니다. 삭제된 댓글도 조회 가능합니다.")
+    @Operation(summary="게시글 댓글 조회 - 관리자", description= "관리자가 모든 댓글을 조회할 때 사용하는 api입니다. 삭제된 댓글도 조회 가능합니다. 멤버 id를 넣으면 멤버가 쓴 댓글을 전부 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "댓글 조회에 성공하였습니다.", content = @Content(mediaType = "application/json")),
     })
     @Parameters(value = {
+            @Parameter(name="memberId", description = "멤버 번호", example = "1"),
             @Parameter(name="page", description = "페이지 번호", example = "5"),
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
 
-    ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(int page, int size);
+    ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(Long memberId, int page, int size);
 
 
-    @Operation(summary="게시글 유저 댓글 조회 - 관리자", description= "관리자가 유저의 모든 댓글을 조회할 때 사용하는 api입니다. 삭제된 댓글도 조회 가능합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "댓글 조회에 성공하였습니다.",  content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.",  content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    @Parameters(value = {
-            @Parameter(name="memberId", description = "멤버 번호", example = "332"),
-            @Parameter(name="page", description = "페이지 번호", example = "5"),
-            @Parameter(name="size", description = "페이지 크기", example = "30")
-    })
-    ResponseEntity<Page<CommentResponseDTO>> getCommentsByMemberId(Long memberId, int page, int size);
 
 
     @Operation(summary="게시글 유저 댓글 생성 - 유저", description= "유저의 댓글을 생성할 때 사용하는 api입니다.")
