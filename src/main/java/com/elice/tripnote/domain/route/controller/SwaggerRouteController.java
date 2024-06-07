@@ -21,9 +21,9 @@ import java.util.List;
 @Tag(name = "route API", description = "경로 관련 api입니다.")
 public interface SwaggerRouteController {
     @Operation(summary = "경로 생성", description = "경로를 추가합니다.")
-    @Parameters({
-            @Parameter(name = "requestDto", required = true, description = "총 경비(없어도 됨), 경로 이름, 여행지 id 리스트, 해시태그 id 리스트(없어도 됨)")
-    })
+//    @Parameters({
+//            @Parameter(name = "requestDto", required = true, description = "총 경비(없어도 됨), 경로 이름, 여행지 id 리스트, 해시태그 id 리스트(없어도 됨)")
+//    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",
                     content = {@Content(schema = @Schema(implementation = Long.class))}),
@@ -115,7 +115,7 @@ public interface SwaggerRouteController {
             @ApiResponse(responseCode = "404", description = "해당 member ID 또는 입력된 경로 id와 연결된 like_bookmark_period 객체가 존재하지 않습니다."),
     })
     @Parameters(value = {
-            @Parameter(name = "integratedId", required = true, description = "좋아요를 누르고 싶은 경로 id"),
+            @Parameter(name = "routeId", required = true, description = "좋아요를 누르고 싶은 경로 id"),
     })
     ResponseEntity<Void> addOrRemoveLike(Long integratedId);
     @Operation(summary = "북마크 추가/취소", description = "북마크가 눌리지 않은 상태에서 이 api를 호출하면 -> 북마크 추가\n북마크가 눌린 상태에서 이 api 호출 -> 북마크 취소")
@@ -124,7 +124,7 @@ public interface SwaggerRouteController {
             @ApiResponse(responseCode = "404", description = "해당 member ID 또는 입력된 경로 id와 연결된 like_bookmark_period 객체가 존재하지 않습니다."),
     })
     @Parameters(value = {
-            @Parameter(name = "integratedId", required = true, description = "북마크를 누르고 싶은 경로 id"),
+            @Parameter(name = "routeId", required = true, description = "북마크를 누르고 싶은 경로 id"),
     })
     ResponseEntity<Void> addOrRemoveBookmark(Long integratedId);
     @Operation(summary = "내가 북마크 누른 경로 리스트", description = "자신이 누른 북마크 경로를 반환합니다.")
@@ -147,9 +147,6 @@ public interface SwaggerRouteController {
     ResponseEntity<Page<RouteDetailResponseDTO>> findMyRoute(Pageable pageable);
 
     @Operation(summary = "경로 이름 수정", description = "경로의 이름을 수정합니다.")
-    @Parameters({
-            @Parameter(name = "requestDto", required = true, description = "경로 id, 새로운 경로 이름")
-    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",
                     content = {@Content(schema = @Schema(implementation = Long.class))}),

@@ -41,7 +41,7 @@ public class KakaoService {
 
     @Value("${kakao.secret}")
     private String secretKey;
-    private final String redirectURI = "http://34.64.39.102:8080/api/member/kakao/login";
+    private final String redirectURI = "http://localhost:8080/api/member/kakao/login";
     //http://localhost:8080
     //http://34.64.39.102:8080
 
@@ -212,6 +212,7 @@ public class KakaoService {
             throw new CustomException(NO_MEMBER);
         });
 //        Member member = memberRepository.findById(memberId)
+        log.info("로그아웃할 유저 id: {}", member.getId());
 
         Long kakaoId = member.getOauthId();
         String str_kakaoId = String.valueOf(kakaoId);

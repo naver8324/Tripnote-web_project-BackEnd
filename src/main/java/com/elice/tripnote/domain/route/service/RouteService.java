@@ -408,33 +408,33 @@ public class RouteService {
         routeRepository.save(route);
     }
 
-    public List<RouteDetailResponseDTO> findLike() {
-        Member member = getMemberFromJwt();
-        /*
-        select r.id, r.name
-        from Route r
-        join like_post lp on lp.route_id=r.id
-        where member_id=:memberId
-         */
-        List<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findLikedRoutesByMemberId(member.getId());
-
-        List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
-        for (RouteIdNameResponseDTO dto : routeIdNameDTOS) {
-            routeDetailResponseDTOS.add(RouteDetailResponseDTO.builder()
-                    .routeId(dto.getRouteId())
-                    .name(dto.getName())
-                    .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
-                    /*
-                    select *
-                    from spot s
-                    join route_spot rs on rs.spot_id=s.id
-                    where rs.route_id=:routeId
-                    order by rs.sequence asc
-                     */
-                    .build());
-        }
-        return routeDetailResponseDTOS;
-    }
+//    public List<RouteDetailResponseDTO> findLike() {
+//        Member member = getMemberFromJwt();
+//        /*
+//        select r.id, r.name
+//        from Route r
+//        join like_post lp on lp.route_id=r.id
+//        where member_id=:memberId
+//         */
+//        List<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findLikedRoutesByMemberId(member.getId());
+//
+//        List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
+//        for (RouteIdNameResponseDTO dto : routeIdNameDTOS) {
+//            routeDetailResponseDTOS.add(RouteDetailResponseDTO.builder()
+//                    .routeId(dto.getRouteId())
+//                    .name(dto.getName())
+//                    .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
+//                    /*
+//                    select *
+//                    from spot s
+//                    join route_spot rs on rs.spot_id=s.id
+//                    where rs.route_id=:routeId
+//                    order by rs.sequence asc
+//                     */
+//                    .build());
+//        }
+//        return routeDetailResponseDTOS;
+//    }
 
     public Page<RouteDetailResponseDTO> findBookmark(Pageable pageable) {
         Member member = getMemberFromJwt();
