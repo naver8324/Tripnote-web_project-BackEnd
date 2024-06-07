@@ -38,6 +38,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         CommentResponseDTO commentResponseDTO = query
                 .select(Projections.constructor(CommentResponseDTO.class,
+                        comment.id,
                         member.nickname,
                         comment.content,
                         comment.createdAt,
@@ -68,6 +69,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         List<CommentResponseDTO> commentResponseDTOs = query
                 .select(Projections.constructor(CommentResponseDTO.class,
+                        comment.id,
                         member.nickname,
                         comment.content,
                         comment.createdAt,
@@ -100,6 +102,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         List<CommentResponseDTO> commentResponseDTOs = query
                 .select(Projections.constructor(CommentResponseDTO.class,
+                        comment.id,
                         member.nickname,
                         comment.content,
                         comment.createdAt,
@@ -131,6 +134,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         List<CommentResponseDTO> commentResponseDTOs = query
                 .select(Projections.constructor(CommentResponseDTO.class,
+                        comment.id,
                         member.nickname,
                         comment.content,
                         comment.createdAt,
