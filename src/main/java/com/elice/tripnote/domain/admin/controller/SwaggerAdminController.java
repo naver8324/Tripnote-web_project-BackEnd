@@ -24,7 +24,7 @@ public interface SwaggerAdminController {
             parameters = {
                     @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", schema = @Schema(type = "integer", defaultValue = "0")),
                     @Parameter(name = "size", description = "페이지 크기", schema = @Schema(type = "integer", defaultValue = "10")),
-                    @Parameter(name = "sort", description = "정렬 기준. 예: id,asc 또는 id,desc", schema = @Schema(type = "string", defaultValue = "id"))
+                    @Parameter(name = "sort", description = "정렬 기준. 예: id", schema = @Schema(type = "string", defaultValue = "id"))
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 목록 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))),

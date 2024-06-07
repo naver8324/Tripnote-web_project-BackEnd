@@ -60,4 +60,11 @@ public class JWTUtil {
     public long getExpirationTimeMillis(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration().getTime();
     }
+
+    public String validateAndReturnToken(String token){
+        if (token != null && token.startsWith("Bearer ")) {
+            return token.substring(7); // Remove "Bearer " prefix
+        }
+        return token;
+    }
 }
