@@ -8,6 +8,7 @@ import com.elice.tripnote.domain.member.service.KakaoService;
 import com.elice.tripnote.domain.member.service.MemberService;
 import com.elice.tripnote.domain.member.service.TokenBlacklistService;
 import com.elice.tripnote.global.annotation.MemberRole;
+import com.elice.tripnote.global.jwt.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -28,6 +29,7 @@ public class MemberController implements SwaggerMemberController {
     private final MemberService memberService;
     private final KakaoService kakaoService;
     private final TokenBlacklistService tokenBlacklistService;
+    private final JWTUtil jwtUtil;
 
 
     // 회원가입
@@ -99,11 +101,10 @@ public class MemberController implements SwaggerMemberController {
     @Override
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // Remove "Bearer " prefix
-            tokenBlacklistService.addTokenToBlacklist(token);
-        }
+        String token = jwtUtil.validateAndReturnToken(request.getHeader("Authorization"));
+
+        tokenBlacklistService.addTokenToBlacklist(token);
+
         return ResponseEntity.ok().build();
     }
 
@@ -113,6 +114,7 @@ public class MemberController implements SwaggerMemberController {
      */
     @GetMapping("/kakao")
     public ResponseEntity<Void> kakao(){
+        System.out.println("------------------------- kakao api IN -------------------------");
         return kakaoService.getAuthorizationCode();
     }
 
