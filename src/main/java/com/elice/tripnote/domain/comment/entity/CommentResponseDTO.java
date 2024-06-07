@@ -14,6 +14,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CommentResponseDTO {
 
+    @NotNull
+    private Long id;
+
+
     @NotBlank
     private String nickname;
 
