@@ -14,6 +14,7 @@ public interface CustomRouteRepository {
     Page<RouteIdNameResponseDTO> findRoutesByMemberId(Long memberId, Pageable pageable);
     int getIntegratedRouteLikeCounts(Long integratedRouteId);
     Route getMinRouteByIntegratedId(Long integratedId);
+    Long findPostIdByIntegratedRouteId(Long integratedId);
 
 
 }

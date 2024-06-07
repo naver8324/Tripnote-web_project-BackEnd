@@ -4,9 +4,11 @@ import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
 import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
 import com.elice.tripnote.domain.link.routespot.entity.QRouteSpot;
+import com.elice.tripnote.domain.post.entity.QPost;
 import com.elice.tripnote.domain.route.entity.QRoute;
 import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.entity.RouteIdNameResponseDTO;
+import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
@@ -29,6 +31,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     private final QLikePost likePost = new QLikePost("lp");
     private final QBookmark bookmark = new QBookmark("b");
     private final QIntegratedRoute integratedRoute = new QIntegratedRoute("ir");
+    private final QPost post = new QPost("p");
 
     public List<Long> findIntegratedRouteIdsBySpots(List<Long> spots) {
         /*
@@ -155,6 +158,23 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .from(route)
                 .where(route.id.eq(minRouteId))
                 .fetchOne();
+    }
+
+    public Long findPostIdByIntegratedRouteId(Long integratedId) {
+        JPQLQuery<Long> minRouteId = JPAExpressions
+                .select(route.id.min())
+                .from(route)
+                .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
+                .where(integratedRoute.id.eq(integratedId)
+                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)));
+
+        return query
+                .select(post.id)
+                .from(post)
+                .join(route).on(post.route.id.eq(route.id))
+                .where(route.id.eq(minRouteId))
+                .fetchOne();
+
     }
 
 }

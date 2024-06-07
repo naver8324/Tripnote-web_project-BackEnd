@@ -29,7 +29,7 @@ public class RouteController implements SwaggerRouteController {
     @Override
     @MemberRole
     @PostMapping("/member/routes")
-    public ResponseEntity<Long> save(@Valid @RequestBody SaveRequestDTO requestDto) {
+    public ResponseEntity<Long> save(@RequestBody SaveRequestDTO requestDto) {
         return ResponseEntity.ok(routeService.save(requestDto));
     }
 
@@ -126,7 +126,8 @@ public class RouteController implements SwaggerRouteController {
      */
     @Override
     @GetMapping("/guest/routes/spot")
-    public ResponseEntity<List<RecommendedRouteResponseDTO>> getRoutesThroughSpotGuest(@RequestParam(value = "spots", required = false) List<Long> spots) {
+    public ResponseEntity<List<RecommendedRouteResponseDTO>> getRoutesThroughSpotGuest(
+            @RequestParam(value = "spots", required = false) List<Long> spots) {
         return ResponseEntity.ok(routeService.getRoutesThroughSpotGuest(spots));
     }
 
@@ -200,7 +201,8 @@ public class RouteController implements SwaggerRouteController {
      */
     @MemberRole
     @GetMapping("/member/routes/bookmark")
-    public ResponseEntity<Page<RouteDetailResponseDTO>> findBookmark(@PageableDefault(page = 0, size = 3) Pageable pageable) {
+    public ResponseEntity<Page<RouteDetailResponseDTO>> findBookmark(
+            @PageableDefault(page = 0, size = 3) Pageable pageable) {
         //pageable 사용법
         //request param으로 page, size 조절 가능
         return ResponseEntity.ok(routeService.findBookmark(pageable));
@@ -221,7 +223,8 @@ public class RouteController implements SwaggerRouteController {
      */
     @MemberRole
     @GetMapping("/member/routes")
-    public ResponseEntity<Page<RouteDetailResponseDTO>> findMyRoute(@PageableDefault(page = 0, size = 3) Pageable pageable) {
+    public ResponseEntity<Page<RouteDetailResponseDTO>> findMyRoute(
+            @PageableDefault(page = 0, size = 3) Pageable pageable) {
         //pageable 사용법
         //request param으로 page, size 조절 가능
         /*

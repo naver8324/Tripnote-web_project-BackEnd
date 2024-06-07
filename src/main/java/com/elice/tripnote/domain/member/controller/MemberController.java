@@ -140,6 +140,7 @@ public class MemberController implements SwaggerMemberController {
      * @throws IOException
      */
     @Override
+    @MemberRole
     @GetMapping("/kakao/logout")
     public ResponseEntity<Long> kakaoLogout(HttpServletResponse response) throws IOException {
         Long kakaoId = kakaoService.logout();
@@ -156,6 +157,7 @@ public class MemberController implements SwaggerMemberController {
      * @throws IOException
      */
     @Override
+    @MemberRole
     @GetMapping("/kakao/unlink")
     public ResponseEntity<Long> kakaoUnlink(HttpServletResponse response) throws IOException {
         //유저 아이디로 카카오 아이디 받아오기
@@ -177,6 +179,7 @@ public class MemberController implements SwaggerMemberController {
      */
     //TODO: 추후 https:// 도메인으로 kakao dev에 등록 필요
     @Override
+    @MemberRole
     @GetMapping("/kakao/disconnect")
     public ResponseEntity<Long> kakaoDisconnect(
             @RequestParam("user_id") String kakaoId,
