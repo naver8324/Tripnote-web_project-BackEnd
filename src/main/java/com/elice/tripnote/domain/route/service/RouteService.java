@@ -79,8 +79,10 @@ public class RouteService {
                     return integratedRouteRepository.save(newRoute);
                 });
 
+        //TODO: region 값에 알맞은 해시태그 경로에 붙여주기
+//        requestDto.getHashtagIds().add();
 
-        if (requestDto.getHashtagIds() != null) {
+//        if (requestDto.getHashtagIds() != null) {
             // 통합 경로 객체(IntegratedRoute) 이용해서 uuid_hashtag 객체 생성
             // 현재 db에서 integratedRoute와 연관된 해시태그 찾기(이미 저장돼있는 해시태그)
             List<Long> dbHashtagIds = uuidHashtagRepository.findHashtagIdsByIntegratedRouteId(integratedRoute.getId());
@@ -105,7 +107,7 @@ public class RouteService {
                         .build();
                 uuidHashtagRepository.save(uuidHashtag);
             }
-        }
+//        }
 
 
         // 해당 통합경로 아이디 값을 가진 객체가 있는지 확인.

@@ -26,6 +26,7 @@ public class IntegratedRoute {
     @Column(name = "integrated_routes", nullable = false)
     String integratedRoutes;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "region", nullable = true)
     Region region;
 

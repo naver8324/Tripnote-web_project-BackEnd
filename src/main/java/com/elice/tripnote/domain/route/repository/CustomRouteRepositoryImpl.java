@@ -94,6 +94,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .orderBy(route.id.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .orderBy(route.id.desc())
                 .fetchResults();
 
         return new PageImpl<>(queryResults.getResults(), pageable, queryResults.getTotal());
@@ -119,6 +120,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .where(route.member.id.eq(memberId))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .orderBy(route.id.desc())
                 .fetchResults();
 
         return new PageImpl<>(results.getResults(), pageable, results.getTotal());
