@@ -41,13 +41,13 @@ public class KakaoService {
 
     @Value("${kakao.secret}")
     private String secretKey;
-    private final String redirectURI = "http://localhost:8080/api/member/kakao/login";
-    //http://localhost:8080
-    //http://34.64.39.102:8080
+
+    @Value("${kakao.redirect}")
+    private String redirectURI;
 
     private final MemberRepository memberRepository;
 
-    public ResponseEntity<Void> getAuthorizationCode(){
+    public ResponseEntity<Void> getAuthorizationCode() {
         // URL에 쿼리 파라미터 추가
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl("https://kauth.kakao.com/oauth/authorize")
                 .queryParam("response_type", "code")
@@ -150,7 +150,7 @@ public class KakaoService {
                             .build();
                     return memberRepository.save(newMember);
                 });
-        if(member.getOauthId() == null) {
+        if (member.getOauthId() == null) {
             log.info("기존 회원 정보와 카카오 회원 정보를 연동시킵니다.");
             member.addKakaoInfo(dto.getKakaoId());
         }
