@@ -101,26 +101,29 @@ public interface SwaggerMemberController {
     /*
     카카오 로그인 api
      */
-    @Operation(summary = "카카오 로그인 API(인가 코드 요청해서 kakao/login으로 리다이렉트)")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
-    })
-    ResponseEntity<Void> kakao();
+   @Operation(summary = "카카오 로그인 API(kakao login을 위해 필요한 리다이렉트 url string으로 전달)")
+   @ApiResponses({
+           @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
+   })
+   ResponseEntity<String> kakao();
 
-    @Operation(summary = "카카오 로그인을 리다이렉트 받는 api")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
-    })
-    @Parameters({
-            @Parameter(name = "code", description = "카카오에서 받아오는 코드를 넣어주세요.")
-    })
-    ResponseEntity<Void> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws IOException;
+   @Operation(summary = "카카오 로그인을 한 코드를 프론트에서 받아온 후 카카오에 토큰 발급 요청 및 받아옴")
+   @ApiResponses({
+           @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
+   })
+   @Parameters({
+           @Parameter(name = "code", description = "카카오에서 받아오는 코드를 넣어주세요.")
+   })
+   ResponseEntity<TokenResponseDTO> kakaoLogin(@RequestParam String code);
 
     @Operation(summary = "회원 로그아웃 API")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK, 성공"),
     })
-    ResponseEntity<Long> kakaoLogout(HttpServletResponse response) throws IOException;
+    @Parameters({
+            @Parameter(name = "kakaoToken", description = "카카오에서 받아온 토큰을 넣어주세요.")
+    })
+    ResponseEntity<Long> kakaoLogout(@RequestParam String kakaoToken, HttpServletResponse response) throws IOException;
 
     @Operation(summary = "회원 탈퇴 API")
     @ApiResponses({

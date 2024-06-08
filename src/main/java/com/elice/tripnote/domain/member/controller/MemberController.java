@@ -1,9 +1,6 @@
 package com.elice.tripnote.domain.member.controller;
 
-import com.elice.tripnote.domain.member.entity.MemberRequestDTO;
-import com.elice.tripnote.domain.member.entity.MemberResponseDTO;
-import com.elice.tripnote.domain.member.entity.PasswordDTO;
-import com.elice.tripnote.domain.member.entity.ProfileUpdateDTO;
+import com.elice.tripnote.domain.member.entity.*;
 import com.elice.tripnote.domain.member.service.KakaoService;
 import com.elice.tripnote.domain.member.service.MemberService;
 import com.elice.tripnote.domain.member.service.TokenBlacklistService;
@@ -19,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/member")
@@ -112,10 +110,12 @@ public class MemberController implements SwaggerMemberController {
     /*
     카카오 로그인 api
      */
+    @Override
     @GetMapping("/kakao")
-    public ResponseEntity<Void> kakao(){
-        System.out.println("------------------------- kakao api IN -------------------------");
-        return kakaoService.getAuthorizationCode();
+    public ResponseEntity<String> kakao(){
+
+        String uri = kakaoService.getAuthorizationCode();
+        return ResponseEntity.ok().body(uri);
     }
 
     /**
@@ -126,11 +126,12 @@ public class MemberController implements SwaggerMemberController {
      */
     @Override
     @GetMapping("/kakao/login")
-    public ResponseEntity<Void> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws IOException {
+    public ResponseEntity<TokenResponseDTO> kakaoLogin(@RequestParam String code){
         String accessToken = kakaoService.getAccessToken(code);
+        log.info("token : {}", accessToken);
         System.out.println("------------------------- kakao access token: " + accessToken + " -------------------------");
-        kakaoService.kakaoLogin(accessToken);
-        return ResponseEntity.ok().build();
+
+        return ResponseEntity.ok().body(kakaoService.kakaoLogin(accessToken));
     }
 
     /**
@@ -142,8 +143,8 @@ public class MemberController implements SwaggerMemberController {
     @Override
     @MemberRole
     @GetMapping("/kakao/logout")
-    public ResponseEntity<Long> kakaoLogout(HttpServletResponse response) throws IOException {
-        Long kakaoId = kakaoService.logout();
+    public ResponseEntity<Long> kakaoLogout(@RequestParam String kakaoToken, HttpServletResponse response) throws IOException {
+        Long kakaoId = kakaoService.logout(kakaoToken);
 
         log.info("로그아웃이 완료되었습니다.");
         return ResponseEntity.ok(kakaoId);
