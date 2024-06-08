@@ -1,8 +1,8 @@
 package com.elice.tripnote.domain.integratedroute.entity;
 
-import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
 import com.elice.tripnote.domain.likebookmarkperiod.entity.LikeBookmarkPeriod;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
+import com.elice.tripnote.domain.spot.constant.Region;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -26,8 +26,9 @@ public class IntegratedRoute {
     @Column(name = "integrated_routes", nullable = false)
     String integratedRoutes;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "region", nullable = true)
-    IntegratedRouteStatus region;
+    Region region;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "integratedRoute")
     @JsonIgnore
@@ -37,7 +38,7 @@ public class IntegratedRoute {
     @JsonIgnore
     List<LikeBookmarkPeriod> likeBookmarkPeriods = new ArrayList<>();
     @Builder
-    public IntegratedRoute(String integratedRoutes, IntegratedRouteStatus region, List<UUIDHashtag> uuidHashtags, List<LikeBookmarkPeriod> likeBookmarkPeriods){
+    public IntegratedRoute(String integratedRoutes, Region region, List<UUIDHashtag> uuidHashtags, List<LikeBookmarkPeriod> likeBookmarkPeriods){
         this.integratedRoutes=integratedRoutes;
         this.region=region;
         this.uuidHashtags=uuidHashtags;
@@ -45,7 +46,7 @@ public class IntegratedRoute {
     }
 
     @Builder
-    public IntegratedRoute(String integratedRoutes, IntegratedRouteStatus region){
+    public IntegratedRoute(String integratedRoutes, Region region){
         this.integratedRoutes=integratedRoutes;
         this.region=region;
     }

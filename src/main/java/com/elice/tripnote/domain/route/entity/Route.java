@@ -26,7 +26,6 @@ public class Route {
     @JoinColumn(name = "integrated_route_id", nullable = false)
     private IntegratedRoute integratedRoute;
 
-    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RouteStatus routeStatus;
@@ -34,11 +33,23 @@ public class Route {
     @Column(nullable = true)
     private int expense;
 
+    @Column(nullable = true)
+    private String name;
+
     @Builder
-    public Route(Member member, IntegratedRoute integratedRoute, RouteStatus routeStatus, int expense){
-        this.integratedRoute=integratedRoute;
-        this.member=member;
-        this.routeStatus=routeStatus;
+    public Route(Member member, IntegratedRoute integratedRoute, RouteStatus routeStatus, int expense, String name) {
+        this.integratedRoute = integratedRoute;
+        this.member = member;
+        this.routeStatus = routeStatus;
         this.expense = expense;
+        this.name=name;
+    }
+
+    public void updateStatus(RouteStatus status) {
+        this.routeStatus = status;
+    }
+
+    public void updateRouteName(String name) {
+        this.name = name;
     }
 }

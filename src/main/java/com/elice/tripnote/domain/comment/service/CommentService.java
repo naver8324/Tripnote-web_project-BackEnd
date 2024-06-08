@@ -32,6 +32,16 @@ public class CommentService {
 
     // 게시글에서 게시글에 해당하는 댓글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 댓글만 불러옵니다.
 
+
+
+
+    private CommentResponseDTO getComment(Long commentId){
+
+        return commentRepository.customFindNotDeletedComment(commentId);
+
+
+    }
+
     public Page<CommentResponseDTO> getCommentsByPostId(Long postId, int page, int size){
 
 
@@ -47,26 +57,15 @@ public class CommentService {
 
 
     // 관리자가 모든 댓글을 불러올 때 사용하는 메서드. 삭제된 댓글도 불러옵니다.
-    public Page<CommentResponseDTO> getCommentsAll(int page, int size){
+    public Page<CommentResponseDTO> getCommentsAll(Long memberId, int page, int size){
 
 
 
-        return commentRepository.customFindComments(page, size);
-
-
-    }
-
-    // 관리자가 한 유저의 전체 댓글을 불러올 때 사용하는 메서드. 삭제된 댓글도 불러옵니다.
-    public Page<CommentResponseDTO> getCommentsByMemberId(Long memberId, int page, int size){
-
-
-        Member member = memberOrElseThrowsException(memberId);
-
-        return commentRepository.customFindCommentsByMemberId(memberId, page, size);
-
+        return commentRepository.customFindComments(memberId, page, size);
 
 
     }
+
 
 
     // 댓글을 저장하는 메서드입니다.
@@ -91,7 +90,8 @@ public class CommentService {
         post.getComments().add(comment);
         member.getComments().add(comment);
 
-        return comment.toDTO();
+
+        return getComment(comment.getId());
 
 
     }
@@ -111,9 +111,9 @@ public class CommentService {
         }
 
         comment.update(commentDTO);
+        commentRepository.flush();
 
-        return comment.toDTO();
-
+        return getComment(comment.getId());
 
     }
 
@@ -176,7 +176,6 @@ public class CommentService {
 
     @Transactional
     public void deleteCommentsByPostId(Long postId) {
-//        Post post = postOrElseThrowsException(postId);
 
         commentRepository.customDeleteCommentsByPostId(postId);
     }

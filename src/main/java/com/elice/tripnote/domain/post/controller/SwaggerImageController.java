@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 
 
@@ -26,7 +27,7 @@ public interface SwaggerImageController {
             @ApiResponse(responseCode = "200", description = "이미지 저장을 할 수 있는 presigned url을 받는데 성공했습니다.",  content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "<p>파일 크기가 범위를 넘었습니다.</p><br><p>이미지가 아닌 파일입니다.</p>",  content = @Content(mediaType = "application/json")),
     })
-    ResponseEntity<ImageResponseDTO> createPresignedImageUrl(ImageRequestDTO imageDTO);
+    ResponseEntity<ImageResponseDTO> createPresignedImageUrl(@Valid ImageRequestDTO imageDTO);
 
 
 

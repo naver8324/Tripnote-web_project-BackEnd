@@ -1,10 +1,9 @@
 package com.elice.tripnote.domain.comment.repository;
 
 
-import com.elice.tripnote.domain.comment.entity.Comment;
 import com.elice.tripnote.domain.comment.entity.CommentResponseDTO;
 import com.elice.tripnote.domain.comment.entity.QComment;
-import com.elice.tripnote.domain.post.entity.QPost;
+import com.elice.tripnote.domain.member.entity.QMember;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -12,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,58 +24,64 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
 
     private final QComment comment = QComment.comment;
+    private final QMember member = QMember.member;
 
 
-    public Page<CommentResponseDTO> customFindNotDeletedCommentsByPostId(Long postId, int page, int size){
-
-        page = page > 0 ? page - 1 : 0;
-
-        Long totalCount =(long) query
-                .from(comment)
-                .where(comment.post.id.eq(postId)
-                        .and(comment.isDeleted.isFalse()))
-                .fetch().size();
 
 
-        List<CommentResponseDTO> commentResponseDTOs = query
+
+
+
+    public CommentResponseDTO customFindNotDeletedComment(Long commentId){
+
+
+
+        CommentResponseDTO commentResponseDTO = query
                 .select(Projections.constructor(CommentResponseDTO.class,
-                                comment.id,
-                                comment.content,
-                                comment.report,
-                                comment.isDeleted
+                        comment.id,
+                        member.nickname,
+                        comment.content,
+                        comment.createdAt,
+                        comment.report,
+                        comment.isDeleted
                 ))
                 .from(comment)
-                .where(comment.post.id.eq(postId)
+                .join(comment.member, member)
+                .where(comment.id.eq(commentId)
                         .and(comment.isDeleted.isFalse()))
-                .orderBy(comment.id.desc())
-                .offset(page * size)
-                .limit(size)
-                .fetch();
+                .fetchFirst();
 
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        return new PageImpl<>(commentResponseDTOs, pageRequest, totalCount);
+        return commentResponseDTO;
     }
 
 
-    public Page<CommentResponseDTO> customFindComments(int page, int size){
+
+    public Page<CommentResponseDTO> customFindNotDeletedCommentsByPostId(Long postId, int page, int size) {
 
         page = page > 0 ? page - 1 : 0;
 
-        Long totalCount =(long) query
+        Long totalCount = query
+                .select(comment.count())
                 .from(comment)
-                .fetch().size();
+                .where(comment.post.id.eq(postId)
+                        .and(comment.isDeleted.isFalse()))
+                .fetchFirst();
 
 
         List<CommentResponseDTO> commentResponseDTOs = query
                 .select(Projections.constructor(CommentResponseDTO.class,
                         comment.id,
+                        member.nickname,
                         comment.content,
+                        comment.createdAt,
                         comment.report,
                         comment.isDeleted
                 ))
                 .from(comment)
-                .orderBy(comment.id.desc())
+                .join(comment.member, member)
+                .where(comment.post.id.eq(postId)
+                        .and(comment.isDeleted.isFalse()))
+                .orderBy(comment.id.asc())
                 .offset(page * size)
                 .limit(size)
                 .fetch();
@@ -88,25 +92,29 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
     }
 
 
-    public Page<CommentResponseDTO> customFindCommentsByMemberId(Long memberId, int page, int size){
+    public Page<CommentResponseDTO> customFindComments(Long memberId,int page, int size){
 
         page = page > 0 ? page - 1 : 0;
 
-        Long totalCount = (long) query
+        Long totalCount =query
+                .select(comment.count())
                 .from(comment)
-                .where(comment.member.id.eq(memberId))
-                .fetch().size();
+                .where(memberId != null ? member.id.eq(memberId) : null)
+                .fetchFirst();
 
 
         List<CommentResponseDTO> commentResponseDTOs = query
                 .select(Projections.constructor(CommentResponseDTO.class,
                         comment.id,
+                        member.nickname,
                         comment.content,
+                        comment.createdAt,
                         comment.report,
                         comment.isDeleted
                 ))
                 .from(comment)
-                .where(comment.member.id.eq(memberId))
+                .join(comment.member, member)
+                .where(memberId != null ? member.id.eq(memberId) : null)
                 .orderBy(comment.id.desc())
                 .offset(page * size)
                 .limit(size)
@@ -116,6 +124,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         return new PageImpl<>(commentResponseDTOs, pageRequest, totalCount);
     }
+
 
 
     public void customDeleteCommentsByPostId(Long postId){

@@ -49,11 +49,12 @@ public class Post extends BaseTimeEntity {
     private boolean isDeleted;
 
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "route_id", nullable = false)
     private Route route;
 
@@ -75,17 +76,6 @@ public class Post extends BaseTimeEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "post")
     private List<Bookmark> bookmarks = new ArrayList<>();
 
-
-    public PostResponseDTO toDTO() {
-
-        return PostResponseDTO.builder()
-                .id(id)
-                .title(title)
-                .content(content)
-                .isDeleted(isDeleted)
-                .build();
-
-    }
 
     public void update(PostRequestDTO postDTO) {
         title = postDTO.getTitle();

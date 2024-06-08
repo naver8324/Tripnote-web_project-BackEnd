@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class SpotResponseDTO {
-    private Long id;
     private String location;
-    private String region;
+    private double lat;
+    private double lng;
 }

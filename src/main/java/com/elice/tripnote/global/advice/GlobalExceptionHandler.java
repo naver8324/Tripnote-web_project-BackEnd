@@ -1,13 +1,7 @@
 package com.elice.tripnote.global.advice;
 
 
-import com.elice.tripnote.domain.hashtag.exception.HashtagNameDuplicateException;
-import com.elice.tripnote.domain.member.exception.CustomDuplicateException;
-import com.elice.tripnote.domain.post.exception.*;
-import com.elice.tripnote.domain.route.exception.AlgorithmNotFoundException;
 import com.elice.tripnote.global.exception.CustomException;
-import com.elice.tripnote.global.exception.JwtTokenException;
-import com.elice.tripnote.global.exception.NoSuchSpotException;
 import com.elice.tripnote.global.entity.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +10,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,9 +1,12 @@
 package com.elice.tripnote.domain.comment.entity;
 
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -11,10 +14,18 @@ import lombok.*;
 @NoArgsConstructor
 public class CommentResponseDTO {
 
+    @NotNull
     private Long id;
+
+
+    @NotBlank
+    private String nickname;
 
     @NotNull
     private String content;
+
+    @NotNull
+    private LocalDateTime createdAt;
 
     @PositiveOrZero
     private int report;

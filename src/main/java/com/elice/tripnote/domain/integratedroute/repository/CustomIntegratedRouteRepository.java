@@ -1,11 +1,11 @@
 package com.elice.tripnote.domain.integratedroute.repository;
 
-import com.elice.tripnote.domain.integratedroute.status.IntegratedRouteStatus;
-import com.elice.tripnote.domain.route.entity.IntegratedRouteDTO;
+import com.elice.tripnote.domain.spot.constant.Region;
 
 import java.util.List;
 
 public interface CustomIntegratedRouteRepository {
-    List<IntegratedRouteDTO> findTopIntegratedRoutesByRegionAndHashtags(IntegratedRouteStatus region, List<Long> hashtags);
-    List<IntegratedRouteDTO> findIntegratedRouteFilterByHashtags(List<Long> integratedIds, List<Long> hashtags);
+    List<Long> findTopIntegratedRoutesByRegionAndHashtags(Region region);
+    List<Long> findIntegratedRoute(List<Long> integratedIds);
+    //List<Long> findIntegratedRouteFilterByHashtags(List<Long> integratedIds, List<Long> hashtags);
 }

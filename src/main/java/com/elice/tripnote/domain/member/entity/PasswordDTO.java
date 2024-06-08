@@ -1,10 +1,11 @@
 package com.elice.tripnote.domain.member.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
-@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PasswordDTO {
     private String password;
 }

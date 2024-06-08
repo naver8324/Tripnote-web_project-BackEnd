@@ -1,27 +1,42 @@
 package com.elice.tripnote.domain.post.repository;
 
 
+import com.elice.tripnote.domain.hashtag.entity.Hashtag;
+import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
+import com.elice.tripnote.domain.hashtag.entity.HashtagResponseDTO;
+import com.elice.tripnote.domain.hashtag.entity.QHashtag;
+import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
 import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
 import com.elice.tripnote.domain.link.reportPost.entity.QReportPost;
+import com.elice.tripnote.domain.link.uuidhashtag.entity.QUUIDHashtag;
 import com.elice.tripnote.domain.member.entity.QMember;
 import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.entity.QPost;
-import com.elice.tripnote.domain.route.entity.LikeBookmarkResponseDTO;
 import com.elice.tripnote.domain.route.entity.QRoute;
 import com.elice.tripnote.domain.route.status.RouteStatus;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.query.criteria.JpaSubQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.querydsl.core.group.GroupBy.groupBy;
+import static com.querydsl.core.group.GroupBy.list;
 
 @Repository
 @RequiredArgsConstructor
@@ -35,6 +50,9 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
     private final QPost post = QPost.post;
     private final QRoute route = QRoute.route;
+    private final QIntegratedRoute integratedRoute = QIntegratedRoute.integratedRoute;
+    private final QUUIDHashtag uuidHashtags = QUUIDHashtag.uUIDHashtag;
+    private final QHashtag hashtag = QHashtag.hashtag;
 
     private final QLikePost likePost = QLikePost.likePost;
     private final QReportPost reportPost = QReportPost.reportPost;
@@ -42,7 +60,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     private final QBookmark bookmark = QBookmark.bookmark;
 
 
-    public Page<PostResponseDTO> customFindNotDeletedPosts(int page, int size){
+    public Page<PostResponseDTO> customFindNotDeletedPosts(String order, int page, int size){
 
         page = page > 0 ? page - 1 : 0;
 
@@ -52,33 +70,170 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .where(post.isDeleted.isFalse())
                 .fetchFirst();
 
+        OrderSpecifier orderSpecifier = post.id.desc() ;
 
-        List<PostResponseDTO> postResponseDTOs = query
-                .select(Projections.constructor(PostResponseDTO.class,
-                        post.id,
-                        post.title,
-                        post.content,
-                        post.isDeleted
-                ))
+        if(order.equals("likes")){
+            orderSpecifier = post.likes.desc();
+        }
+
+        List<Long> postIds = query
+                .select(post.id)
                 .from(post)
                 .where(post.isDeleted.isFalse())
-                .orderBy(post.id.desc())
+                .orderBy(orderSpecifier)
                 .offset(page * size)
                 .limit(size)
                 .fetch();
+
+        List<PostResponseDTO> postResponseDTOs = query
+                .from(post)
+                .join(post.member, member)
+                .on(post.id.in(postIds))
+                .join(post.route, route)
+                .join(route.integratedRoute, integratedRoute)
+                .join(integratedRoute.uuidHashtags, uuidHashtags)
+                .join(uuidHashtags.hashtag, hashtag)
+                .orderBy(orderSpecifier)
+                .transform(groupBy(post.id).list(Projections.constructor(PostResponseDTO.class,
+                                post.id,
+                                post.title,
+                                post.content,
+                                post.isDeleted,
+                                post.createdAt,
+                                member.nickname,
+                                list(Projections.constructor(HashtagResponseDTO.class,
+                                        hashtag.id,
+                                        hashtag.name,
+                                        hashtag.isCity)
+                                )
+                        )
+                ));
+
+
+//
+//        List<PostResponseDTO> postResponseDTOs = query
+//                .from(post)
+//                .join(post.member, member)
+//                .join(post.route, route)
+//                .join(route.integratedRoute, integratedRoute)
+//                .join(integratedRoute.uuidHashtags, uuidHashtags)
+//                .join(uuidHashtags.hashtag, hashtag)
+//                .where(post.isDeleted.isFalse())
+//                .orderBy(orderSpecifier)
+//                .offset(page * size)
+//                .limit(size)
+//                .transform(groupBy(post.id).list(Projections.constructor(PostResponseDTO.class,
+//                                post.id,
+//                                post.title,
+//                                post.content,
+//                                post.isDeleted,
+//                                post.createdAt,
+//                                member.nickname,
+//                                list(Projections.constructor(HashtagResponseDTO.class,
+//                                        hashtag.id,
+//                                        hashtag.name,
+//                                        hashtag.isCity)
+//                                )
+//                        )
+//                ));
 
         PageRequest pageRequest = PageRequest.of(page, size);
 
         return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
     }
 
-    public Page<PostResponseDTO> customFindPosts(int page, int size){
+    public Page<PostResponseDTO> customFindByHashtagNotDeletedPosts(List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size){
+
+        page = page > 0 ? page - 1 : 0;
+
+        List<String> hashtagNames = hashtagRequestDTOList.stream().map(HashtagRequestDTO::getName).toList();
+
+        JPQLQuery<Long> subQuery = JPAExpressions
+                .select(post.id)
+                .from(post)
+                .join(post.member, member)
+                .join(post.route, route)
+                .join(route.integratedRoute, integratedRoute)
+                .join(integratedRoute.uuidHashtags, uuidHashtags)
+                .join(uuidHashtags.hashtag, hashtag)
+                .on(hashtag.name.in(hashtagNames))
+                .where(post.isDeleted.isFalse())
+                .groupBy(post.id)
+                .having(hashtag.count().eq((long) hashtagRequestDTOList.size()));
+
+        long totalCount = query
+                .select(post.count())
+                .from(post)
+                .where(post.id.in(subQuery))
+                .fetchFirst();
+
+        OrderSpecifier orderSpecifier = post.id.desc();
+
+        if(order.equals("likes")){
+            orderSpecifier = post.likes.desc();
+        }
+
+        List<Long> postIds =query
+                .select(post.id)
+                .from(post)
+                .join(post.member, member)
+                .join(post.route, route)
+                .join(route.integratedRoute, integratedRoute)
+                .join(integratedRoute.uuidHashtags, uuidHashtags)
+                .join(uuidHashtags.hashtag, hashtag)
+                .on(hashtag.name.in(hashtagNames))
+                .where(post.isDeleted.isFalse())
+                .orderBy(orderSpecifier)
+                .orderBy(post.createdAt.desc())
+                .groupBy(post.id)
+                .having(hashtag.count().eq((long) hashtagRequestDTOList.size()))
+                .offset(page * size)
+                .limit(size)
+                .fetch();
+
+
+        List<PostResponseDTO> postResponseDTOs = query
+                .from(post)
+                .join(post.member, member)
+                .on(post.id.in(postIds))
+                .join(post.route, route)
+                .join(route.integratedRoute, integratedRoute)
+                .join(integratedRoute.uuidHashtags, uuidHashtags)
+                .join(uuidHashtags.hashtag, hashtag)
+                .orderBy(orderSpecifier)
+                .orderBy(post.createdAt.desc())
+                .transform(groupBy(post.id).list(Projections.constructor(PostResponseDTO.class,
+                                post.id,
+                                post.title,
+                                post.content,
+                                post.isDeleted,
+                                post.createdAt,
+                                member.nickname,
+                                list(Projections.constructor(HashtagResponseDTO.class,
+                                        hashtag.id,
+                                        hashtag.name,
+                                        hashtag.isCity)
+                                )
+                        )
+                ));
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
+    }
+
+
+
+
+
+    public Page<PostResponseDTO> customFindPosts(Long memberId, int page, int size){
 
         page = page > 0 ? page - 1 : 0;
 
         long totalCount =query
                 .select(post.count())
                 .from(post)
+                .join(post.member, member)
+                .where(memberId != null ? member.id.eq(memberId) : null)
                 .fetchFirst();
 
 
@@ -87,14 +242,17 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         post.id,
                         post.title,
                         post.content,
-                        post.isDeleted
+                        post.isDeleted,
+                        post.createdAt,
+                        member.nickname
                 ))
                 .from(post)
-                .orderBy(post.id.desc())
+                .join(post.member, member)
+                .where(memberId != null ? member.id.eq(memberId) : null)
+                .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)
                 .fetch();
-
         PageRequest pageRequest = PageRequest.of(page, size);
 
         return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
@@ -112,18 +270,20 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         .and(post.isDeleted.isFalse()))
                 .fetchFirst();
 
-
         List<PostResponseDTO> postResponseDTOs = query
                 .select(Projections.constructor(PostResponseDTO.class,
                         post.id,
                         post.title,
                         post.content,
-                        post.isDeleted
-                ))
+                        post.isDeleted,
+                        post.createdAt,
+                        member.nickname
+                        ))
                 .from(post)
-                .where(post.member.id.eq(memberId)
-                        .and(post.isDeleted.isFalse()))
-                .orderBy(post.id.desc())
+                .join(post.member, member)
+                .on(post.member.id.eq(memberId))
+                .where(post.isDeleted.isFalse())
+                .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)
                 .fetch();
@@ -152,7 +312,9 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         post.id,
                         post.title,
                         post.content,
-                        post.isDeleted
+                        post.isDeleted,
+                        post.createdAt,
+                        post.member.nickname
                 ))
                 .from(post)
                 .join(post.likePosts, likePost)
@@ -160,7 +322,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(likePost.member, member)
                 .on(member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
-                .orderBy(post.id.desc())
+                .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)
                 .fetch();
@@ -191,7 +353,9 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                         post.id,
                         post.title,
                         post.content,
-                        post.isDeleted
+                        post.isDeleted,
+                        post.createdAt,
+                        post.member.nickname
                 ))
                 .from(post)
                 .join(post.bookmarks, bookmark)
@@ -199,7 +363,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 .join(bookmark.member, member)
                 .on(member.id.eq(memberId))
                 .where(post.isDeleted.isFalse())
-                .orderBy(post.id.desc())
+                .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)
                 .fetch();
@@ -211,41 +375,49 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
     }
 
 
-    public PostDetailResponseDTO customFindPost(Long postId){
+    public PostDetailResponseDTO customFindPost(Long postId, Long memberId){
 
-        return query
-                .select(Projections.constructor(PostDetailResponseDTO.class,
+
+        List<PostDetailResponseDTO> result =query
+                .from(post)
+                .join(post.member, member)
+                .join(post.route, route)
+                .join(route.integratedRoute, integratedRoute)
+                .join(integratedRoute.uuidHashtags, uuidHashtags)
+                .join(uuidHashtags.hashtag, hashtag)
+                .leftJoin(post.likePosts, likePost)
+                .on(likePost.member.id.eq(memberId))
+                .leftJoin(post.bookmarks, bookmark)
+                .on(bookmark.member.id.eq(memberId))
+                .leftJoin(post.reportPosts, reportPost)
+                .on(reportPost.member.id.eq(memberId))
+                .where(post.id.eq(postId)
+                        .and(post.isDeleted.isFalse()))
+                .transform(groupBy(post.id).list(Projections.constructor(PostDetailResponseDTO.class,
                         post.id,
                         post.title,
                         post.content,
                         post.likes,
                         post.report,
                         post.isDeleted,
+                        post.createdAt,
                         likePost.likedAt,
+                        bookmark.markedAt,
                         reportPost.reportedAt,
-                        route.id
-                ))
-                .from(post)
-                .join(post.route, route)
-                .leftJoin(post.likePosts, likePost)
-                .leftJoin(post.reportPosts, reportPost)
-                .where(post.id.eq(postId)
-                        .and(post.isDeleted.isFalse()))
-                .fetchOne();
+                        route.id,
+                        member.nickname,
+                                list(Projections.constructor(HashtagResponseDTO.class,
+                                        hashtag.id,
+                                        hashtag.name,
+                                        hashtag.isCity)
+                                )
+                        )
+                ));
 
-    }
-
-    public boolean customCheckIfRouteHasPost(Long routeId){
-
-        return query
-                .select(post.count())
-                .from(post)
-                .join(post.route, route)
-                .where(route.id.eq(routeId)
-                        .and(route.routeStatus.eq(RouteStatus.PUBLIC))
-                )
-                .fetchOne() != null;
-
+        if(result.isEmpty()){
+            return null;
+        }
+        return result.get(0);
 
     }
 
