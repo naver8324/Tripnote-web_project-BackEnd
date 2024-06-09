@@ -97,9 +97,9 @@ public class PostService {
 
     //  전체 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제된 게시글도 불러오며 관리자만 사용할 수 있습니다.
 
-    public Page<PostResponseDTO> getPostsAll(int page, int size){
+    public Page<PostResponseDTO> getPostsAll(Long memberId, int page, int size){
 
-        return postRepository.customFindPosts(page, size);
+        return postRepository.customFindPosts(memberId, page, size);
 
 
     }

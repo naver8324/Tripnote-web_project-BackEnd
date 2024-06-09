@@ -24,7 +24,7 @@ public interface SwaggerAdminController {
             parameters = {
                     @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", schema = @Schema(type = "integer", defaultValue = "0")),
                     @Parameter(name = "size", description = "페이지 크기", schema = @Schema(type = "integer", defaultValue = "10")),
-                    @Parameter(name = "sort", description = "정렬 기준. 예: id,asc 또는 id,desc", schema = @Schema(type = "string", defaultValue = "id"))
+                    @Parameter(name = "sort", description = "정렬 기준. 예: id", schema = @Schema(type = "string", defaultValue = "id"))
             })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원 목록 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))),
@@ -44,6 +44,17 @@ public interface SwaggerAdminController {
     })
     @DeleteMapping("/delete-member")
     ResponseEntity<Void> deleteMember(@RequestParam String email);
+
+    @Operation(summary = "회원 복구", description = "이메일을 통해 회원을 복구합니다.",
+            parameters = @Parameter(name = "email", description = "복구할 회원의 이메일", required = true, schema = @Schema(type = "string")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원 복구에 성공하였습니다."),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다. (토큰 값이 제대로 전달되었는지 확인이 필요합니다.)"),
+            @ApiResponse(responseCode = "403", description = "관리자 권한이 없습니다."),
+            @ApiResponse(responseCode = "404", description = "해당하는 회원을 찾을 수 없습니다.")
+    })
+    @DeleteMapping("/restore-member")
+    ResponseEntity<Void> restoreMember(@RequestParam String email);
 
 
 }

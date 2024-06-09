@@ -16,12 +16,15 @@ public enum Region {
     private String name;
     private String englishName;
 
-        Region(String name, String seoul){
-        this.name =name;
+    Region(String name, String englishName) {
+        this.name = name;
+        this.englishName = englishName;
     }
+
     public String getName() {
         return name;
     }
+
 
     public static Region fromString(String name) {
         for (Region region : Region.values()) {
