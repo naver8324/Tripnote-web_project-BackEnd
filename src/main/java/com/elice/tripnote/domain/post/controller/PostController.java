@@ -8,6 +8,8 @@ import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.service.PostService;
 import com.elice.tripnote.global.annotation.AdminRole;
 import com.elice.tripnote.global.annotation.MemberRole;
+import com.elice.tripnote.global.exception.CustomException;
+import com.elice.tripnote.global.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -77,7 +79,13 @@ public class PostController implements SwaggerPostController {
     @Override
     @AdminRole
     @GetMapping("/admin/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsAll(@RequestParam(name="postId", required = false) Long postId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+    public ResponseEntity<Page<PostResponseDTO>> getPostsAll(@RequestParam(name="postId", required = false) Long postId, @RequestParam(name="nickname", required = false) String nickname, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        if( postId != null && nickname != null){
+            throw new CustomException(ErrorCode.TOO_MANY_ARGUMENT);
+        }
+        if(nickname != null){
+            return ResponseEntity.ok().body(postService.getPostsAll(nickname, page, size));
+        }
         return ResponseEntity.ok().body(postService.getPostsAll(postId, page, size));
     }
 
