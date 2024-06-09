@@ -33,6 +33,6 @@ public interface SpotRepository extends JpaRepository<Spot, Long>, CustomSpotRep
 
 
 //    @Modifying
-    @Query("SELECT s FROM Spot s WHERE s.region = :region AND s.location = :location")
+    @Query("SELECT s FROM Spot s WHERE s.region = :region AND s.location LIKE %:location%")
     Spot findByRegionAndLocation(@Param("region") Region region, @Param("location") String location); // 변경
 }
