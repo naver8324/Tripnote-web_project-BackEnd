@@ -92,7 +92,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
     }
 
 
-    public Page<CommentResponseDTO> customFindComments(Long commentId,int page, int size){
+    public Page<CommentResponseDTO> customFindComments(Long commentId, int page, int size){
 
         page = page > 0 ? page - 1 : 0;
 
@@ -101,6 +101,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
         Long totalCount =query
                 .select(comment.count())
                 .from(comment)
+                .join(comment.member, member)
                 .where(memberId != null ? member.id.eq(memberId) : null)
                 .fetchFirst();
 
@@ -136,6 +137,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
         Long totalCount =query
                 .select(comment.count())
                 .from(comment)
+                .join(comment.member, member)
                 .where(memberId != null ? member.id.eq(memberId) : null)
                 .fetchFirst();
 
