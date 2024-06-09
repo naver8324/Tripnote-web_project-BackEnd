@@ -168,6 +168,7 @@ public class CommentService {
         }
 
         comment.delete();
+        commentRepository.save(comment);
 
     }
 
@@ -179,6 +180,8 @@ public class CommentService {
 
         Comment comment = commentOrElseThrowsException(commentId);
         comment.delete();
+
+        commentRepository.save(comment);
 
     }
 
