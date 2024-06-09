@@ -225,9 +225,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
 
 
-    public Page<PostResponseDTO> customFindPosts(Long memberId, int page, int size){
+    public Page<PostResponseDTO> customFindPosts(Long postId, int page, int size){
 
         page = page > 0 ? page - 1 : 0;
+
+        Long memberId = postId != null? query.select(member.id).from(member).join(member.posts, post).where(post.id.eq(postId)).fetchFirst() : null;
 
         long totalCount =query
                 .select(post.count())
