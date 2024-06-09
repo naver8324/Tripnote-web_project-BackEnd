@@ -266,11 +266,15 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         Long memberId = query.select(member.id).from(member).where(member.nickname.eq(nickname)).fetchFirst();
 
+        if(memberId == null){
+            memberId = -1L;
+        }
+
         long totalCount =query
                 .select(post.count())
                 .from(post)
                 .join(post.member, member)
-                .where(memberId != null ? member.id.eq(memberId) : null)
+                .where(member.id.eq(memberId))
                 .fetchFirst();
 
 
@@ -285,7 +289,7 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 ))
                 .from(post)
                 .join(post.member, member)
-                .where(memberId != null ? member.id.eq(memberId) : null)
+                .where(member.id.eq(memberId))
                 .orderBy(post.createdAt.desc())
                 .offset(page * size)
                 .limit(size)

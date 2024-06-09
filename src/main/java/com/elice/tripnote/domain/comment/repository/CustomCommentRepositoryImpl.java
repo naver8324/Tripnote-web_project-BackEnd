@@ -134,11 +134,15 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
         Long memberId = query.select(member.id).from(member).where(member.nickname.eq(nickname)).fetchFirst();
 
+        if(memberId == null){
+            memberId = -1L;
+        }
+
         Long totalCount =query
                 .select(comment.count())
                 .from(comment)
                 .join(comment.member, member)
-                .where(memberId != null ? member.id.eq(memberId) : null)
+                .where(member.id.eq(memberId))
                 .fetchFirst();
 
 
@@ -153,7 +157,7 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
                 ))
                 .from(comment)
                 .join(comment.member, member)
-                .where(memberId != null ? member.id.eq(memberId) : null)
+                .where(member.id.eq(memberId))
                 .orderBy(comment.id.desc())
                 .offset(page * size)
                 .limit(size)
