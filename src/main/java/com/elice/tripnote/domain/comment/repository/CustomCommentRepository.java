@@ -8,7 +8,7 @@ public interface CustomCommentRepository{
 
     public CommentResponseDTO customFindNotDeletedComment(Long commentId);
     public Page<CommentResponseDTO> customFindNotDeletedCommentsByPostId(Long postId, int page, int size);
-    public Page<CommentResponseDTO> customFindComments(Long memberId, int page, int size);
+    public Page<CommentResponseDTO> customFindComments(Long commentId, int page, int size);
     public void customDeleteCommentsByPostId(Long memberId);
 
 

@@ -92,9 +92,11 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
     }
 
 
-    public Page<CommentResponseDTO> customFindComments(Long memberId,int page, int size){
+    public Page<CommentResponseDTO> customFindComments(Long commentId,int page, int size){
 
         page = page > 0 ? page - 1 : 0;
+
+        Long memberId = commentId != null? query.select(member.id).from(member).join(member.comments, comment).where(comment.id.eq(commentId)).fetchFirst() : null;
 
         Long totalCount =query
                 .select(comment.count())
