@@ -260,6 +260,43 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
         return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
     }
 
+    public Page<PostResponseDTO> customFindPosts(String nickname, int page, int size){
+
+        page = page > 0 ? page - 1 : 0;
+
+        Long memberId = query.select(member.id).from(member).where(member.nickname.eq(nickname)).fetchFirst();
+
+        long totalCount =query
+                .select(post.count())
+                .from(post)
+                .join(post.member, member)
+                .where(memberId != null ? member.id.eq(memberId) : null)
+                .fetchFirst();
+
+
+        List<PostResponseDTO> postResponseDTOs = query
+                .select(Projections.constructor(PostResponseDTO.class,
+                        post.id,
+                        post.title,
+                        post.content,
+                        post.isDeleted,
+                        post.createdAt,
+                        member.nickname
+                ))
+                .from(post)
+                .join(post.member, member)
+                .where(memberId != null ? member.id.eq(memberId) : null)
+                .orderBy(post.createdAt.desc())
+                .offset(page * size)
+                .limit(size)
+                .fetch();
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
+    }
+
+
+
 
     public Page<PostResponseDTO> customFindNotDeletedPostsByMemberId(Long memberId, int page, int size){
 

@@ -66,6 +66,16 @@ public class CommentService {
 
     }
 
+    public Page<CommentResponseDTO> getCommentsAll(String nickname, int page, int size){
+
+
+
+        return commentRepository.customFindComments(nickname, page, size);
+
+
+    }
+
+
 
 
     // 댓글을 저장하는 메서드입니다.

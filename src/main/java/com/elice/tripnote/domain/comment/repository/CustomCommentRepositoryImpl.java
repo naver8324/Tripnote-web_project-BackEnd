@@ -127,6 +127,40 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
         return new PageImpl<>(commentResponseDTOs, pageRequest, totalCount);
     }
 
+    public Page<CommentResponseDTO> customFindComments(String nickname,int page, int size){
+
+        page = page > 0 ? page - 1 : 0;
+
+        Long memberId = query.select(member.id).from(member).where(member.nickname.eq(nickname)).fetchFirst();
+
+        Long totalCount =query
+                .select(comment.count())
+                .from(comment)
+                .where(memberId != null ? member.id.eq(memberId) : null)
+                .fetchFirst();
+
+
+        List<CommentResponseDTO> commentResponseDTOs = query
+                .select(Projections.constructor(CommentResponseDTO.class,
+                        comment.id,
+                        member.nickname,
+                        comment.content,
+                        comment.createdAt,
+                        comment.report,
+                        comment.isDeleted
+                ))
+                .from(comment)
+                .join(comment.member, member)
+                .where(memberId != null ? member.id.eq(memberId) : null)
+                .orderBy(comment.id.desc())
+                .offset(page * size)
+                .limit(size)
+                .fetch();
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return new PageImpl<>(commentResponseDTOs, pageRequest, totalCount);
+    }
 
 
     public void customDeleteCommentsByPostId(Long postId){

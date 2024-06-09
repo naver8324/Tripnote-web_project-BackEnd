@@ -105,6 +105,14 @@ public class PostService {
     }
 
 
+    public Page<PostResponseDTO> getPostsAll(String nickname, int page, int size){
+
+        return postRepository.customFindPosts(nickname, page, size);
+
+
+    }
+
+
 
     // 게시글을 상세 조회하는 메서드입니다. 삭제되지 않은 게시글만 볼 수 있습니다.
 
