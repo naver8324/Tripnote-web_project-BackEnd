@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.route.repository;
 
+import com.elice.tripnote.domain.hashtag.entity.QHashtag;
 import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
 import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
@@ -32,6 +33,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     private final QBookmark bookmark = new QBookmark("b");
     private final QIntegratedRoute integratedRoute = new QIntegratedRoute("ir");
     private final QPost post = new QPost("p");
+    private final QHashtag hashtag = new QHashtag("h");
 
     public List<Long> findIntegratedRouteIdsBySpots(List<Long> spots) {
         /*
@@ -90,7 +92,8 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 ))
                 .from(route)
                 .join(bookmark).on(bookmark.route.id.eq(route.id))
-                .where(bookmark.member.id.eq(memberId))
+                .where(bookmark.member.id.eq(memberId)
+                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
                 .orderBy(route.id.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -117,7 +120,8 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                         route.name
                 ))
                 .from(route)
-                .where(route.member.id.eq(memberId))
+                .where(route.member.id.eq(memberId)
+                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(route.id.desc())
@@ -177,6 +181,15 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .where(route.id.eq(minRouteId))
                 .fetchOne();
 
+    }
+
+    public boolean findHashtagIdIdCity(Long hashtagId){
+
+        return query
+                .select(hashtag.isCity)
+                .from(hashtag)
+                .where(hashtag.id.eq(hashtagId))
+                .fetchOne();
     }
 
 }
