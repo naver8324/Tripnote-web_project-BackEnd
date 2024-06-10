@@ -125,6 +125,7 @@ $ npm run dev
 ---
 
 ## ERD
+  <img alt ="DB ERD" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/trip+note+erd.png">
 
 
 ---
