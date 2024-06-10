@@ -75,38 +75,40 @@ public class RouteService {
                     IntegratedRoute newRoute = IntegratedRoute.builder()
                             .integratedRoutes(uuid)
                             .region(region)
+                            .routeStatus(RouteStatus.PUBLIC)
                             .build();
                     return integratedRouteRepository.save(newRoute);
                 });
 
-        //TODO: region 값에 알맞은 해시태그 경로에 붙여주기
-//        requestDto.getHashtagIds().add();
+        Long regionHashtagId = (long) region.getIndex();
+        log.info("지역 해시태그 아이디: {}", regionHashtagId);
+        if (routeRepository.findHashtagIdIdCity(regionHashtagId)) requestDto.getHashtagIds().add(regionHashtagId);
 
 //        if (requestDto.getHashtagIds() != null) {
-            // 통합 경로 객체(IntegratedRoute) 이용해서 uuid_hashtag 객체 생성
-            // 현재 db에서 integratedRoute와 연관된 해시태그 찾기(이미 저장돼있는 해시태그)
-            List<Long> dbHashtagIds = uuidHashtagRepository.findHashtagIdsByIntegratedRouteId(integratedRoute.getId());
+        // 통합 경로 객체(IntegratedRoute) 이용해서 uuid_hashtag 객체 생성
+        // 현재 db에서 integratedRoute와 연관된 해시태그 찾기(이미 저장돼있는 해시태그)
+        List<Long> dbHashtagIds = uuidHashtagRepository.findHashtagIdsByIntegratedRouteId(integratedRoute.getId());
 
-            // 저장되어 있지 않아 새롭게 추가해야하는 해시태그 추출
-            List<Long> newHashtagIds = requestDto.getHashtagIds().stream()
-                    .filter(id -> !dbHashtagIds.contains(id))
-                    .collect(Collectors.toList());
+        // 저장되어 있지 않아 새롭게 추가해야하는 해시태그 추출
+        List<Long> newHashtagIds = requestDto.getHashtagIds().stream()
+                .filter(id -> !dbHashtagIds.contains(id))
+                .collect(Collectors.toList());
 
-            // 추가해야하는 해시태그 아이디들의 객체 찾기
-            List<Hashtag> hashtags = newHashtagIds.stream()
-                    .map(hashtagRepository::findById)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toList());
+        // 추가해야하는 해시태그 아이디들의 객체 찾기
+        List<Hashtag> hashtags = newHashtagIds.stream()
+                .map(hashtagRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
 
 
-            for (Hashtag hashtag : hashtags) {
-                UUIDHashtag uuidHashtag = UUIDHashtag.builder()
-                        .hashtag(hashtag)
-                        .integratedRoute(integratedRoute)
-                        .build();
-                uuidHashtagRepository.save(uuidHashtag);
-            }
+        for (Hashtag hashtag : hashtags) {
+            UUIDHashtag uuidHashtag = UUIDHashtag.builder()
+                    .hashtag(hashtag)
+                    .integratedRoute(integratedRoute)
+                    .build();
+            uuidHashtagRepository.save(uuidHashtag);
+        }
 //        }
 
 
@@ -232,6 +234,8 @@ public class RouteService {
 
         route.updateStatus(RouteStatus.DELETE);
         route = routeRepository.save(route);
+
+        integratedRouteRepository.deleteIntegratedRoute(route.getIntegratedRoute().getId());
         return route.getId();
     }
 

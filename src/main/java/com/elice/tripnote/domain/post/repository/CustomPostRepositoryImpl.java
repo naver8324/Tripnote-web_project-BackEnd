@@ -225,9 +225,11 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
 
 
-    public Page<PostResponseDTO> customFindPosts(Long memberId, int page, int size){
+    public Page<PostResponseDTO> customFindPosts(Long postId, int page, int size){
 
         page = page > 0 ? page - 1 : 0;
+
+        Long memberId = postId != null? query.select(member.id).from(member).join(member.posts, post).where(post.id.eq(postId)).fetchFirst() : null;
 
         long totalCount =query
                 .select(post.count())
@@ -257,6 +259,47 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
         return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
     }
+
+    public Page<PostResponseDTO> customFindPosts(String nickname, int page, int size){
+
+        page = page > 0 ? page - 1 : 0;
+
+        Long memberId = query.select(member.id).from(member).where(member.nickname.eq(nickname)).fetchFirst();
+
+        if(memberId == null){
+            memberId = -1L;
+        }
+
+        long totalCount =query
+                .select(post.count())
+                .from(post)
+                .join(post.member, member)
+                .where(member.id.eq(memberId))
+                .fetchFirst();
+
+
+        List<PostResponseDTO> postResponseDTOs = query
+                .select(Projections.constructor(PostResponseDTO.class,
+                        post.id,
+                        post.title,
+                        post.content,
+                        post.isDeleted,
+                        post.createdAt,
+                        member.nickname
+                ))
+                .from(post)
+                .join(post.member, member)
+                .where(member.id.eq(memberId))
+                .orderBy(post.createdAt.desc())
+                .offset(page * size)
+                .limit(size)
+                .fetch();
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return new PageImpl<>(postResponseDTOs, pageRequest, totalCount);
+    }
+
+
 
 
     public Page<PostResponseDTO> customFindNotDeletedPostsByMemberId(Long memberId, int page, int size){

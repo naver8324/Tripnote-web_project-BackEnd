@@ -13,7 +13,8 @@ public interface CustomPostRepository {
     Page<PostResponseDTO> customFindNotDeletedPosts(String order, int page, int size);
     Page<PostResponseDTO> customFindByHashtagNotDeletedPosts(List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size);
 
-    Page<PostResponseDTO> customFindPosts(Long memberId, int page, int size);
+    Page<PostResponseDTO> customFindPosts(Long postId, int page, int size);
+    Page<PostResponseDTO> customFindPosts(String nickname, int page, int size);
     PostDetailResponseDTO customFindPost(Long postId, Long memberId);
 
     Page<PostResponseDTO> customFindNotDeletedPostsByMemberId(Long memberId, int page, int size);

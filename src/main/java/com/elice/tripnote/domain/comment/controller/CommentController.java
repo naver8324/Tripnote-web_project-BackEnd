@@ -6,6 +6,8 @@ import com.elice.tripnote.domain.comment.entity.CommentResponseDTO;
 import com.elice.tripnote.domain.comment.service.CommentService;
 import com.elice.tripnote.global.annotation.AdminRole;
 import com.elice.tripnote.global.annotation.MemberRole;
+import com.elice.tripnote.global.exception.CustomException;
+import com.elice.tripnote.global.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,8 +32,15 @@ public class CommentController implements SwaggerCommentController {
     @Override
     @AdminRole
     @GetMapping("/admin/comments")
-    public ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(@RequestParam(name="memberId", required = false) Long memberId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(commentService.getCommentsAll(memberId, page, size));
+    public ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(@RequestParam(name="commentId", required = false) Long commentId, @RequestParam(name="nickname", required = false) String nickname, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+        if( commentId != null && nickname != null){
+            throw new CustomException(ErrorCode.TOO_MANY_ARGUMENT);
+        }
+        if(nickname != null){
+            return ResponseEntity.ok().body(commentService.getCommentsAll(nickname, page, size));
+        }
+
+        return ResponseEntity.ok().body(commentService.getCommentsAll(commentId, page, size));
     }
 
 
