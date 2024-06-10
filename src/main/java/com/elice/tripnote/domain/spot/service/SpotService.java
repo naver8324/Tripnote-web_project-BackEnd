@@ -44,32 +44,52 @@ public class SpotService {
 //        }
 //        return spot;
 //    }
-public List<Spot> getByRegionAndLocation(Region region, String location) {
-    List<SpotDTO> list = searchByLocations(location);
-    List<Spot> spotList = new ArrayList<>();
-    for(SpotDTO spotDTO : list){
-        if(spotDTO.getImageUrl()==null){
+    public List<Spot> getByRegionAndLocation(Region region, String location) {
+        Spot spot = spotRepository.findSpotByRegionAndLocation(region,location);
+        List<Spot> spots = spotRepository.findByRegionAndLocation(region,location);
+        List<Spot> spotList = new ArrayList<>();
+        if(spot !=null){
+            spotList.add(spot);
+        }
+        if(!spotList.isEmpty()){
+            for(Spot s : spots){
+                if(spotList.contains(s))
+                    continue;
+                spotList.add(s);
+            }
+        }
+
+        if(spotList.size() >5){
+            return spotList;
+        }
+        List<SpotDTO> spotDTOs = searchByLocations(location);
+        for (SpotDTO spotDTO : spotDTOs) {
+            if(spotList.size() >5)
+                break;
+            if (spotDTO.getImageUrl() == null) {
+                log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
+                throw new CustomException(ErrorCode.NO_LANDMARK);
+            }
+            if (!region.equals(spotDTO.getRegion())) {
+                continue; // Skip this Spot and move to the next one
+            }
+            Spot newSpot = dtoToEntity(spotDTO);
+            Spot existingSpot = spotRepository.findByLocation(newSpot.getLocation()).orElse(null);
+            if (existingSpot == null) {
+                Spot temp = spotRepository.save(newSpot);
+                spotList.add(temp);
+            } else {
+                if(spotList.contains(existingSpot))
+                    continue;
+                spotList.add(existingSpot);
+            }
+        }
+        if (spotList.isEmpty()) {
             log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
             throw new CustomException(ErrorCode.NO_LANDMARK);
         }
-        if(!region.equals(spotDTO.getRegion())){
-            continue; // Skip this Spot and move to the next one
-        }
-        Spot newSpot = dtoToEntity(spotDTO);
-        Spot existingSpot = spotRepository.findByLocation(newSpot.getLocation()).orElse(null);
-        if(existingSpot == null){
-            Spot temp = spotRepository.save(newSpot);
-            spotList.add(temp);
-        } else {
-            spotList.add(existingSpot);
-        }
+        return spotList;
     }
-    if(spotList.isEmpty()){
-        log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
-        throw new CustomException(ErrorCode.NO_LANDMARK);
-    }
-    return spotList;
-}
 
     public List<Spot> getByRegion(Region region) {
         //Region validRegion = Region.fromString(region);
@@ -156,12 +176,13 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
     @Transactional
     public SpotDTO search(String query) {
         var searchLocalReq = new SearchLocalReq();
-        searchLocalReq.setQuery(query);
+        //searchLocalReq.setQuery(query);
+        searchLocalReq.setNewQuery(query);
         var searchLocalRes = naverClient.searchLocal(searchLocalReq);
 
         if (searchLocalRes.getTotal() > 0) {
             var localItemOptional = searchLocalRes.getItems().stream()
-                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명"))
+                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류"))
                     .findFirst();
             if(!localItemOptional.isPresent()){
                 throw new CustomException(ErrorCode.NO_LANDMARK);
@@ -176,8 +197,9 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
                 var imageItem = searchImageRes.getItems().stream().findFirst().get();
 
                 var result = new SpotDTO();
-                var location = localItem.getTitle().replaceAll("<b>","");
-                location = location.replaceAll("</b>","");
+                var location = localItem.getTitle();
+               // location = localItem.getTitle().replaceAll("<b>","");
+               // location = location.replaceAll("</b>","");
                 //result.setLocation(localItem.getTitle());
                 result.setLocation(location);
                 result.setImageUrl(imageItem.getLink());
@@ -213,15 +235,66 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
         return new SpotDTO(spot.getLocation(), spot.getImageUrl(), spot.getRegion(), spot.getAddress(), spot.getLat(), spot.getLng());
     }
 
+//    @Transactional
+//    public List<SpotDTO> searchAndSaveSpots(String query) {
+//        var searchLocalReq = new SearchLocalReq();
+//        searchLocalReq.setQuery(query);
+//        var searchLocalRes = naverClient.searchLocal(searchLocalReq);
+//
+//        if (searchLocalRes.getTotal() > 0) {
+//            var filteredItems = searchLocalRes.getItems().stream()
+//                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류"))
+//                    .limit(5)
+//                    .collect(Collectors.toList());
+//
+//            if (filteredItems.isEmpty()) {
+//                throw new CustomException(ErrorCode.NO_LANDMARK);
+//            }
+//
+//            return filteredItems.stream()
+//                    .map(localItem -> {
+//                        var imageQuery = localItem.getTitle().replaceAll("<[^>]*>", "");
+//                        var searchImageReq = new SearchImageReq();
+//                        searchImageReq.setQuery(imageQuery);
+//                        var searchImageRes = naverClient.searchImage(searchImageReq);
+//
+//                        String imageUrl = null;
+//                        if (searchImageRes.getTotal() > 0) {
+//                            var imageItem = searchImageRes.getItems().stream().findFirst().get();
+//                            imageUrl = imageItem.getLink();
+//                        }
+//                        var location = localItem.getTitle();
+//                        location = localItem.getTitle().replaceAll("<b>","");
+//                        location = location.replaceAll("</b>","");
+//                        var region = Region.fromString(localItem.getAddress().split(" ")[0]);
+//                        var mapY = localItem.getMapy() / 1E7;
+//                        var mapX = localItem.getMapx() / 1E7;
+//
+//                        // 데이터베이스에서 장소 검색 (부분 일치 검색)
+//                        var existingSpots = spotRepository.findByRegionAndLocation(region, location);
+//
+//                        if (existingSpots==null) {
+//                            // 장소가 없으면 저장
+//                            var newSpot = new Spot(location, imageUrl, region, localItem.getAddress(), mapY, mapX);
+//                            spotRepository.save(newSpot);
+//                        }
+//
+//                        return new SpotDTO(location, imageUrl, region, localItem.getAddress(), mapY, mapX);
+//                    })
+//                    .collect(Collectors.toList());
+//        }
+//        return List.of();
+//    }
     @Transactional
     public List<SpotDTO> searchByLocations(String query) {
         var searchLocalReq = new SearchLocalReq();
-        searchLocalReq.setQuery(query);
+        //searchLocalReq.setQuery(query);
+        searchLocalReq.setNewQuery(query);
         var searchLocalRes = naverClient.searchLocal(searchLocalReq);
 
         if (searchLocalRes.getTotal() > 0) {
             var filteredItems = searchLocalRes.getItems().stream()
-                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명"))
+                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류"))
                     .limit(5)
                     .collect(Collectors.toList());
 
