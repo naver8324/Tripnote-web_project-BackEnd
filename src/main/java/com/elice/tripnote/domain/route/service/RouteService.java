@@ -257,7 +257,7 @@ public class RouteService {
 
         for (Long irId : integratedIds) {
             recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
-                    .routeId(irId)
+                    .integratedRouteId(irId)
                     .postId(routeRepository.findPostIdByIntegratedRouteId(irId))
                     .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
                     .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
@@ -326,8 +326,8 @@ public class RouteService {
         for (Long irId : integratedIds) {
             log.info("현재 통합 경로 id -> {}", irId);
             recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
-                    .routeId(irId)
-                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId))
+                    .integratedRouteId(irId)
+                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId)) // 해당 통합 경로 id 중 가장 작은 route id
                     .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
                     .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
                     .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
