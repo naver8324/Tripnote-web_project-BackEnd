@@ -1,7 +1,6 @@
-
 # Trip Note
 
-------------
+---
 
 <div style="text-align:center"><img alt="image" width="329" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/logo-green.png" /></div>
 
