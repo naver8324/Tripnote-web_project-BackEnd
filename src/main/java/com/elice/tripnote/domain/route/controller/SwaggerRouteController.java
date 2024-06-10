@@ -31,17 +31,17 @@ public interface SwaggerRouteController {
     })
     ResponseEntity<Long> save(SaveRequestDTO requestDto);
 
-    @Operation(summary = "경로 공개/비공개", description = "경로가 현재 공개 상태라면 비공개로, 현재 비공개 상태라면 공개 상태로 변경합니다.")
-    @Parameters({
-            @Parameter(name = "routeId", required = true, description = "공개 여부를 수정하려는 경로의 id")
-    })
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공",
-                    content = {@Content(schema = @Schema(implementation = Long.class))}),
-            @ApiResponse(responseCode = "403", description = "해당 route를 비공개할 수 있는 권한이 없습니다."),
-            @ApiResponse(responseCode = "404", description = "해당 member ID 또는 Route Id가 존재하지 않습니다."),
-    })
-    ResponseEntity<Long> setRouteStatus(Long routeId);
+//    @Operation(summary = "경로 공개/비공개", description = "경로가 현재 공개 상태라면 비공개로, 현재 비공개 상태라면 공개 상태로 변경합니다.")
+//    @Parameters({
+//            @Parameter(name = "routeId", required = true, description = "공개 여부를 수정하려는 경로의 id")
+//    })
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "성공",
+//                    content = {@Content(schema = @Schema(implementation = Long.class))}),
+//            @ApiResponse(responseCode = "403", description = "해당 route를 비공개할 수 있는 권한이 없습니다."),
+//            @ApiResponse(responseCode = "404", description = "해당 member ID 또는 Route Id가 존재하지 않습니다."),
+//    })
+//    ResponseEntity<Long> setRouteStatus(Long routeId);
 
     @Operation(summary = "경로 삭제", description = "경로를 삭제합니다.")
     @Parameters({

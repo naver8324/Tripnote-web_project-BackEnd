@@ -75,6 +75,7 @@ public class RouteService {
                     IntegratedRoute newRoute = IntegratedRoute.builder()
                             .integratedRoutes(uuid)
                             .region(region)
+                            .routeStatus(RouteStatus.PUBLIC)
                             .build();
                     return integratedRouteRepository.save(newRoute);
                 });
@@ -232,6 +233,8 @@ public class RouteService {
 
         route.updateStatus(RouteStatus.DELETE);
         route = routeRepository.save(route);
+
+        integratedRouteRepository.deleteIntegratedRoute(route.getIntegratedRoute().getId());
         return route.getId();
     }
 
