@@ -176,10 +176,10 @@ public class MemberService implements UserDetailsService {
     }
 
     // 전체 멤버 조회 서비스
-    public Page<MemberResponseDTO> findMembers(Pageable pageable) {
-        Page<Member> members = memberRepository.findAll(pageable);
-        return members.map(Member::toDto);
-    }
+    //public Page<MemberResponseDTO> findMembers(Pageable pageable) {
+    //    Page<Member> members = memberRepository.findAll(pageable);
+    //    return members.map(Member::toDto);
+    //}
 
 
     // 로그인중인 멤버 정보 조회 서비스
