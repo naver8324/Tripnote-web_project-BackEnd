@@ -61,15 +61,15 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
 
     }
 
-    public List<Spot> findSpotsByRouteIdInOrder(Long routeId){
-        return query
-                .select(spot)
-                .from(spot)
-                .join(routeSpot).on(routeSpot.spot.id.eq(spot.id))
-                .where(routeSpot.route.id.eq(routeId))
-                .orderBy(routeSpot.sequence.asc())
-                .fetch();
-    }
+//    public List<Spot> findSpotsByRouteIdInOrder(Long routeId){
+//        return query
+//                .select(spot)
+//                .from(spot)
+//                .join(routeSpot).on(routeSpot.spot.id.eq(spot.id))
+//                .where(routeSpot.route.id.eq(routeId))
+//                .orderBy(routeSpot.sequence.asc())
+//                .fetch();
+//    }
 
     public List<Spot> findSpotsByIntegratedRouteIdInOrder(Long integratedRouteId){
         // integratedRouteId와 같은 통합 경로 id를 가지는 아무 routeId 구하기

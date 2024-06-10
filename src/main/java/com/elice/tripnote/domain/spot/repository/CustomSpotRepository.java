@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CustomSpotRepository {
     List<SpotResponseDTO> findByRouteIds(Long integratedRouteId);
-    List<Spot> findSpotsByRouteIdInOrder(Long routeId);
+//    List<Spot> findSpotsByRouteIdInOrder(Long routeId);
     List<Spot> findSpotsByIntegratedRouteIdInOrder(Long integratedRouteId);
     SpotRegionDTO getRegionByspotId(Long spotId);
 }

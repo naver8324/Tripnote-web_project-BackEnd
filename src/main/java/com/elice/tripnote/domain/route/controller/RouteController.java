@@ -173,32 +173,13 @@ public class RouteController implements SwaggerRouteController {
      * @param integratedRouteId 북마크하고 싶은 경로 id
      */
     @MemberRole
-    @PatchMapping("/member/routes/bookmark/{routeId}")
+    @PatchMapping("/member/routes/bookmark/{integratedRouteId}")
     public ResponseEntity<Void> addOrRemoveBookmark(@PathVariable("integratedRouteId") Long integratedRouteId) {
         routeService.addOrRemoveBookmark(integratedRouteId);
         return ResponseEntity.ok().build();
     }
 
 
-    /**
-     * 자신이 좋아요한 경로 리스트
-     * @return [경로 id, 경로 이름, 해당되는 경로의 여행지 리스트] 리스트 리턴
-     */
-    //TODO: 필요없음 삭제하기
-//    @MemberRole
-//    @GetMapping("/member/routes/like")
-//    public ResponseEntity<List<RouteDetailResponseDTO>> findLike() {
-//        return ResponseEntity.ok(routeService.findLike());
-//        /*
-//        route {
-//            routeId:
-//            name : string
-//            spots : [
-//            spot,spot,spot (순서 정리된채로)
-//            ]
-//        }
-//         */
-//    }
 
     /**
      * 자신이 북마크한 경로 리스트
@@ -212,15 +193,6 @@ public class RouteController implements SwaggerRouteController {
         //pageable 사용법
         //request param으로 page, size 조절 가능
         return ResponseEntity.ok(routeService.findBookmark(pageable));
-        /*
-        route {
-            routeId:
-            name : string
-            spots : [
-            spot,spot,spot (순서 정리된채로)
-            ]
-        }
-         */
     }
 
     /**
@@ -232,18 +204,6 @@ public class RouteController implements SwaggerRouteController {
     @GetMapping("/member/routes")
     public ResponseEntity<Page<RouteDetailResponseDTO>> findMyRoute(
             @PageableDefault(page = 0, size = 3, sort = "route.id", direction = Sort.Direction.ASC) Pageable pageable) {
-        //pageable 사용법
-        //request param으로 page, size 조절 가능
-        /*
-        route {
-            routeId:
-            name : string
-            spots : [
-            spot,spot,spot (순서 정리된채로)
-            ]
-        }
-         */
-        // 경로 이름 때문에 여기서 통합 경로 리턴하는 건 안될듯
         return ResponseEntity.ok(routeService.findMyRoute(pageable));
     }
 

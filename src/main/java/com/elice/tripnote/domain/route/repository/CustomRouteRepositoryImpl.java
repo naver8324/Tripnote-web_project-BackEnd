@@ -6,10 +6,11 @@ import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
 import com.elice.tripnote.domain.link.routespot.entity.QRouteSpot;
 import com.elice.tripnote.domain.post.entity.QPost;
-import com.elice.tripnote.domain.route.entity.QRoute;
-import com.elice.tripnote.domain.route.entity.Route;
-import com.elice.tripnote.domain.route.entity.RouteIdNameResponseDTO;
+import com.elice.tripnote.domain.route.entity.*;
 import com.elice.tripnote.domain.route.status.RouteStatus;
+import com.elice.tripnote.domain.spot.dto.SpotDTO;
+import com.elice.tripnote.domain.spot.entity.QSpot;
+import com.elice.tripnote.domain.spot.entity.Spot;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
@@ -22,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     private final JPAQueryFactory query;
     private final QRoute route = new QRoute("r");
     private final QRouteSpot routeSpot = new QRouteSpot("rs");
+    private final QSpot spot = new QSpot("s");
     private final QLikePost likePost = new QLikePost("lp");
     private final QBookmark bookmark = new QBookmark("b");
     private final QIntegratedRoute integratedRoute = new QIntegratedRoute("ir");
@@ -83,52 +87,126 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
 //
 //    }
 
-    public Page<RouteIdNameResponseDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable) {
-
-        QueryResults<RouteIdNameResponseDTO> queryResults = query
-                .select(Projections.constructor(RouteIdNameResponseDTO.class,
-                        route.id,
-                        route.name
-                ))
-                .from(route)
-                .join(bookmark).on(bookmark.route.id.eq(route.id))
-                .where(bookmark.member.id.eq(memberId)
-                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
-                .orderBy(route.id.asc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(route.id.desc())
-                .fetchResults();
-
-        return new PageImpl<>(queryResults.getResults(), pageable, queryResults.getTotal());
-    }
-
-
-    public Page<RouteIdNameResponseDTO> findRoutesByMemberId(Long memberId, Pageable pageable) {
-//        return query
-//                .select(Projections.constructor(RouteIdNameDTO.class,
+//    public Page<RouteIdNameResponseDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable) {
+//
+//        QueryResults<RouteIdNameResponseDTO> queryResults = query
+//                .select(Projections.constructor(RouteIdNameResponseDTO.class,
 //                        route.id,
 //                        route.name
 //                ))
 //                .from(route)
-//                .where(route.member.id.eq(memberId))
+//                .join(bookmark).on(bookmark.route.id.eq(route.id))
+//                .where(bookmark.member.id.eq(memberId)
+//                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+//                .orderBy(route.id.asc())
+//                .offset(pageable.getOffset())
+//                .limit(pageable.getPageSize())
+//                .orderBy(route.id.desc())
+//                .fetchResults();
+//
+//        return new PageImpl<>(queryResults.getResults(), pageable, queryResults.getTotal());
+//    }
+
+    public Page<RouteDetailResponseDTO> findRouteDetailsByMemberId(Long memberId, Pageable pageable, boolean isBookmark) {
+
+        List<RouteIdNameResponseDTO> routes;
+        if(isBookmark){
+            routes = query
+                    .select(Projections.constructor(RouteIdNameResponseDTO.class,
+                            route.id,
+                            route.name
+                    ))
+                    .from(route)
+                    .join(bookmark).on(bookmark.route.id.eq(route.id))
+                    .where(bookmark.member.id.eq(memberId)
+                            .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .orderBy(route.id.asc())
+                    .fetch();
+        } else{
+            routes = query
+                    .select(Projections.constructor(RouteIdNameResponseDTO.class,
+                            route.id,
+                            route.name
+                    ))
+                    .from(route)
+                    .where(route.member.id.eq(memberId)
+                            .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .orderBy(route.id.asc())
+                    .fetch();
+        }
+        //먼저 멤버 id로 자신이 쓴 경로 아이디 알아내기
+//        List<RouteIdNameResponseDTO> routes = query
+//                .select(Projections.constructor(RouteIdNameResponseDTO.class,
+//                        route.id,
+//                        route.name
+//                ))
+//                .from(route)
+//                .where(route.member.id.eq(memberId)
+//                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+//                .offset(pageable.getOffset())
+//                .limit(pageable.getPageSize())
+//                .orderBy(route.id.asc())
 //                .fetch();
 
-        QueryResults<RouteIdNameResponseDTO> results = query
-                .select(Projections.constructor(RouteIdNameResponseDTO.class,
-                        route.id,
-                        route.name
+        // 그 중 경로 id만 리스트로 추출
+        List<Long> routeIds = routes.stream()
+                .map(RouteIdNameResponseDTO::getRouteId)
+                .collect(Collectors.toList());
+
+        List<SpotRouteIdDTO> spots = query
+                .select(Projections.constructor(SpotRouteIdDTO.class,
+                        routeSpot.route.id,
+                        spot.id,
+                        spot.location,
+                        spot.imageUrl,
+                        spot.region,
+                        spot.address,
+                        spot.lat,
+                        spot.lng
                 ))
+                .from(routeSpot)
+                .join(spot).on(spot.id.eq(routeSpot.spot.id))
+                .where(routeSpot.route.id.in(routeIds))
+                // 일단 route id 순서대로, 그 안에서는 sequence 순서대로
+                .orderBy(routeSpot.route.id.asc(), routeSpot.sequence.asc())
+                .fetch();
+
+        Map<Long, List<SpotRouteIdDTO>> routeIdToSpotsMap = spots.stream()
+                .collect(Collectors.groupingBy(SpotRouteIdDTO::getRouteId));
+
+        List<RouteDetailResponseDTO> routeDetails = routes.stream()
+                .map(routeDto -> new RouteDetailResponseDTO(
+                        routeDto.getRouteId(),
+                        routeDto.getName(),
+                        routeIdToSpotsMap.getOrDefault(routeDto.getRouteId(), List.of())
+                                .stream()
+                                .map(spotDto -> new Spot(
+                                        spotDto.getId(),
+                                        spotDto.getLocation(),
+                                        spotDto.getImageUrl(),
+                                        spotDto.getRegion(),
+                                        spotDto.getAddress(),
+                                        spotDto.getLat(),
+                                        spotDto.getLng()
+                                ))
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
+
+        long total = query
+                .select(route.count())
                 .from(route)
                 .where(route.member.id.eq(memberId)
                         .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(route.id.desc())
-                .fetchResults();
+                .fetchOne();
 
-        return new PageImpl<>(results.getResults(), pageable, results.getTotal());
+        return new PageImpl<>(routeDetails, pageable, total);
     }
+
 
     public int getIntegratedRouteLikeCounts(Long integratedRouteId) {
         /*
