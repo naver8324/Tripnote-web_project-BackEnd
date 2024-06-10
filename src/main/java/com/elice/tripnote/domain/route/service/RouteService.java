@@ -79,8 +79,8 @@ public class RouteService {
                     return integratedRouteRepository.save(newRoute);
                 });
 
-        //TODO: region 값에 알맞은 해시태그 경로에 붙여주기
-//        requestDto.getHashtagIds().add();
+        Long regionHashtagId = (long) region.getIndex();
+        if(routeRepository.findHashtagIdIdCity(regionHashtagId)) requestDto.getHashtagIds().add(regionHashtagId);
 
 //        if (requestDto.getHashtagIds() != null) {
             // 통합 경로 객체(IntegratedRoute) 이용해서 uuid_hashtag 객체 생성

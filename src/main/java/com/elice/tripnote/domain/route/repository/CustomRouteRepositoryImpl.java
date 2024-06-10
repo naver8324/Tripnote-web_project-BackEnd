@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.route.repository;
 
+import com.elice.tripnote.domain.hashtag.entity.QHashtag;
 import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
 import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
@@ -32,6 +33,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     private final QBookmark bookmark = new QBookmark("b");
     private final QIntegratedRoute integratedRoute = new QIntegratedRoute("ir");
     private final QPost post = new QPost("p");
+    private final QHashtag hashtag = new QHashtag("h");
 
     public List<Long> findIntegratedRouteIdsBySpots(List<Long> spots) {
         /*
@@ -177,6 +179,15 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .where(route.id.eq(minRouteId))
                 .fetchOne();
 
+    }
+
+    public boolean findHashtagIdIdCity(Long hashtagId){
+
+        return query
+                .select(hashtag.isCity)
+                .from(hashtag)
+                .where(hashtag.id.eq(hashtagId))
+                .fetchOne();
     }
 
 }

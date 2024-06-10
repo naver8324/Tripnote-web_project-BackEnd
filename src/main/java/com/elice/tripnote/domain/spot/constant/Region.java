@@ -43,4 +43,8 @@ public enum Region {
         }
         throw new CustomException(ErrorCode.NO_REGION);
     }
+
+    public int getIndex() {
+        return this.ordinal();
+    }
 }
