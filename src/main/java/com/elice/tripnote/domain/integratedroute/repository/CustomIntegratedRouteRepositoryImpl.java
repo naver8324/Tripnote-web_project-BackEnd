@@ -146,7 +146,8 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
                 .select(ir.id)
                 .from(ir)
                 .join(r).on(r.integratedRoute.id.eq(ir.id))
-                .where(ir.id.eq(integratedRouteId))
+                .where(ir.id.eq(integratedRouteId)
+                        .and(r.routeStatus.eq(RouteStatus.PUBLIC)))
                 .fetchCount();
 
         if(count < 1){
