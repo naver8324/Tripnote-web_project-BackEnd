@@ -29,12 +29,6 @@ public interface SwaggerMemberController {
     ResponseEntity<Void> signup(@RequestBody MemberRequestDTO memberRequestDTO);
 
 
-//    @Operation(summary = "이메일로 회원 조회", description = "이메일을 기반으로 회원을 조회합니다.")
-//    @ApiResponse(responseCode = "200", description = "회원 조회에 성공하였습니다.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Member.class)))
-//    @GetMapping("/{email}")
-//    ResponseEntity<MemberResponseDTO> getMemberByEmail(@PathVariable @Parameter(description = "이메일 주소", required = true) String email);
-
-
     @Operation(summary = "이메일 중복 확인", description = "입력한 이메일이 이미 등록되어 있는지 확인합니다. (이메일이 이미 존재하면 true 반환, 사용가능하면 false 반환)")
     @ApiResponse(responseCode = "200", description = "이메일 중복 확인에 성공하였습니다.")
     @GetMapping("/check-email")

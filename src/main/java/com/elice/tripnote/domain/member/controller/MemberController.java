@@ -38,12 +38,6 @@ public class MemberController implements SwaggerMemberController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-//    @Override
-//    @GetMapping
-//    public ResponseEntity<MemberResponseDTO> getMemberByEmail(@RequestParam String email) {
-//        return ResponseEntity.ok().body(memberService.getMemberResponseDTOByEmail(email));
-//    }
-
     // 이메일 중복검사 (이메일이 이미 존재하면 true 반환, 사용가능하면 false 반환)
     @Override
     @GetMapping("/check-email")
