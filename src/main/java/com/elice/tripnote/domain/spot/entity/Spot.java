@@ -20,7 +20,7 @@ public class Spot {
     @Column(nullable = false)
     private String location;
 
-    @Column(nullable = true)
+    @Column(columnDefinition = "varchar(512)",nullable = true)
     private String imageUrl;
 
     @Enumerated(EnumType.STRING) // Enum 타입으로 지정
