@@ -1,6 +1,7 @@
 package com.elice.tripnote.domain.comment.entity;
 
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -19,6 +20,7 @@ public class CommentResponseDTO {
 
 
     @NotBlank
+    @Max(20)
     private String nickname;
 
     @NotNull

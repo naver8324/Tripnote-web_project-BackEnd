@@ -157,12 +157,12 @@ public class RouteController implements SwaggerRouteController {
     /**
      * 좋아요 추가/취소
      *
-     * @param integratedId 좋아요하고 싶은 경로 ic
+     * @param integratedRouteId 좋아요하고 싶은 경로 ic
      */
     @MemberRole
-    @PatchMapping("/member/routes/like/{routeId}")
-    public ResponseEntity<Void> addOrRemoveLike(@PathVariable("routeId") Long integratedId) {
-        routeService.addOrRemoveLike(integratedId);
+    @PatchMapping("/member/routes/like/{integratedRouteId}")
+    public ResponseEntity<Void> addOrRemoveLike(@PathVariable("integratedRouteId") Long integratedRouteId) {
+        routeService.addOrRemoveLike(integratedRouteId);
         return ResponseEntity.ok().build();
     }
 
@@ -170,12 +170,12 @@ public class RouteController implements SwaggerRouteController {
     /**
      * 북마크 추가/취소
      *
-     * @param integratedId 북마크하고 싶은 경로 id
+     * @param integratedRouteId 북마크하고 싶은 경로 id
      */
     @MemberRole
     @PatchMapping("/member/routes/bookmark/{routeId}")
-    public ResponseEntity<Void> addOrRemoveBookmark(@PathVariable("routeId") Long integratedId) {
-        routeService.addOrRemoveBookmark(integratedId);
+    public ResponseEntity<Void> addOrRemoveBookmark(@PathVariable("integratedRouteId") Long integratedRouteId) {
+        routeService.addOrRemoveBookmark(integratedRouteId);
         return ResponseEntity.ok().build();
     }
 
