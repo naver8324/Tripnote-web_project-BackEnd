@@ -115,9 +115,9 @@ public interface SwaggerRouteController {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
     })
     @Parameters(value = {
-            @Parameter(name = "integratedRouteId", required = true, description = "경로 번호"),
+            @Parameter(name = "routeId", required = true, description = "경로 번호"),
     })
-    ResponseEntity<List<SpotResponseDTO>> getSpots(Long integratedRouteId);
+    ResponseEntity<List<SpotResponseDTO>> getSpots(Long routeId);
 
     @Operation(summary = "좋아요 추가/취소", description = "좋아요가 눌리지 않은 상태에서 이 api를 호출하면 -> 좋아요 추가\n좋아요가 눌린 상태에서 이 api 호출 -> 좋아요 취소")
     @ApiResponses(value = {
