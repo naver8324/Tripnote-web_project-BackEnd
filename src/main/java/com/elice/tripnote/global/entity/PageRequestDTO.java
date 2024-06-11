@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 @AllArgsConstructor
-@Schema(description = "페이지네이션 요청 DTO")
+@Schema(description = "페이지네이션 요청 DTO 필요한 값만 넣으면 됩니다.")
 public class PageRequestDTO {
 
     @Schema(description = "페이지 번호 1 이상", defaultValue = "1")
