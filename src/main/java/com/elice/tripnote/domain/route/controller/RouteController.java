@@ -56,6 +56,13 @@ public class RouteController implements SwaggerRouteController {
         return ResponseEntity.ok(routeService.deleteRoute(routeId));
     }
 
+
+    @MemberRole
+    @GetMapping("/member/routes/{routeId}")
+    public ResponseEntity<RecommendedRouteResponseDTO> getRouteInfo(@PathVariable("routeId") Long routeId) {
+        return ResponseEntity.ok(routeService.getRouteInfo(routeId));
+    }
+
     /**
      * 특정 지역 내에서 여행하는 경로(지역 기반 경로 추천) (회원)
      * 지역에 맞는 경로 알아내기
@@ -170,32 +177,13 @@ public class RouteController implements SwaggerRouteController {
      * @param integratedRouteId 북마크하고 싶은 경로 id
      */
     @MemberRole
-    @PatchMapping("/member/routes/bookmark/{routeId}")
+    @PatchMapping("/member/routes/bookmark/{integratedRouteId}")
     public ResponseEntity<Void> addOrRemoveBookmark(@PathVariable("integratedRouteId") Long integratedRouteId) {
         routeService.addOrRemoveBookmark(integratedRouteId);
         return ResponseEntity.ok().build();
     }
 
 
-    /**
-     * 자신이 좋아요한 경로 리스트
-     * @return [경로 id, 경로 이름, 해당되는 경로의 여행지 리스트] 리스트 리턴
-     */
-    //TODO: 필요없음 삭제하기
-//    @MemberRole
-//    @GetMapping("/member/routes/like")
-//    public ResponseEntity<List<RouteDetailResponseDTO>> findLike() {
-//        return ResponseEntity.ok(routeService.findLike());
-//        /*
-//        route {
-//            routeId:
-//            name : string
-//            spots : [
-//            spot,spot,spot (순서 정리된채로)
-//            ]
-//        }
-//         */
-//    }
 
     /**
      * 자신이 북마크한 경로 리스트
@@ -208,15 +196,6 @@ public class RouteController implements SwaggerRouteController {
         //pageable 사용법
         //request param으로 page, size 조절 가능
         return ResponseEntity.ok(routeService.findBookmark(pageRequestDTO));
-        /*
-        route {
-            routeId:
-            name : string
-            spots : [
-            spot,spot,spot (순서 정리된채로)
-            ]
-        }
-         */
     }
 
     /**
@@ -227,18 +206,6 @@ public class RouteController implements SwaggerRouteController {
     @MemberRole
     @GetMapping("/member/routes")
     public ResponseEntity<Page<RouteDetailResponseDTO>> findMyRoute(PageRequestDTO pageRequestDTO) {
-        //pageable 사용법
-        //request param으로 page, size 조절 가능
-        /*
-        route {
-            routeId:
-            name : string
-            spots : [
-            spot,spot,spot (순서 정리된채로)
-            ]
-        }
-         */
-        // 경로 이름 때문에 여기서 통합 경로 리턴하는 건 안될듯
         return ResponseEntity.ok(routeService.findMyRoute(pageRequestDTO));
     }
 

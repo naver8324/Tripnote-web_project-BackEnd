@@ -7,6 +7,7 @@ import com.elice.tripnote.domain.route.entity.SpotResponseDTO;
 import com.elice.tripnote.domain.spot.entity.QSpot;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.entity.SpotRegionDTO;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -61,15 +64,15 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
 
     }
 
-    public List<Spot> findSpotsByRouteIdInOrder(Long routeId){
-        return query
-                .select(spot)
-                .from(spot)
-                .join(routeSpot).on(routeSpot.spot.id.eq(spot.id))
-                .where(routeSpot.route.id.eq(routeId))
-                .orderBy(routeSpot.sequence.asc())
-                .fetch();
-    }
+//    public List<Spot> findSpotsByRouteIdInOrder(Long routeId){
+//        return query
+//                .select(spot)
+//                .from(spot)
+//                .join(routeSpot).on(routeSpot.spot.id.eq(spot.id))
+//                .where(routeSpot.route.id.eq(routeId))
+//                .orderBy(routeSpot.sequence.asc())
+//                .fetch();
+//    }
 
     public List<Spot> findSpotsByIntegratedRouteIdInOrder(Long integratedRouteId){
         // integratedRouteId와 같은 통합 경로 id를 가지는 아무 routeId 구하기
@@ -88,5 +91,33 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
                 .orderBy(routeSpot.sequence.asc())
                 .fetch();
     }
+
+    public Map<Long, List<Spot>> findSpotsByIntegratedRouteIds(List<Long> integratedIds) {
+        // 각 integratedRouteId에 해당하는 최소 routeId 찾기
+        JPQLQuery<Long> minRouteIdsSubquery = JPAExpressions
+                .select(route.id.min())
+                .from(route)
+//                .join(routeSpot).on(routeSpot.route.id.eq(route.id))
+                .join(integratedRoute).on(route.integratedRoute.id.eq(integratedRoute.id))
+                .where(integratedRoute.id.in(integratedIds))
+                .groupBy(integratedRoute.id);
+
+        List<Tuple> results = query
+                .select(route.integratedRoute.id, routeSpot.spot)
+                .from(routeSpot)
+                .join(route).on(routeSpot.route.id.eq(route.id))
+//                .join(integratedRoute).on(route.integratedRoute.id.eq(integratedRoute.id))
+                .where(route.id.in(minRouteIdsSubquery))
+                .orderBy(routeSpot.sequence.asc())
+                .fetch();
+
+        return results.stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(integratedRoute.id),
+                        Collectors.mapping(tuple -> tuple.get(routeSpot.spot), Collectors.toList())
+                ));
+    }
+
+
 
 }
