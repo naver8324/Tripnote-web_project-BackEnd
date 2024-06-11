@@ -35,18 +35,10 @@ public class PostController implements SwaggerPostController {
         return ResponseEntity.ok().body(postService.getPosts(pageRequestDTO));
     }
 
-    @Override
+    //@Override
     @PostMapping("/posts")
     public ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@Valid @RequestBody List<HashtagRequestDTO> hashtagRequestDTOList,
-                                                                   @RequestParam(name="order", required = false, defaultValue = "") String order,
-                                                                   @RequestParam(name="page", defaultValue = "1") int page,
-                                                                   @RequestParam(name="size", defaultValue = "30") int size) {
-
-        //@requestBody를 2개 받을 수 없어서 일단 postRequestDTO는 각각 파람으로 받은 후 dto에 데이터 삽입
-        PageRequestDTO pageRequestDTO = new PageRequestDTO();
-        pageRequestDTO.setOrder(order);
-        pageRequestDTO.setPage(page);
-        pageRequestDTO.setSize(size);
+                                                                   PageRequestDTO pageRequestDTO) {
 
         if(hashtagRequestDTOList == null){
             return ResponseEntity.ok().body(postService.getPosts(pageRequestDTO));
