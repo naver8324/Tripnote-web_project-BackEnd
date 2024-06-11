@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.route.repository;
 
+import com.elice.tripnote.domain.route.entity.RecommendedRouteResponseDTO;
 import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.entity.RouteDetailResponseDTO;
 import com.elice.tripnote.domain.route.entity.RouteIdNameResponseDTO;
@@ -24,7 +25,8 @@ public interface CustomRouteRepository {
     boolean findHashtagIdIdCity(Long hashtagId);
     //    Page<RouteDetailResponseDTO> findRouteDetailsByMemberId(Long memberId, Pageable pageable);
     Page<RouteDetailResponseDTO> findRouteDetailsByMemberId(Long memberId, PageRequestDTO pageRequestDTO, boolean isBookmark);
-
+    List<RecommendedRouteResponseDTO> getRecommendedRoutes(List<Long> integratedRouteIds, Long memberId, boolean isMember);
+    List<Long> findIntegratedRouteIdsBySpotsAndLikes(List<Long> spots);
 
 
 }

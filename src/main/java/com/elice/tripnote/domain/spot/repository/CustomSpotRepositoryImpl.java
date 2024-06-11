@@ -92,7 +92,7 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
                 .fetch();
     }
 
-    public /*Map<Long, List<Spot>>*/Object findSpotsByIntegratedRouteIds(List<Long> integratedIds) {
+    public Map<Long, List<Spot>> findSpotsByIntegratedRouteIds(List<Long> integratedIds) {
         // 각 integratedRouteId에 해당하는 최소 routeId 찾기
         JPQLQuery<Long> minRouteIdsSubquery = JPAExpressions
                 .select(route.id.min())
@@ -102,8 +102,7 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
                 .where(integratedRoute.id.in(integratedIds))
                 .groupBy(integratedRoute.id);
 
-//        List<Tuple> results
-                return query
+        List<Tuple> results = query
                 .select(route.integratedRoute.id, routeSpot.spot)
                 .from(routeSpot)
                 .join(route).on(routeSpot.route.id.eq(route.id))
@@ -112,11 +111,11 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
                 .orderBy(routeSpot.sequence.asc())
                 .fetch();
 
-//        return results.stream()
-//                .collect(Collectors.groupingBy(
-//                        tuple -> tuple.get(integratedRoute.id),
-//                        Collectors.mapping(tuple -> tuple.get(routeSpot.spot), Collectors.toList())
-//                ));
+        return results.stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(integratedRoute.id),
+                        Collectors.mapping(tuple -> tuple.get(routeSpot.spot), Collectors.toList())
+                ));
 
     }
 

@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.route.repository;
 
 import com.elice.tripnote.domain.hashtag.entity.QHashtag;
 import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
+import com.elice.tripnote.domain.likebookmarkperiod.entity.QLikeBookmarkPeriod;
 import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
 import com.elice.tripnote.domain.link.routespot.entity.QRouteSpot;
@@ -14,6 +15,7 @@ import com.elice.tripnote.global.entity.PageRequestDTO;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -24,6 +26,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +45,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     private final QIntegratedRoute integratedRoute = new QIntegratedRoute("ir");
     private final QPost post = new QPost("p");
     private final QHashtag hashtag = new QHashtag("h");
+    private final QLikeBookmarkPeriod lbp = new QLikeBookmarkPeriod("lbp");
 
     public List<Long> findIntegratedRouteIdsBySpots(List<Long> spots) {
         /*
@@ -273,6 +278,120 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .from(hashtag)
                 .where(hashtag.id.eq(hashtagId))
                 .fetchOne();
+    }
+
+    public List<RecommendedRouteResponseDTO> getRecommendedRoutes(List<Long> integratedRouteIds, Long memberId, boolean isMember){
+//        System.out.println("매개변수로 들어오는 integratedRouteIds" + integratedRouteIds);
+        // 필요한 데이터를 한 번의 쿼리로 가져오기
+        List<Tuple> results = query
+                .select(
+                        integratedRoute.id,
+                        post.id,
+                        post.id.count().as("postLikes"),
+                        route.id.min().as("routeId"),
+                        spot.id,
+                        spot.location,
+                        spot.imageUrl,
+                        spot.region,
+                        spot.address,
+                        spot.lat,
+                        spot.lng,
+                        Expressions.as(
+                                JPAExpressions.select(likePost.id.count())
+                                        .from(likePost)
+                                        .where(likePost.route.id.eq(route.id.min())),
+                                "likes"
+                        ),
+                        Expressions.as(
+                                isMember ? JPAExpressions.select(likePost.id.count())
+                                        .from(likePost)
+                                        .where(likePost.member.id.eq(memberId)
+                                                .and(likePost.route.id.eq(route.id.min())))
+                                        : Expressions.constant(0L),
+                                "likedAt"
+                        ),
+                        Expressions.as(
+                                isMember ? JPAExpressions.select(bookmark.id.count())
+                                        .from(bookmark)
+                                        .where(bookmark.member.id.eq(memberId)
+                                                .and(bookmark.route.id.eq(route.id.min())))
+                                        : Expressions.constant(0L),
+                                "markedAt"
+                        )
+                )
+                .from(integratedRoute)
+                .join(route).on(route.integratedRoute.id.eq(integratedRoute.id))
+                .leftJoin(post).on(post.route.id.eq(route.id))  // join -> leftjoin으로 변경
+                .leftJoin(post.likePosts, likePost)
+                .leftJoin(routeSpot).on(routeSpot.route.id.eq(route.id))
+                .leftJoin(spot).on(routeSpot.spot.id.eq(spot.id))
+                .where(integratedRoute.id.in(integratedRouteIds))
+                .groupBy(integratedRoute.id, post.id, spot.id, spot.location, spot.imageUrl, spot.region, spot.address, spot.lat, spot.lng)
+                .orderBy(post.id.count().desc())
+                .fetch();
+
+
+        // 결과를 처리하여 DTO 리스트 생성
+        Map<Long, RecommendedRouteResponseDTO> resultMap = results.stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(integratedRoute.id),
+                        Collectors.collectingAndThen(Collectors.toList(), tuples -> {
+                            int likes = Math.toIntExact((Long) tuples.get(0).get(Expressions.path(Long.class, "likes")));
+                            boolean likedAt = tuples.get(0).get(Expressions.path(Long.class, "likedAt")) > 0;
+                            boolean markedAt = tuples.get(0).get(Expressions.path(Long.class, "markedAt")) > 0;
+
+                            List<Spot> spots = tuples.stream()
+                                    .map(tuple -> new Spot(tuple.get(spot.id),
+                                            tuple.get(spot.location),
+                                            tuple.get(spot.imageUrl),
+                                            tuple.get(spot.region),
+                                            tuple.get(spot.address),
+                                            tuple.get(spot.lat),
+                                            tuple.get(spot.lng)))
+                                    .collect(Collectors.toList());
+
+                            return new RecommendedRouteResponseDTO(
+                                    tuples.get(0).get(integratedRoute.id),
+                                    tuples.get(0).get(post.id),
+                                    spots,
+                                    likes,
+                                    likedAt,
+                                    markedAt
+                            );
+                        })
+                ));
+
+        return new ArrayList<>(resultMap.values());
+    }
+
+    public List<Long> findIntegratedRouteIdsBySpotsAndLikes(List<Long> spots) {
+        JPQLQuery<Long> integratedRouteQuery = query
+                .selectDistinct(route.integratedRoute.id)
+                .from(route)
+                .join(routeSpot).on(routeSpot.route.id.eq(route.id))
+                .where(routeSpot.spot.id.in(spots))
+                .groupBy(route.id, route.integratedRoute.id)
+                .having(routeSpot.spot.id.countDistinct().eq((long) spots.size()));
+
+        JPQLQuery<LocalDateTime> maxStartAtSubquery = JPAExpressions.select(lbp.startAt.max())
+                .from(lbp)
+                .where(lbp.integratedRoute.id.eq(integratedRoute.id))
+                .groupBy(lbp.integratedRoute.id);
+
+
+        return query
+                .select(integratedRoute.id)
+                .from(integratedRoute)
+                .join(lbp).on(integratedRoute.id.eq(lbp.integratedRoute.id))
+                .where(
+                        integratedRoute.id.in(integratedRouteQuery)
+                                .and(lbp.startAt.eq(maxStartAtSubquery))
+                                .and(integratedRoute.routeStatus.eq(RouteStatus.PUBLIC))
+                )
+                .groupBy(integratedRoute.id)
+                .orderBy(lbp.likes.sum().desc())
+                .limit(3)
+                .fetch();
     }
 
 
