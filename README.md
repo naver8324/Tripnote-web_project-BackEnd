@@ -127,8 +127,14 @@ $ npm run dev
 ## ERD
   <img alt ="DB ERD" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/trip+note+erd.png">
 
+---
+
+## 와이어프레임
+  <img alt ="wireFrame" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/figma.jpg">
 
 ---
+
+
 
 
 
