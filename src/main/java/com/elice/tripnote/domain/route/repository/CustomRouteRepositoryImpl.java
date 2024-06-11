@@ -6,11 +6,13 @@ import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
 import com.elice.tripnote.domain.link.routespot.entity.QRouteSpot;
 import com.elice.tripnote.domain.post.entity.QPost;
-import com.elice.tripnote.domain.route.entity.QRoute;
-import com.elice.tripnote.domain.route.entity.Route;
-import com.elice.tripnote.domain.route.entity.RouteIdNameResponseDTO;
+import com.elice.tripnote.domain.route.entity.*;
 import com.elice.tripnote.domain.route.status.RouteStatus;
-import com.querydsl.core.QueryResults;
+import com.elice.tripnote.domain.spot.entity.QSpot;
+import com.elice.tripnote.domain.spot.entity.Spot;
+import com.elice.tripnote.global.entity.PageRequestDTO;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -18,10 +20,14 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -29,6 +35,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     private final JPAQueryFactory query;
     private final QRoute route = new QRoute("r");
     private final QRouteSpot routeSpot = new QRouteSpot("rs");
+    private final QSpot spot = new QSpot("s");
     private final QLikePost likePost = new QLikePost("lp");
     private final QBookmark bookmark = new QBookmark("b");
     private final QIntegratedRoute integratedRoute = new QIntegratedRoute("ir");
@@ -67,68 +74,108 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .fetch();
     }
 
-//    public Page<RouteIdNameDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable) {
-//
-//        return query
-//                .select(Projections.constructor(RouteIdNameDTO.class,
+    public Page<RouteDetailResponseDTO> findRouteDetailsByMemberId(Long memberId, PageRequestDTO pageRequestDTO, boolean isBookmark) {
+        PageRequest pageRequest = PageRequest.of(pageRequestDTO.getPage()-1, pageRequestDTO.getSize());
+//        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(pageRequestDTO.getOrder(), pageRequestDTO.isAsc());
+
+        List<RouteIdNameResponseDTO> routes;
+        if(isBookmark){
+            routes = query
+                    .select(Projections.constructor(RouteIdNameResponseDTO.class,
+                            route.id,
+                            route.name
+                    ))
+                    .from(route)
+                    .join(bookmark).on(bookmark.route.id.eq(route.id))
+                    .where(bookmark.member.id.eq(memberId)
+                            .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+                    .offset(pageRequest.getOffset())
+                    .limit(pageRequest.getPageSize())
+                    .orderBy(route.id.asc())
+                    .fetch();
+        } else{
+            routes = query
+                    .select(Projections.constructor(RouteIdNameResponseDTO.class,
+                            route.id,
+                            route.name
+                    ))
+                    .from(route)
+                    .where(route.member.id.eq(memberId)
+                            .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+                    .offset(pageRequest.getOffset())
+                    .limit(pageRequest.getPageSize())
+                    .orderBy(route.id.asc())
+                    .fetch();
+        }
+        //먼저 멤버 id로 자신이 쓴 경로 아이디 알아내기
+//        List<RouteIdNameResponseDTO> routes = query
+//                .select(Projections.constructor(RouteIdNameResponseDTO.class,
 //                        route.id,
 //                        route.name
 //                ))
 //                .from(route)
-//                .join(bookmark).on(bookmark.route.id.eq(route.id))
-//                .where(bookmark.member.id.eq(memberId))
+//                .where(route.member.id.eq(memberId)
+//                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+//                .offset(pageable.getOffset())
+//                .limit(pageable.getPageSize())
 //                .orderBy(route.id.asc())
 //                .fetch();
-//
-//
-//    }
 
-    public Page<RouteIdNameResponseDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable) {
+        // 그 중 경로 id만 리스트로 추출
+        List<Long> routeIds = routes.stream()
+                .map(RouteIdNameResponseDTO::getRouteId)
+                .collect(Collectors.toList());
 
-        QueryResults<RouteIdNameResponseDTO> queryResults = query
-                .select(Projections.constructor(RouteIdNameResponseDTO.class,
-                        route.id,
-                        route.name
+        List<SpotRouteIdDTO> spots = query
+                .select(Projections.constructor(SpotRouteIdDTO.class,
+                        routeSpot.route.id,
+                        spot.id,
+                        spot.location,
+                        spot.imageUrl,
+                        spot.region,
+                        spot.address,
+                        spot.lat,
+                        spot.lng
                 ))
-                .from(route)
-                .join(bookmark).on(bookmark.route.id.eq(route.id))
-                .where(bookmark.member.id.eq(memberId)
-                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
-                .orderBy(route.id.asc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(route.id.desc())
-                .fetchResults();
+                .from(routeSpot)
+                .join(spot).on(spot.id.eq(routeSpot.spot.id))
+                .where(routeSpot.route.id.in(routeIds))
+                // 일단 route id 순서대로, 그 안에서는 sequence 순서대로
+                .orderBy(routeSpot.route.id.asc(), routeSpot.sequence.asc())
+                .fetch();
 
-        return new PageImpl<>(queryResults.getResults(), pageable, queryResults.getTotal());
-    }
+        Map<Long, List<SpotRouteIdDTO>> routeIdToSpotsMap = spots.stream()
+                .collect(Collectors.groupingBy(SpotRouteIdDTO::getRouteId));
 
-
-    public Page<RouteIdNameResponseDTO> findRoutesByMemberId(Long memberId, Pageable pageable) {
-//        return query
-//                .select(Projections.constructor(RouteIdNameDTO.class,
-//                        route.id,
-//                        route.name
-//                ))
-//                .from(route)
-//                .where(route.member.id.eq(memberId))
-//                .fetch();
-
-        QueryResults<RouteIdNameResponseDTO> results = query
-                .select(Projections.constructor(RouteIdNameResponseDTO.class,
-                        route.id,
-                        route.name
+        List<RouteDetailResponseDTO> routeDetails = routes.stream()
+                .map(routeDto -> new RouteDetailResponseDTO(
+                        routeDto.getRouteId(),
+                        routeDto.getName(),
+                        routeIdToSpotsMap.getOrDefault(routeDto.getRouteId(), List.of())
+                                .stream()
+                                .map(spotDto -> new Spot(
+                                        spotDto.getId(),
+                                        spotDto.getLocation(),
+                                        spotDto.getImageUrl(),
+                                        spotDto.getRegion(),
+                                        spotDto.getAddress(),
+                                        spotDto.getLat(),
+                                        spotDto.getLng()
+                                ))
+                                .collect(Collectors.toList())
                 ))
+                .collect(Collectors.toList());
+
+        long total = query
+                .select(route.count())
                 .from(route)
                 .where(route.member.id.eq(memberId)
                         .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(route.id.desc())
-                .fetchResults();
+                .fetchOne();
 
-        return new PageImpl<>(results.getResults(), pageable, results.getTotal());
+        return new PageImpl<>(routeDetails, pageRequest, total);
     }
+
 
     public int getIntegratedRouteLikeCounts(Long integratedRouteId) {
         /*
@@ -150,6 +197,24 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .fetchOne();
 
         return likeCount != null ? likeCount : 0;
+    }
+
+    public Map<Long, Integer> getIntegratedRouteLikeCounts(List<Long> integratedIds) {
+        //특정 통합 경로의 좋아요 개수 구하기
+        List<Tuple> results = query
+                .select(integratedRoute.id, likePost.id.count().intValue())
+                .from(route)
+                .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
+                .join(likePost).on(likePost.route.id.eq(route.id))
+                .where(integratedRoute.id.in(integratedIds))
+                .groupBy(integratedRoute.id)
+                .fetch();
+
+        return results.stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(integratedRoute.id),
+                        tuple -> tuple.get(likePost.id.count().intValue())
+                ));
     }
 
     public Route getMinRouteByIntegratedId(Long integratedId) {
@@ -183,6 +248,24 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
 
     }
 
+    public Map<Long, Long> findPostIdsByIntegratedRouteIds(List<Long> integratedIds) {
+        List<Tuple> results = query
+                .select(post.route.integratedRoute.id, post.id, likePost.id.count().as("likeCount"))
+                .from(post)
+                .join(likePost).on(likePost.post.id.eq(post.id))
+                .where(post.route.integratedRoute.id.in(integratedIds)
+                        .and(post.route.routeStatus.eq(RouteStatus.PUBLIC)))
+                .groupBy(post.route.integratedRoute.id, post.id)
+                .orderBy(post.route.integratedRoute.id.asc(), likePost.id.count().desc())
+                .fetch();
+
+        Map<Long, Long> resultMap = new LinkedHashMap<>(); // 순서가 유지되도록 LinkedHashMap 사용
+
+        results.forEach(tuple -> resultMap.put(tuple.get(post.route.integratedRoute.id), tuple.get(post.id)));
+
+        return resultMap;
+    }
+
     public boolean findHashtagIdIdCity(Long hashtagId){
 
         return query
@@ -191,5 +274,6 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .where(hashtag.id.eq(hashtagId))
                 .fetchOne();
     }
+
 
 }

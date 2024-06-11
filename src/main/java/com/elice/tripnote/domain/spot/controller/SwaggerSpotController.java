@@ -56,9 +56,6 @@ public interface SwaggerSpotController {
 //    ResponseEntity<SpotDTO> getSpotById(Long id);
 
     @Operation(summary = "클라이언트 spot 선택", description = "클라이언트가 경로 만들 때 선택한 여행지가 id를 통해 list 생성")
-    @Parameters({
-            @Parameter(name = "id", description = "Spot 테이블의 기본키")
-    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "성공",
                     content = {@Content(schema = @Schema(implementation = SpotResponseDTO.class))}),

@@ -16,12 +16,15 @@ import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagRepository;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
+import com.elice.tripnote.domain.post.entity.Post;
+import com.elice.tripnote.domain.post.repository.PostRepository;
 import com.elice.tripnote.domain.route.entity.*;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.repository.SpotRepository;
+import com.elice.tripnote.global.entity.PageRequestDTO;
 import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
@@ -29,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -37,10 +41,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,6 +60,7 @@ public class RouteService {
     private final SpotRepository spotRepository;
     private final BookmarkRepository bookmarkRepository;
     private final LikePostRepository likePostRepository;
+    private final PostRepository postRepository;
 
     @Transactional
     public Long save(SaveRequestDTO requestDto) {
@@ -80,9 +82,11 @@ public class RouteService {
                     return integratedRouteRepository.save(newRoute);
                 });
 
-        Long regionHashtagId = (long) region.getIndex();
-        log.info("지역 해시태그 아이디: {}", regionHashtagId);
-        if (routeRepository.findHashtagIdIdCity(regionHashtagId)) requestDto.getHashtagIds().add(regionHashtagId);
+        if (region != Region.MIXED_REGION) {
+            Long regionHashtagId = (long) region.getIndex();
+            log.info("지역 해시태그 아이디: {}", regionHashtagId);
+            if (routeRepository.findHashtagIdIdCity(regionHashtagId)) requestDto.getHashtagIds().add(regionHashtagId);
+        }
 
 //        if (requestDto.getHashtagIds() != null) {
         // 통합 경로 객체(IntegratedRoute) 이용해서 uuid_hashtag 객체 생성
@@ -194,27 +198,27 @@ public class RouteService {
         }
     }
 
-    @Transactional
-    public Long setRouteToStatus(Long routeId) {
-        Member member = getMemberFromJwt();
-
-        Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> {
-                    throw new CustomException(ErrorCode.NO_ROUTE);
-                });
-
-        // 해당 경로가 자신의 것이 맞는지 확인
-        if (member.getId() != route.getMember().getId())
-            throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_STATUS);
-        if (route.getRouteStatus() == RouteStatus.PUBLIC) route.updateStatus(RouteStatus.PRIVATE);
-        else if (route.getRouteStatus() == RouteStatus.PRIVATE) route.updateStatus(RouteStatus.PUBLIC);
-        else {
-            log.warn("삭제된 경로입니다. 경로 번호: {}", routeId);
-            throw new CustomException(ErrorCode.NO_ROUTE);
-        }
-
-        return routeRepository.save(route).getId();
-    }
+//    @Transactional
+//    public Long setRouteToStatus(Long routeId) {
+//        Member member = getMemberFromJwt();
+//
+//        Route route = routeRepository.findById(routeId)
+//                .orElseThrow(() -> {
+//                    throw new CustomException(ErrorCode.NO_ROUTE);
+//                });
+//
+//        // 해당 경로가 자신의 것이 맞는지 확인
+//        if (member.getId() != route.getMember().getId())
+//            throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_STATUS);
+//        if (route.getRouteStatus() == RouteStatus.PUBLIC) route.updateStatus(RouteStatus.PRIVATE);
+//        else if (route.getRouteStatus() == RouteStatus.PRIVATE) route.updateStatus(RouteStatus.PUBLIC);
+//        else {
+//            log.warn("삭제된 경로입니다. 경로 번호: {}", routeId);
+//            throw new CustomException(ErrorCode.NO_ROUTE);
+//        }
+//
+//        return routeRepository.save(route).getId();
+//    }
 
     @Transactional
     public Long deleteRoute(Long routeId) {
@@ -239,6 +243,27 @@ public class RouteService {
         return route.getId();
     }
 
+    public RecommendedRouteResponseDTO getRouteInfo(Long routeId) {
+        Member member = getMemberFromJwt();
+        // routeid를 이용해서 통합 경로 id 가져오기
+        Route route = routeRepository.findById(routeId).orElseThrow(() -> {
+            throw new CustomException(ErrorCode.NO_ROUTE);
+        });
+        Long integratedRouteId = route.getIntegratedRoute().getId();
+        return RecommendedRouteResponseDTO.builder()
+                .integratedRouteId(integratedRouteId)
+                .postId(
+                        postRepository.findByRouteId(routeId)
+                                .map(post -> post.getId())
+                                .orElse(null)
+                )
+                .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(integratedRouteId)) // 해당 route에 맞는 spots구하기
+                .likes(routeRepository.getIntegratedRouteLikeCounts(integratedRouteId)) // 해당 경로의 좋아요 수
+                .likedAt(likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedRouteId)) // 자신이 이 경로에 좋아요를 눌렀는지
+                .markedAt(bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedRouteId)) // 자신이 이 경로에 북마크를 눌렀는지
+                .build();
+    }
+
     public List<RecommendedRouteResponseDTO> getRegionMember(Region region) {
         Member member = getMemberFromJwt();
         return getRegion(region, true, member);
@@ -249,42 +274,44 @@ public class RouteService {
     }
 
     private List<RecommendedRouteResponseDTO> getRegion(Region region, boolean isMember, Member member) {
-
         List<Long> integratedIds = integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region);
+        return getRecommendRoutesByIntegratedRoutes(integratedIds, isMember, member);
+    }
+
+    private List<RecommendedRouteResponseDTO> getRecommendRoutesByIntegratedRoutes(List<Long> integratedRouteIds, boolean isMember, Member member) {
+        //        List<Long> integratedIds = integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region);
+//
+//        // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
+//        List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
+//
+//        for (Long irId : integratedIds) {
+//            recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
+//                    .integratedRouteId(irId)
+//                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId))
+//                    .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
+//                    .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
+//                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
+//                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
+//                    .build());
+//        }
+
+        Map<Long, Long> postIdMap = routeRepository.findPostIdsByIntegratedRouteIds(integratedRouteIds); //이거 다시 확인 요망
+        Map<Long, List<Spot>> spotsMap = spotRepository.findSpotsByIntegratedRouteIds(integratedRouteIds);
+        Map<Long, Integer> likeCountsMap = routeRepository.getIntegratedRouteLikeCounts(integratedRouteIds);
 
         // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
         List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
 
-        for (Long irId : integratedIds) {
+        for (Long irId : integratedRouteIds) {
             recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
                     .integratedRouteId(irId)
-                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId))
-                    .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
-                    .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
+                    .postId(postIdMap.get(irId))
+                    .spots(spotsMap.getOrDefault(irId, List.of())) // 해당 route에 맞는 spots 구하기
+                    .likes(likeCountsMap.getOrDefault(irId, 0)) // 해당 경로의 좋아요 수
                     .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
                     .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
                     .build());
         }
-
-        /*
-        select count(id)
-        from like_post lp
-        where lp.member_id=:memberId
-            and lp.route_id=:routeId
-         */
-
-
-        /*
-        아래 값 5개
-        {
-          route id
-          여행지 리스트 - 순서 정리된 채로, (id, region 필요 없음)
-          likes: (해당 경로의 좋아요 개수)
-          likedAt(경로 조회한 유저가 좋아요 눌렀는지)
-          markedAt(경로 조회한 유저가 북마크를 눌렀는지)
-        }
-
-         */
         return recommendedRouteResponseDTOS;
     }
 
@@ -321,21 +348,7 @@ public class RouteService {
         log.info("통합 경로 id들: {}", integratedIds);
         integratedIds = integratedRouteRepository.findIntegratedRoute(integratedIds);
 
-        // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
-        List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
-        for (Long irId : integratedIds) {
-            log.info("현재 통합 경로 id -> {}", irId);
-            recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
-                    .integratedRouteId(irId)
-                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId)) // 해당 통합 경로 id 중 가장 작은 route id
-                    .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
-                    .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
-                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
-                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
-                    .build());
-        }
-        return recommendedRouteResponseDTOS;
-
+        return getRecommendRoutesByIntegratedRoutes(integratedIds, isMember, member);
     }
 
     @Transactional
@@ -390,9 +403,6 @@ public class RouteService {
         }
 
         // 없는 경우
-        //Route route = routeRepository.findById(routeId).orElseThrow(() -> {
-        //    throw new CustomException(ErrorCode.NO_ROUTE);
-        //});
         Route route = routeRepository.getMinRouteByIntegratedId(integratedId);
 
         Bookmark bookmark = Bookmark.builder()
@@ -415,74 +425,15 @@ public class RouteService {
         routeRepository.save(route);
     }
 
-//    public List<RouteDetailResponseDTO> findLike() {
-//        Member member = getMemberFromJwt();
-//        /*
-//        select r.id, r.name
-//        from Route r
-//        join like_post lp on lp.route_id=r.id
-//        where member_id=:memberId
-//         */
-//        List<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findLikedRoutesByMemberId(member.getId());
-//
-//        List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
-//        for (RouteIdNameResponseDTO dto : routeIdNameDTOS) {
-//            routeDetailResponseDTOS.add(RouteDetailResponseDTO.builder()
-//                    .routeId(dto.getRouteId())
-//                    .name(dto.getName())
-//                    .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
-//                    /*
-//                    select *
-//                    from spot s
-//                    join route_spot rs on rs.spot_id=s.id
-//                    where rs.route_id=:routeId
-//                    order by rs.sequence asc
-//                     */
-//                    .build());
-//        }
-//        return routeDetailResponseDTOS;
-//    }
-
-    public Page<RouteDetailResponseDTO> findBookmark(Pageable pageable) {
+    public Page<RouteDetailResponseDTO> findBookmark(PageRequestDTO pageRequestDTO) {
         Member member = getMemberFromJwt();
-        /*
-        select r.id, r.name
-        from Route r
-        join bookmark b on b.route_id=r.id
-        where member_id=:memberId
-         */
-        Page<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findMarkedRoutesByMemberId(member.getId(), pageable);
-
-        List<RouteDetailResponseDTO> routeDetailResponseDTOS = routeIdNameDTOS.getContent().stream()
-                .map(dto -> RouteDetailResponseDTO.builder()
-                        .routeId(dto.getRouteId())
-                        .name(dto.getName())
-                        .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
-                        .build())
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(routeDetailResponseDTOS, pageable, routeIdNameDTOS.getTotalElements());
+        return routeRepository.findRouteDetailsByMemberId(member.getId(), pageRequestDTO, true);
     }
 
 
-    public Page<RouteDetailResponseDTO> findMyRoute(Pageable pageable) {
+    public Page<RouteDetailResponseDTO> findMyRoute(PageRequestDTO pageRequestDTO) {
         Member member = getMemberFromJwt();
-        /*
-        select r.id, r.name
-        from Route r
-        where member_id=:memberId
-         */
-        Page<RouteIdNameResponseDTO> routeIdNameDTOS = routeRepository.findRoutesByMemberId(member.getId(), pageable);
-
-        List<RouteDetailResponseDTO> routeDetailResponseDTOS = new ArrayList<>();
-        for (RouteIdNameResponseDTO dto : routeIdNameDTOS) {
-            routeDetailResponseDTOS.add(RouteDetailResponseDTO.builder()
-                    .routeId(dto.getRouteId())
-                    .name(dto.getName())
-                    .spots(spotRepository.findSpotsByRouteIdInOrder(dto.getRouteId()))
-                    .build());
-        }
-        return new PageImpl<>(routeDetailResponseDTOS, pageable, routeIdNameDTOS.getTotalElements());
+        return routeRepository.findRouteDetailsByMemberId(member.getId(), pageRequestDTO, false);
     }
 
     private Member getMemberFromJwt() {

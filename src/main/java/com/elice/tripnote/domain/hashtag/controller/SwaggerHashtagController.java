@@ -20,8 +20,6 @@ public interface SwaggerHashtagController {
 
     @Operation(summary = "해시태그 전체 조회", description = "해시태그의 모든 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공")
-    @Parameters(value = {
-    })
     ResponseEntity<Page<HashtagDTO>> getHashtags(PageRequestDTO pageRequestDTO);
 
     @Operation(summary = "해시태그 조회", description = "도시 또는 도시가 아닌 해시태그를 조회합니다.")
