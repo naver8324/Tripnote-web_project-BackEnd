@@ -16,6 +16,7 @@ import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagRepository;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
+import com.elice.tripnote.domain.post.entity.Post;
 import com.elice.tripnote.domain.post.repository.PostRepository;
 import com.elice.tripnote.domain.route.entity.*;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
@@ -251,7 +252,11 @@ public class RouteService {
         Long integratedRouteId = route.getIntegratedRoute().getId();
         return RecommendedRouteResponseDTO.builder()
                 .integratedRouteId(integratedRouteId)
-                .postId(postRepository.findByRouteId(routeId).getId())
+                .postId(
+                        postRepository.findByRouteId(routeId)
+                                .map(post -> post.getId())
+                                .orElse(null)
+                )
                 .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(integratedRouteId)) // 해당 route에 맞는 spots구하기
                 .likes(routeRepository.getIntegratedRouteLikeCounts(integratedRouteId)) // 해당 경로의 좋아요 수
                 .likedAt(likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedRouteId)) // 자신이 이 경로에 좋아요를 눌렀는지
