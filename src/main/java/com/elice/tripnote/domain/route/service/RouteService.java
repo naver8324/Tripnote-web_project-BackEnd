@@ -279,39 +279,38 @@ public class RouteService {
     }
 
     private List<RecommendedRouteResponseDTO> getRecommendRoutesByIntegratedRoutes(List<Long> integratedRouteIds, boolean isMember, Member member) {
-        //        List<Long> integratedIds = integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region);
+
+        // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
+        List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
+        for (Long irId : integratedRouteIds) {
+            recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
+                    .integratedRouteId(irId)
+                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId))
+                    .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
+                    .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
+                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
+                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
+                    .build());
+        }
+
+//        Map<Long, Long> postIdMap = routeRepository.findPostIdsByIntegratedRouteIds(integratedRouteIds); //이거 다시 확인 요망
+//        var spotsMap = spotRepository.findSpotsByIntegratedRouteIds(integratedRouteIds);
+//        Map<Long, Integer> likeCountsMap = routeRepository.getIntegratedRouteLikeCounts(integratedRouteIds);
 //
 //        // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
 //        List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
 //
-//        for (Long irId : integratedIds) {
+//        for (Long irId : integratedRouteIds) {
 //            recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
 //                    .integratedRouteId(irId)
-//                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId))
-//                    .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
-//                    .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
+//                    .postId(postIdMap.get(irId))
+//                    .spots(spotsMap/*.getOrDefault(irId, List.of())*/) // 해당 route에 맞는 spots 구하기
+//                    .likes(likeCountsMap.getOrDefault(irId, 0)) // 해당 경로의 좋아요 수
 //                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
 //                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
 //                    .build());
 //        }
 
-        Map<Long, Long> postIdMap = routeRepository.findPostIdsByIntegratedRouteIds(integratedRouteIds); //이거 다시 확인 요망
-        Map<Long, List<Spot>> spotsMap = spotRepository.findSpotsByIntegratedRouteIds(integratedRouteIds);
-        Map<Long, Integer> likeCountsMap = routeRepository.getIntegratedRouteLikeCounts(integratedRouteIds);
-
-        // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
-        List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
-
-        for (Long irId : integratedRouteIds) {
-            recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
-                    .integratedRouteId(irId)
-                    .postId(postIdMap.get(irId))
-                    .spots(spotsMap.getOrDefault(irId, List.of())) // 해당 route에 맞는 spots 구하기
-                    .likes(likeCountsMap.getOrDefault(irId, 0)) // 해당 경로의 좋아요 수
-                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
-                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
-                    .build());
-        }
         return recommendedRouteResponseDTOS;
     }
 
