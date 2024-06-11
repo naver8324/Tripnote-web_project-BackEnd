@@ -130,7 +130,10 @@ $ npm run dev
 ---
 
 
+## 와이어프레임
+  [Figma](https://www.figma.com/board/sGnAjT5v20aHp9qURFdKcf/Untitled?node-id=0-1&t=AzCSYLUmwCI8eo9V-0)
 
+---
 
 
 
