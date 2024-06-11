@@ -281,37 +281,67 @@ public class RouteService {
     private List<RecommendedRouteResponseDTO> getRecommendRoutesByIntegratedRoutes(List<Long> integratedRouteIds, boolean isMember, Member member) {
 
         // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
-        List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
-        for (Long irId : integratedRouteIds) {
-            recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
-                    .integratedRouteId(irId)
-                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId))
-                    .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
-                    .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
-                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
-                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
-                    .build());
-        }
-
-//        Map<Long, Long> postIdMap = routeRepository.findPostIdsByIntegratedRouteIds(integratedRouteIds); //이거 다시 확인 요망
-//        var spotsMap = spotRepository.findSpotsByIntegratedRouteIds(integratedRouteIds);
-//        Map<Long, Integer> likeCountsMap = routeRepository.getIntegratedRouteLikeCounts(integratedRouteIds);
-//
-//        // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
 //        List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
-//
 //        for (Long irId : integratedRouteIds) {
 //            recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
 //                    .integratedRouteId(irId)
-//                    .postId(postIdMap.get(irId))
-//                    .spots(spotsMap/*.getOrDefault(irId, List.of())*/) // 해당 route에 맞는 spots 구하기
-//                    .likes(likeCountsMap.getOrDefault(irId, 0)) // 해당 경로의 좋아요 수
+//                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId))
+//                    .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
+//                    .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
 //                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
 //                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
 //                    .build());
 //        }
+//        return recommendedRouteResponseDTOS;
+        return routeRepository.getRecommendedRoutes(integratedRouteIds, isMember ? member.getId() : null, isMember);
 
-        return recommendedRouteResponseDTOS;
+        /*
+        integrated route id를 이용해서 가장 좋아요 많은 post id 구하기
+        integrated route id를 이용해서 경로의 spots 구하기
+        integrated route id 이용해서 좋아요 개수 구하기
+        해당 유저가 좋아요, 북마크 눌렀는지 알아내기
+
+        select p.id
+        from post p
+        join like_post lp on lp.post_id=p.id
+        join route r on r.id=p.route_id
+        join integrated_route ir on ir.id=r.integrated_route_id
+        where ir.id=(:integratedRouteId)
+        group by p.id
+        order by count(lp.member_id) desc
+        limit 1;
+
+
+
+        JPQLQuery<Long> subquery = JPAExpressions
+                        .select(route.id.min())
+                        .from(route)
+                        .where(route.integratedRoute.id.eq(integratedRouteId));
+
+
+        select count(lp.id)
+        from like_post lp
+        where lp.route_id=(:subquery)
+
+        select count(lp.id)
+        from like_post lp
+        where lp.member_id=(:memberId) and lp.route_id=(:subquery)
+
+        select count(lp.id)
+        from bookmark b
+        where b.member_id=(:memberId) and b.route_id=(:subquery)
+
+
+        //아래 쿼리는 List로 들어가게
+        select s
+        from spot s
+        join route_spot rs on rs.spot_id=s.id
+        join route r on r.id=rs.route_id
+        where r.id=(:subquery)
+
+         */
+
+
     }
 
 
@@ -343,9 +373,12 @@ public class RouteService {
 
         // 해당하는 여행지들이 모두 있는 통합 경로 id 리턴
         //TODO: findIntegratedRouteIdsBySpots, findIntegratedRoute 하나로 합치기
-        List<Long> integratedIds = routeRepository.findIntegratedRouteIdsBySpots(spots);
-        log.info("통합 경로 id들: {}", integratedIds);
-        integratedIds = integratedRouteRepository.findIntegratedRoute(integratedIds);
+//        List<Long> integratedIds = routeRepository.findIntegratedRouteIdsBySpots(spots);
+//        log.info("통합 경로 id들: {}", integratedIds);
+//        integratedIds = integratedRouteRepository.findIntegratedRoute(integratedIds);
+//        log.info("최종적인 통합 경로 id들: {}", integratedIds)
+//       ;
+        List<Long> integratedIds = routeRepository.findIntegratedRouteIdsBySpotsAndLikes(spots);
 
         return getRecommendRoutesByIntegratedRoutes(integratedIds, isMember, member);
     }
@@ -354,7 +387,7 @@ public class RouteService {
     public void addOrRemoveLike(Long integratedId) {
         Member member = getMemberFromJwt();
 
-        //TODO: 가장 최신의 객체 가져오기
+        //TODO: 가장 최신의 객체 가져오기(스케줄러 필요)
         LikeBookmarkPeriod likeBookmarkPeriod = likeBookPeriodRepository.findByIntegratedRouteId(integratedId)
                 .orElseThrow(() -> {
                     throw new CustomException(ErrorCode.NO_LIKE_BOOKMARK_PERIOD);
@@ -388,7 +421,7 @@ public class RouteService {
     public void addOrRemoveBookmark(Long integratedId) {
         Member member = getMemberFromJwt();
 
-        //TODO: 가장 최신의 객체 가져오기
+        //TODO: 가장 최신의 객체 가져오기(스케줄러 필요)
         LikeBookmarkPeriod likeBookmarkPeriod = likeBookPeriodRepository.findByIntegratedRouteId(integratedId)
                 .orElseThrow(() -> {
                     throw new CustomException(ErrorCode.NO_LIKE_BOOKMARK_PERIOD);

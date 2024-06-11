@@ -12,5 +12,5 @@ public interface CustomSpotRepository {
 //    List<Spot> findSpotsByRouteIdInOrder(Long routeId);
     List<Spot> findSpotsByIntegratedRouteIdInOrder(Long integratedRouteId);
     SpotRegionDTO getRegionByspotId(Long spotId);
-    Object findSpotsByIntegratedRouteIds(List<Long> integratedIds);
+    Map<Long, List<Spot>> findSpotsByIntegratedRouteIds(List<Long> integratedIds);
 }

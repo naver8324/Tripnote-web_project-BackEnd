@@ -73,22 +73,10 @@ public class RouteController implements SwaggerRouteController {
     @Override
     @MemberRole
     @GetMapping("/member/routes/region")
-    public ResponseEntity<List<RecommendedRouteResponseDTO>> getRegion(@RequestParam("region") String region/*,
-                                                                       @RequestParam(value = "hashtags", required = false) List<Long> hashtags*/) {
-//        if (hashtags == null) hashtags = Collections.emptyList();
+    public ResponseEntity<List<RecommendedRouteResponseDTO>> getRegion(@RequestParam("region") String region) {
         Region status = Region.englishToRegion(region);
         return ResponseEntity.ok(routeService.getRegionMember(status));
-        /*
-        아래 값 5개
-        {
-           route id
-          여행지 리스트 - 순서 정리된 채로, (id, region 필요 없음)
-          likes: (해당 경로의 좋아요 개수)
-          likedAt(경로 조회한 유저가 좋아요 눌렀는지)
-          markedAt(경로 조회한 유저가 북마크를 눌렀는지)
-        }
 
-         */
     }
 
     /**
@@ -99,7 +87,6 @@ public class RouteController implements SwaggerRouteController {
     public ResponseEntity<List<RecommendedRouteResponseDTO>> getRegionGuest(@RequestParam("region") String region) {
         Region status = Region.englishToRegion(region);
         return ResponseEntity.ok(routeService.getRegionGuest(status));
-
     }
 
     // 여행지 선택했을 때, 해당 여행지를 지나가는 경로 id 리턴
@@ -115,17 +102,6 @@ public class RouteController implements SwaggerRouteController {
     @GetMapping("/member/routes/spot")
     public ResponseEntity<List<RecommendedRouteResponseDTO>> getRoutesThroughSpot(@RequestParam(value = "spots", required = false) List<Long> spots) {
         return ResponseEntity.ok(routeService.getRoutesThroughSpotMember(spots));
-        /*
-        아래 값 5개
-        {
-           route id
-          여행지 리스트 - 순서 정리된 채로, (id, region 필요 없음)
-          likes: (해당 경로의 좋아요 개수)
-          likedAt(경로 조회한 유저가 좋아요 눌렀는지)
-          markedAt(경로 조회한 유저가 북마크를 눌렀는지)
-        }
-
-         */
     }
 
     /**
@@ -140,7 +116,6 @@ public class RouteController implements SwaggerRouteController {
 
     /**
      * 특정 경로의 여행지 리스트 반환
-     * 게시글에서 경로 보여줄 때 사용?? -> 통합경로가 아닌, route id 입력받기
      *
      * @param routeId 여행지 리스트가 궁금한 경로의 id
      * @return 특정 경로의 여행지 리스트
@@ -149,12 +124,6 @@ public class RouteController implements SwaggerRouteController {
     @GetMapping("/member/routes/{routeId}/spots")
     public ResponseEntity<List<SpotResponseDTO>> getSpots(@PathVariable("routeId") Long routeId) {
         return ResponseEntity.ok(routeService.getSpots(routeId));
-    /*
-    {
-      spots: [스팟 이름, 경도 , 위도]
-    }
-
-     */
     }
 
 
