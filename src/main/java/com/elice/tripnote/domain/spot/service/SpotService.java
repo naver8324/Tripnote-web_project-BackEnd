@@ -44,7 +44,12 @@ public class SpotService {
 //        }
 //        return spot;
 //    }
-    public List<Spot> getByRegionAndLocation(Region region, String location) {
+    public List<Spot> getSpotsByRegionAndLocation(Region region, String location){
+        if(region==Region.ALL)
+            return getByALLRegionAndLocation(location);
+        return getByRegionAndLocation(region, location);
+    }
+    private List<Spot> getByRegionAndLocation(Region region, String location) {
         Spot spot = spotRepository.findSpotByRegionAndLocation(region,location);
         List<Spot> spots = spotRepository.findByRegionAndLocation(region,location);
         List<Spot> spotList = new ArrayList<>();
@@ -98,7 +103,60 @@ public class SpotService {
         return result;
     }
 
+    private List<Spot> getByALLRegionAndLocation(String location) {
+        Spot spot = spotRepository.findSpotAllRegionAndLocation(location);
+        List<Spot> spots = spotRepository.findSpotAllRegionAndLocations(location);
+        List<Spot> spotList = new ArrayList<>();
+        if(spot !=null){
+            spotList.add(spot);
+        }
+        if(!spotList.isEmpty()){
+            for(Spot s : spots){
+                if(spotList.contains(s))
+                    continue;
+                spotList.add(s);
+            }
+        }
+
+        if(spotList.size() >5){
+            return spotList;
+        }
+        List<SpotDTO> spotDTOs = searchByLocations(location);
+        for (SpotDTO spotDTO : spotDTOs) {
+            if(spotList.size() >5)
+                break;
+            if (spotDTO.getImageUrl() == null) {
+                log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
+                throw new CustomException(ErrorCode.NO_LANDMARK);
+            }
+            Spot newSpot = dtoToEntity(spotDTO);
+            Spot existingSpot = spotRepository.findByLocation(newSpot.getLocation()).orElse(null);
+            if (existingSpot == null) {
+                Spot temp = spotRepository.save(newSpot);
+                spotList.add(temp);
+            } else {
+                if(spotList.contains(existingSpot))
+                    continue;
+                spotList.add(existingSpot);
+            }
+        }
+        if (spotList.isEmpty()) {
+            log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
+            throw new CustomException(ErrorCode.NO_LANDMARK);
+        }
+
+        return spotList;
+    }
+
+
     public List<Spot> getByRegion(Region region) {
+        if (region == Region.ALL) {
+            List<Spot> allSpots = spotRepository.findAll();
+            return allSpots.stream()
+                    .limit(5)  // 상위 5개만 가져옴
+                    .collect(Collectors.toList());
+            //return spotRepository.findTop5ByOrderByLocationAsc();
+        }
         //Region validRegion = Region.fromString(region);
         List<Spot> list = getSpotsByRegion(region, 0, 5);
         if (list.isEmpty()){
