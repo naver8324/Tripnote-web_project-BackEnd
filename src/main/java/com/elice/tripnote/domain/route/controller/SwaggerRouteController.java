@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -52,6 +53,17 @@ public interface SwaggerRouteController {
             @ApiResponse(responseCode = "404", description = "해당 member ID 또는Route Id가 존재하지 않습니다."),
     })
     ResponseEntity<Long> deleteRoute(Long routeId);
+
+    @Operation(summary = "경로 정보 조회", description = "특정 경로의 경로 정보를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "routeId", required = true, description = "조회하려는 경로의 id")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    content = {@Content(schema = @Schema(implementation = Long.class))}),
+            @ApiResponse(responseCode = "404", description = "해당 member ID 또는Route Id가 존재하지 않습니다."),
+    })
+    ResponseEntity<RecommendedRouteResponseDTO> getRouteInfo(@PathVariable("routeId") Long routeId);
 
     @Operation(summary = "지역 기반 경로 추천(회원)", description = "지역을 입력받아서 해당 지역 안을 여행하는 경로 id 리스트를 반환받을 수 있다.")
     @ApiResponses(value = {
