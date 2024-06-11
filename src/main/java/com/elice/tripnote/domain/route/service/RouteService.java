@@ -16,6 +16,7 @@ import com.elice.tripnote.domain.link.uuidhashtag.entity.UUIDHashtag;
 import com.elice.tripnote.domain.link.uuidhashtag.repository.UUIDHashtagRepository;
 import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
+import com.elice.tripnote.domain.post.repository.PostRepository;
 import com.elice.tripnote.domain.route.entity.*;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.route.status.RouteStatus;
@@ -56,6 +57,7 @@ public class RouteService {
     private final SpotRepository spotRepository;
     private final BookmarkRepository bookmarkRepository;
     private final LikePostRepository likePostRepository;
+    private final PostRepository postRepository;
 
     @Transactional
     public Long save(SaveRequestDTO requestDto) {
@@ -77,7 +79,7 @@ public class RouteService {
                     return integratedRouteRepository.save(newRoute);
                 });
 
-        if(region != Region.MIXED_REGION ){
+        if (region != Region.MIXED_REGION) {
             Long regionHashtagId = (long) region.getIndex();
             log.info("지역 해시태그 아이디: {}", regionHashtagId);
             if (routeRepository.findHashtagIdIdCity(regionHashtagId)) requestDto.getHashtagIds().add(regionHashtagId);
@@ -236,6 +238,23 @@ public class RouteService {
 
         integratedRouteRepository.deleteIntegratedRoute(route.getIntegratedRoute().getId());
         return route.getId();
+    }
+
+    public RecommendedRouteResponseDTO getRouteInfo(Long routeId) {
+        Member member = getMemberFromJwt();
+        // routeid를 이용해서 통합 경로 id 가져오기
+        Route route = routeRepository.findById(routeId).orElseThrow(() -> {
+            throw new CustomException(ErrorCode.NO_ROUTE);
+        });
+        Long integratedRouteId = route.getIntegratedRoute().getId();
+        return RecommendedRouteResponseDTO.builder()
+                .integratedRouteId(integratedRouteId)
+                .postId(postRepository.findByRouteId(routeId).getId())
+                .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(integratedRouteId)) // 해당 route에 맞는 spots구하기
+                .likes(routeRepository.getIntegratedRouteLikeCounts(integratedRouteId)) // 해당 경로의 좋아요 수
+                .likedAt(likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedRouteId)) // 자신이 이 경로에 좋아요를 눌렀는지
+                .markedAt(bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedRouteId)) // 자신이 이 경로에 북마크를 눌렀는지
+                .build();
     }
 
     public List<RecommendedRouteResponseDTO> getRegionMember(Region region) {

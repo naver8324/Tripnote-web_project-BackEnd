@@ -58,6 +58,11 @@ public class RouteController implements SwaggerRouteController {
     public ResponseEntity<Long> deleteRoute(@PathVariable("routeId") Long routeId) {
         return ResponseEntity.ok(routeService.deleteRoute(routeId));
     }
+    @MemberRole
+    @GetMapping("/member/routes/{routeId}")
+    public ResponseEntity<RecommendedRouteResponseDTO> getRouteInfo(@PathVariable("routeId") Long routeId) {
+        return ResponseEntity.ok(routeService.getRouteInfo(routeId));
+    }
 
     /**
      * 특정 지역 내에서 여행하는 경로(지역 기반 경로 추천) (회원)
