@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -37,17 +36,7 @@ public interface SwaggerPostController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "게시글 조회에 성공하였습니다.",  content = @Content(mediaType = "application/json")),
     })
-    @Parameters(value = {
-            @Parameter(name="order", description = "정렬 방식, likes라고 쓰면 좋아요순, 아닌 경우는 모두 최신순", example = "likes"),
-            @Parameter(name="page", description = "페이지 번호", example = "5"),
-            @Parameter(name="size", description = "페이지 크기", example = "30")
-    })
-
-
-    ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@Valid List<HashtagRequestDTO> hashtagRequestDTOList,
-                                                            @RequestParam(name="order", required = false, defaultValue = "") String order,
-                                                            @RequestParam(name="page", defaultValue = "1") int page,
-                                                            @RequestParam(name="size", defaultValue = "30") int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@Valid List<HashtagRequestDTO> hashtagRequestDTOList, PageRequestDTO pageRequestDTO);
 
 
     @Operation(summary="게시글 조회 - 유저", description= "유저가 자기가 쓴 모든 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
