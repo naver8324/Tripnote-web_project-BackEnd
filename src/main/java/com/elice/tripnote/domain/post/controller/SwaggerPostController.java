@@ -6,6 +6,7 @@ import com.elice.tripnote.domain.post.entity.PostDetailResponseDTO;
 import com.elice.tripnote.domain.post.entity.PostRequestDTO;
 import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.global.entity.ErrorResponse;
+import com.elice.tripnote.global.entity.PageRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -28,13 +30,7 @@ public interface SwaggerPostController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "게시글 조회에 성공하였습니다.",  content = @Content(mediaType = "application/json")),
     })
-    @Parameters(value = {
-            @Parameter(name="order", description = "정렬 방식, likes라고 쓰면 좋아요순, 아닌 경우는 모두 최신순", example = "likes"),
-            @Parameter(name="page", description = "페이지 번호", example = "5"),
-            @Parameter(name="size", description = "페이지 크기", example = "30")
-    })
-
-    ResponseEntity<Page<PostResponseDTO>> getPosts(String order, int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPosts(@Valid PageRequestDTO pageRequestDTO);
 
 
     @Operation(summary="해쉬태그 게시글 조회  - 모두", description= "특정 해쉬태그들을 가진 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
@@ -47,7 +43,11 @@ public interface SwaggerPostController {
             @Parameter(name="size", description = "페이지 크기", example = "30")
     })
 
-    ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@Valid List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size);
+
+    ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@Valid List<HashtagRequestDTO> hashtagRequestDTOList,
+                                                            @RequestParam(name="order", required = false, defaultValue = "") String order,
+                                                            @RequestParam(name="page", defaultValue = "1") int page,
+                                                            @RequestParam(name="size", defaultValue = "30") int size);
 
 
     @Operation(summary="게시글 조회 - 유저", description= "유저가 자기가 쓴 모든 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
@@ -55,12 +55,7 @@ public interface SwaggerPostController {
             @ApiResponse(responseCode = "200", description = "게시글 조회에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.",  content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @Parameters(value = {
-            @Parameter(name="page", description = "페이지 번호", example = "5"),
-            @Parameter(name="size", description = "페이지 크기", example = "30")
-    })
-
-    ResponseEntity<Page<PostResponseDTO>> getPostsByMemberId(int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsByMemberId(@Valid PageRequestDTO pageRequestDTO);
 
 
     @Operation(summary="좋아요 게시글 조회 - 유저", description= "유저가 좋아요한 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
@@ -68,11 +63,7 @@ public interface SwaggerPostController {
             @ApiResponse(responseCode = "200", description = "게시글 조회에 성공하였습니다.",  content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.",  content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @Parameters(value = {
-            @Parameter(name="page", description = "페이지 번호", example = "5"),
-            @Parameter(name="size", description = "페이지 크기", example = "30")
-    })
-    ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithLikes(int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithLikes(@Valid PageRequestDTO pageRequestDTO);
 
 
     @Operation(summary="북마크 게시글 조회 - 유저", description= "유저가 북마크한 게시글을 조회할 때 사용하는 api입니다. 삭제되지 않은 게시글만 조회 가능합니다.")
@@ -80,11 +71,7 @@ public interface SwaggerPostController {
             @ApiResponse(responseCode = "200", description = "게시글 조회에 성공하였습니다.",  content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당하는 유저는 존재하지 않습니다.",  content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @Parameters(value = {
-            @Parameter(name="page", description = "페이지 번호", example = "5"),
-            @Parameter(name="size", description = "페이지 크기", example = "30")
-    })
-    ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithMark(int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithMark(@Valid PageRequestDTO pageRequestDTO);
 
 
     @Operation(summary="게시글 조회 - 관리자", description= "게시글을 조회할 때 사용하는 api입니다. 삭제된 게시글도 조회 가능합니다. 게시글 번호가 있으면 특정 게시글을 쓴 멤버의 게시글을 전체 조회합니다. 닉네임이 있으면 닉네임이 일치하는 게시글을 가져옵니다.")
@@ -93,12 +80,10 @@ public interface SwaggerPostController {
     })
     @Parameters(value = {
             @Parameter(name="postId", description = "게시글 번호", example = "1"),
-            @Parameter(name="nickname", description = "유저 닉네임", example = "user1"),
-            @Parameter(name="page", description = "페이지 번호", example = "5"),
-            @Parameter(name="size", description = "페이지 크기", example = "30")
+            @Parameter(name="nickname", description = "유저 닉네임", example = "user1")
     })
 
-    ResponseEntity<Page<PostResponseDTO>> getPostsAll(Long postId, String nickname, int page, int size);
+    ResponseEntity<Page<PostResponseDTO>> getPostsAll(Long postId, String nickname, @Valid PageRequestDTO pageRequestDTO);
 
 
 
