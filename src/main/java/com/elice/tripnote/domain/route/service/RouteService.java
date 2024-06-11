@@ -37,10 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,9 +77,11 @@ public class RouteService {
                     return integratedRouteRepository.save(newRoute);
                 });
 
-        Long regionHashtagId = (long) region.getIndex();
-        log.info("지역 해시태그 아이디: {}", regionHashtagId);
-        if (routeRepository.findHashtagIdIdCity(regionHashtagId)) requestDto.getHashtagIds().add(regionHashtagId);
+        if(region != Region.MIXED_REGION ){
+            Long regionHashtagId = (long) region.getIndex();
+            log.info("지역 해시태그 아이디: {}", regionHashtagId);
+            if (routeRepository.findHashtagIdIdCity(regionHashtagId)) requestDto.getHashtagIds().add(regionHashtagId);
+        }
 
 //        if (requestDto.getHashtagIds() != null) {
         // 통합 경로 객체(IntegratedRoute) 이용해서 uuid_hashtag 객체 생성
@@ -194,27 +193,27 @@ public class RouteService {
         }
     }
 
-    @Transactional
-    public Long setRouteToStatus(Long routeId) {
-        Member member = getMemberFromJwt();
-
-        Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> {
-                    throw new CustomException(ErrorCode.NO_ROUTE);
-                });
-
-        // 해당 경로가 자신의 것이 맞는지 확인
-        if (member.getId() != route.getMember().getId())
-            throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_STATUS);
-        if (route.getRouteStatus() == RouteStatus.PUBLIC) route.updateStatus(RouteStatus.PRIVATE);
-        else if (route.getRouteStatus() == RouteStatus.PRIVATE) route.updateStatus(RouteStatus.PUBLIC);
-        else {
-            log.warn("삭제된 경로입니다. 경로 번호: {}", routeId);
-            throw new CustomException(ErrorCode.NO_ROUTE);
-        }
-
-        return routeRepository.save(route).getId();
-    }
+//    @Transactional
+//    public Long setRouteToStatus(Long routeId) {
+//        Member member = getMemberFromJwt();
+//
+//        Route route = routeRepository.findById(routeId)
+//                .orElseThrow(() -> {
+//                    throw new CustomException(ErrorCode.NO_ROUTE);
+//                });
+//
+//        // 해당 경로가 자신의 것이 맞는지 확인
+//        if (member.getId() != route.getMember().getId())
+//            throw new CustomException(ErrorCode.UNAUTHORIZED_UPDATE_STATUS);
+//        if (route.getRouteStatus() == RouteStatus.PUBLIC) route.updateStatus(RouteStatus.PRIVATE);
+//        else if (route.getRouteStatus() == RouteStatus.PRIVATE) route.updateStatus(RouteStatus.PUBLIC);
+//        else {
+//            log.warn("삭제된 경로입니다. 경로 번호: {}", routeId);
+//            throw new CustomException(ErrorCode.NO_ROUTE);
+//        }
+//
+//        return routeRepository.save(route).getId();
+//    }
 
     @Transactional
     public Long deleteRoute(Long routeId) {
@@ -249,42 +248,44 @@ public class RouteService {
     }
 
     private List<RecommendedRouteResponseDTO> getRegion(Region region, boolean isMember, Member member) {
-
         List<Long> integratedIds = integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region);
+        return getRecommendRoutesByIntegratedRoutes(integratedIds, isMember, member);
+    }
+
+    private List<RecommendedRouteResponseDTO> getRecommendRoutesByIntegratedRoutes(List<Long> integratedRouteIds, boolean isMember, Member member) {
+        //        List<Long> integratedIds = integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region);
+//
+//        // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
+//        List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
+//
+//        for (Long irId : integratedIds) {
+//            recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
+//                    .integratedRouteId(irId)
+//                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId))
+//                    .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
+//                    .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
+//                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
+//                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
+//                    .build());
+//        }
+
+        Map<Long, Long> postIdMap = routeRepository.findPostIdsByIntegratedRouteIds(integratedRouteIds); //이거 다시 확인 요망
+        Map<Long, List<Spot>> spotsMap = spotRepository.findSpotsByIntegratedRouteIds(integratedRouteIds);
+        Map<Long, Integer> likeCountsMap = routeRepository.getIntegratedRouteLikeCounts(integratedRouteIds);
 
         // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
         List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
 
-        for (Long irId : integratedIds) {
+        for (Long irId : integratedRouteIds) {
             recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
                     .integratedRouteId(irId)
-                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId))
-                    .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
-                    .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
+                    .postId(postIdMap.get(irId))
+                    .spots(spotsMap.getOrDefault(irId, List.of())) // 해당 route에 맞는 spots 구하기
+                    .likes(likeCountsMap.getOrDefault(irId, 0)) // 해당 경로의 좋아요 수
                     .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
                     .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
                     .build());
         }
-
-        /*
-        select count(id)
-        from like_post lp
-        where lp.member_id=:memberId
-            and lp.route_id=:routeId
-         */
-
-
-        /*
-        아래 값 5개
-        {
-          route id
-          여행지 리스트 - 순서 정리된 채로, (id, region 필요 없음)
-          likes: (해당 경로의 좋아요 개수)
-          likedAt(경로 조회한 유저가 좋아요 눌렀는지)
-          markedAt(경로 조회한 유저가 북마크를 눌렀는지)
-        }
-
-         */
         return recommendedRouteResponseDTOS;
     }
 
@@ -321,21 +322,7 @@ public class RouteService {
         log.info("통합 경로 id들: {}", integratedIds);
         integratedIds = integratedRouteRepository.findIntegratedRoute(integratedIds);
 
-        // 자신은 해당 route에 좋아요 눌렀는지, 북마크 눌렀는지 여부
-        List<RecommendedRouteResponseDTO> recommendedRouteResponseDTOS = new ArrayList<>();
-        for (Long irId : integratedIds) {
-            log.info("현재 통합 경로 id -> {}", irId);
-            recommendedRouteResponseDTOS.add(RecommendedRouteResponseDTO.builder()
-                    .integratedRouteId(irId)
-                    .postId(routeRepository.findPostIdByIntegratedRouteId(irId)) // 해당 통합 경로 id 중 가장 작은 route id
-                    .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(irId)) // 해당 route에 맞는 spots구하기
-                    .likes(routeRepository.getIntegratedRouteLikeCounts(irId)) // 해당 경로의 좋아요 수
-                    .likedAt(isMember ? likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 좋아요를 눌렀는지
-                    .markedAt(isMember ? bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), irId) : false) // 자신이 이 경로에 북마크를 눌렀는지
-                    .build());
-        }
-        return recommendedRouteResponseDTOS;
-
+        return getRecommendRoutesByIntegratedRoutes(integratedIds, isMember, member);
     }
 
     @Transactional

@@ -12,6 +12,7 @@ import com.elice.tripnote.domain.spot.dto.SpotDTO;
 import com.elice.tripnote.domain.spot.entity.QSpot;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -230,6 +232,24 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
         return likeCount != null ? likeCount : 0;
     }
 
+    public Map<Long, Integer> getIntegratedRouteLikeCounts(List<Long> integratedIds) {
+        //특정 통합 경로의 좋아요 개수 구하기
+        List<Tuple> results = query
+                .select(integratedRoute.id, likePost.id.count().intValue())
+                .from(route)
+                .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
+                .join(likePost).on(likePost.route.id.eq(route.id))
+                .where(integratedRoute.id.in(integratedIds))
+                .groupBy(integratedRoute.id)
+                .fetch();
+
+        return results.stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(integratedRoute.id),
+                        tuple -> tuple.get(likePost.id.count().intValue())
+                ));
+    }
+
     public Route getMinRouteByIntegratedId(Long integratedId) {
         JPQLQuery<Long> minRouteId = JPAExpressions
                 .select(route.id.min())
@@ -259,6 +279,24 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .where(route.id.eq(minRouteId))
                 .fetchOne();
 
+    }
+
+    public Map<Long, Long> findPostIdsByIntegratedRouteIds(List<Long> integratedIds) {
+        List<Tuple> results = query
+                .select(post.route.integratedRoute.id, post.id, likePost.id.count().as("likeCount"))
+                .from(post)
+                .join(likePost).on(likePost.post.id.eq(post.id))
+                .where(post.route.integratedRoute.id.in(integratedIds)
+                        .and(post.route.routeStatus.eq(RouteStatus.PUBLIC)))
+                .groupBy(post.route.integratedRoute.id, post.id)
+                .orderBy(post.route.integratedRoute.id.asc(), likePost.id.count().desc())
+                .fetch();
+
+        Map<Long, Long> resultMap = new LinkedHashMap<>(); // 순서가 유지되도록 LinkedHashMap 사용
+
+        results.forEach(tuple -> resultMap.put(tuple.get(post.route.integratedRoute.id), tuple.get(post.id)));
+
+        return resultMap;
     }
 
     public boolean findHashtagIdIdCity(Long hashtagId){
