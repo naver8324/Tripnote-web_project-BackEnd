@@ -1,6 +1,7 @@
 package com.elice.tripnote.domain.route.controller;
 
 import com.elice.tripnote.domain.route.entity.*;
+import com.elice.tripnote.global.entity.PageRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -10,11 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -135,7 +133,7 @@ public interface SwaggerRouteController {
 //    @Parameters(value = {
 //            @Parameter(name = "page", required = false, description = "원하는 page, 첫번째 페이지를 보고 싶다면 0을 입력하면 된다.\n값을 넣지 않는다면 기본값으로 0이 들어간다"),
 //    })
-    ResponseEntity<Page<RouteDetailResponseDTO>> findBookmark(Pageable pageable);
+    ResponseEntity<Page<RouteDetailResponseDTO>> findBookmark(PageRequestDTO pageRequestDTO);
     @Operation(summary = "내가 생성한 경로 리스트", description = "자신이 만든 경로를 반환합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
@@ -144,7 +142,7 @@ public interface SwaggerRouteController {
 //    @Parameters(value = {
 //            @Parameter(name = "page", required = false, description = "원하는 page, 첫번째 페이지를 보고 싶다면 0을 입력하면 된다.\n값을 넣지 않는다면 기본값으로 0이 들어간다"),
 //    })
-    ResponseEntity<Page<RouteDetailResponseDTO>> findMyRoute(Pageable pageable);
+    ResponseEntity<Page<RouteDetailResponseDTO>> findMyRoute(PageRequestDTO pageRequestDTO);
 
     @Operation(summary = "경로 이름 수정", description = "경로의 이름을 수정합니다.")
     @ApiResponses(value = {
