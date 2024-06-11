@@ -137,8 +137,13 @@ public class MemberController implements SwaggerMemberController {
     @Override
     @MemberRole
     @GetMapping("/kakao/logout")
-    public ResponseEntity<Long> kakaoLogout(@RequestParam String kakaoToken, HttpServletResponse response) throws IOException {
+    public ResponseEntity<Long> kakaoLogout(@RequestParam String kakaoToken, HttpServletResponse response, HttpServletRequest request) throws IOException {
         Long kakaoId = kakaoService.logout(kakaoToken);
+
+        // access token 만료시키기
+        String token = jwtUtil.validateAndReturnToken(request.getHeader("Authorization"));
+        log.info("to = "+token);
+        tokenBlacklistService.addTokenToBlacklist(token);
 
         log.info("로그아웃이 완료되었습니다.");
         return ResponseEntity.ok(kakaoId);

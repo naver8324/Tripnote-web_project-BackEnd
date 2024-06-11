@@ -23,6 +23,7 @@ import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.constant.Region;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.domain.spot.repository.SpotRepository;
+import com.elice.tripnote.global.entity.PageRequestDTO;
 import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -418,15 +420,15 @@ public class RouteService {
         routeRepository.save(route);
     }
 
-    public Page<RouteDetailResponseDTO> findBookmark(Pageable pageable) {
+    public Page<RouteDetailResponseDTO> findBookmark(PageRequestDTO pageRequestDTO) {
         Member member = getMemberFromJwt();
-        return routeRepository.findRouteDetailsByMemberId(member.getId(), pageable, true);
+        return routeRepository.findRouteDetailsByMemberId(member.getId(), pageRequestDTO, true);
     }
 
 
-    public Page<RouteDetailResponseDTO> findMyRoute(Pageable pageable) {
+    public Page<RouteDetailResponseDTO> findMyRoute(PageRequestDTO pageRequestDTO) {
         Member member = getMemberFromJwt();
-        return routeRepository.findRouteDetailsByMemberId(member.getId(), pageable, false);
+        return routeRepository.findRouteDetailsByMemberId(member.getId(), pageRequestDTO, false);
     }
 
     private Member getMemberFromJwt() {

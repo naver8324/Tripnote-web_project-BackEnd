@@ -26,6 +26,7 @@ public class Comment extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @Column(columnDefinition = "TINYINT(1)")
     @ColumnDefault("false")
     private boolean isDeleted;
 

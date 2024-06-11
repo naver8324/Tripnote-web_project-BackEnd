@@ -8,11 +8,11 @@ import com.elice.tripnote.domain.link.routespot.entity.QRouteSpot;
 import com.elice.tripnote.domain.post.entity.QPost;
 import com.elice.tripnote.domain.route.entity.*;
 import com.elice.tripnote.domain.route.status.RouteStatus;
-import com.elice.tripnote.domain.spot.dto.SpotDTO;
 import com.elice.tripnote.domain.spot.entity.QSpot;
 import com.elice.tripnote.domain.spot.entity.Spot;
-import com.querydsl.core.QueryResults;
+import com.elice.tripnote.global.entity.PageRequestDTO;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -20,6 +20,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -73,43 +74,9 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .fetch();
     }
 
-//    public Page<RouteIdNameDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable) {
-//
-//        return query
-//                .select(Projections.constructor(RouteIdNameDTO.class,
-//                        route.id,
-//                        route.name
-//                ))
-//                .from(route)
-//                .join(bookmark).on(bookmark.route.id.eq(route.id))
-//                .where(bookmark.member.id.eq(memberId))
-//                .orderBy(route.id.asc())
-//                .fetch();
-//
-//
-//    }
-
-//    public Page<RouteIdNameResponseDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable) {
-//
-//        QueryResults<RouteIdNameResponseDTO> queryResults = query
-//                .select(Projections.constructor(RouteIdNameResponseDTO.class,
-//                        route.id,
-//                        route.name
-//                ))
-//                .from(route)
-//                .join(bookmark).on(bookmark.route.id.eq(route.id))
-//                .where(bookmark.member.id.eq(memberId)
-//                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
-//                .orderBy(route.id.asc())
-//                .offset(pageable.getOffset())
-//                .limit(pageable.getPageSize())
-//                .orderBy(route.id.desc())
-//                .fetchResults();
-//
-//        return new PageImpl<>(queryResults.getResults(), pageable, queryResults.getTotal());
-//    }
-
-    public Page<RouteDetailResponseDTO> findRouteDetailsByMemberId(Long memberId, Pageable pageable, boolean isBookmark) {
+    public Page<RouteDetailResponseDTO> findRouteDetailsByMemberId(Long memberId, PageRequestDTO pageRequestDTO, boolean isBookmark) {
+        PageRequest pageRequest = PageRequest.of(pageRequestDTO.getPage()-1, pageRequestDTO.getSize());
+//        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(pageRequestDTO.getOrder(), pageRequestDTO.isAsc());
 
         List<RouteIdNameResponseDTO> routes;
         if(isBookmark){
@@ -122,8 +89,8 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                     .join(bookmark).on(bookmark.route.id.eq(route.id))
                     .where(bookmark.member.id.eq(memberId)
                             .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
-                    .offset(pageable.getOffset())
-                    .limit(pageable.getPageSize())
+                    .offset(pageRequest.getOffset())
+                    .limit(pageRequest.getPageSize())
                     .orderBy(route.id.asc())
                     .fetch();
         } else{
@@ -135,8 +102,8 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                     .from(route)
                     .where(route.member.id.eq(memberId)
                             .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
-                    .offset(pageable.getOffset())
-                    .limit(pageable.getPageSize())
+                    .offset(pageRequest.getOffset())
+                    .limit(pageRequest.getPageSize())
                     .orderBy(route.id.asc())
                     .fetch();
         }
@@ -206,7 +173,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                         .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
                 .fetchOne();
 
-        return new PageImpl<>(routeDetails, pageable, total);
+        return new PageImpl<>(routeDetails, pageRequest, total);
     }
 
 
@@ -307,5 +274,6 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .where(hashtag.id.eq(hashtagId))
                 .fetchOne();
     }
+
 
 }

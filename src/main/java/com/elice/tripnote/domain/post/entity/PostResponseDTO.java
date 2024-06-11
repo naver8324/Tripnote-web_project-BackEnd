@@ -2,6 +2,7 @@ package com.elice.tripnote.domain.post.entity;
 
 
 import com.elice.tripnote.domain.hashtag.entity.HashtagResponseDTO;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -33,6 +34,7 @@ public class PostResponseDTO{
 
 
     @NotBlank
+    @Max(20)
     private String nickname;
 
 
