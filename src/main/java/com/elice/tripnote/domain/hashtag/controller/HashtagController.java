@@ -60,7 +60,7 @@ public class HashtagController implements SwaggerHashtagController{
     @Override
     @AdminRole
     @PatchMapping("/admin/hashtags/update/{id}")
-    public ResponseEntity<HashtagResponseDTO> updateHashtag(@PathVariable Long id, @RequestBody HashtagRequestDTO hashtagRequestDTO){
+    public ResponseEntity<HashtagResponseDTO> updateHashtag(@PathVariable(name = "id") Long id, @RequestBody HashtagRequestDTO hashtagRequestDTO){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(hashtagService.updateHashtag(id, hashtagRequestDTO));
@@ -69,7 +69,7 @@ public class HashtagController implements SwaggerHashtagController{
     //해시태그 삭제
     @AdminRole
     @DeleteMapping("/admin/hashtags/delete/{id}")
-    public ResponseEntity<Void> deleteHashtag(@PathVariable Long id){
+    public ResponseEntity<Void> deleteHashtag(@PathVariable(name = "id") Long id){
 
         boolean isDelete = hashtagService.deleteHashtag(id);
 
