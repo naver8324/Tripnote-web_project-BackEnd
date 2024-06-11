@@ -189,7 +189,7 @@ public class SpotService {
 
         if (searchLocalRes.getTotal() > 0) {
             var localItemOptional = searchLocalRes.getItems().stream()
-                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류"))
+                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류") || localItem.getCategory().contains("문화,예술") || localItem.getCategory().contains("쇼핑,유통"))
                     .findFirst();
             if(!localItemOptional.isPresent()){
                 throw new CustomException(ErrorCode.NO_LANDMARK);
@@ -252,7 +252,7 @@ public class SpotService {
 
         if (searchLocalRes.getTotal() > 0) {
             var filteredItems = searchLocalRes.getItems().stream()
-                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류"))
+                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류") || localItem.getCategory().contains("문화,예술") ||  localItem.getCategory().contains("쇼핑,유통"))
                     .limit(5)
                     .collect(Collectors.toList());
 
