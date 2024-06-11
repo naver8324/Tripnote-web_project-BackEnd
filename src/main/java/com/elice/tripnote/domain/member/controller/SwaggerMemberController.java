@@ -108,7 +108,7 @@ public interface SwaggerMemberController {
    @Parameters({
            @Parameter(name = "code", description = "카카오에서 받아오는 코드를 넣어주세요.")
    })
-   ResponseEntity<TokenResponseDTO> kakaoLogin(@RequestParam String code);
+   ResponseEntity<TokenResponseDTO> kakaoLogin(@RequestParam(name = "code") String code);
 
     @Operation(summary = "회원 로그아웃 API")
     @ApiResponses({
@@ -117,7 +117,7 @@ public interface SwaggerMemberController {
     @Parameters({
             @Parameter(name = "kakaoToken", description = "카카오에서 받아온 토큰을 넣어주세요.")
     })
-    ResponseEntity<Long> kakaoLogout(@RequestParam String kakaoToken, HttpServletResponse response, HttpServletRequest request) throws IOException;
+    ResponseEntity<Long> kakaoLogout(@RequestParam(name = "kakaoToken") String kakaoToken, HttpServletResponse response, HttpServletRequest request) throws IOException;
 
     @Operation(summary = "회원 탈퇴 API")
     @ApiResponses({

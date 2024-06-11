@@ -55,6 +55,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             log.info("loginId : " + loginId);
             log.info("password : " + password);
 
+            // password 가 null 값이 소셜 로그인 된 이메일로 구분
+            if (password == null){
+                throw new CustomException(ErrorCode.SOCIAL_LOGIN_EMAIL);
+            }
+
             // 스프링 시큐리티에서 email(또는 loginId)과 password를 검증하기 위해서는 token에 담아야 함
             UsernamePasswordAuthenticationToken authToken;
 

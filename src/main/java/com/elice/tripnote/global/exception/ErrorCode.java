@@ -17,6 +17,7 @@ public enum ErrorCode {
     NOT_VALID_ROUTE(HttpStatus.BAD_REQUEST, "이 경로는 비공개, 삭제되었거나 유저의 경로가 아닙니다."),
     REDIRECT_URI_MISMATCH(HttpStatus.BAD_REQUEST, "인가 코드 요청시 사용한 redirect uri와 액세스 토큰 요청 시 사용한 redirect uri가 다릅니다."),
     TOO_MANY_ARGUMENT(HttpStatus.BAD_REQUEST, "너무 많은 인자 값을 넣었습니다."),
+    SOCIAL_LOGIN_EMAIL(HttpStatus.BAD_REQUEST, "소셜로 로그인 된 이메일입니다."),
 
     // 401
     UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "접근 권한이 없습니다."),
