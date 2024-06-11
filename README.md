@@ -102,6 +102,7 @@ $ npm run dev
   <img src="https://img.shields.io/badge/amazonrds-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white"> 
   <img src="https://img.shields.io/badge/swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=white"> 
   <img src="https://img.shields.io/badge/oauth-85EA2D?style=for-the-badge&logo=oauth&logoColor=white"> 
+  <img src="https://img.shields.io/badge/redis-FF4438?style=for-the-badge&logo=redis&logoColor=white"> 
 
 
 - 프론트엔드
