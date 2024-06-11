@@ -28,7 +28,7 @@ public class SpotController implements SwaggerSpotController{
         if(location ==null)
             return ResponseEntity.ok(spotService.getByRegion(region));
             //return ResponseEntity.ok(spotService.getByRegionAndLocation(region,location));
-        return ResponseEntity.ok(spotService.getByRegionAndLocation(region,location));
+        return ResponseEntity.ok(spotService.getSpotsByRegionAndLocation(region,location));
 
     }
 

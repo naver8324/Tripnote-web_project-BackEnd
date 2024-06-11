@@ -11,7 +11,7 @@ public enum Region {
     GYEONGGI("경기도", "gyeonggi"), GANGWON("강원특별자치도", "gangwon"),
     CHUNGBUK("충청북도", "chungbuk"), CHUNGNAM("충청남도", "chungnam"), GYEONGBUK("경상북도", "gyeongbuk"),
     GYEONGNAM("경상남도", "gyeongnam"), JEONBUK("전라북도", "jeonbuk"), JEONNAM("전라남도", "jeonnam"),
-    JEJU("제주특별자치도", "jeju");
+    JEJU("제주특별자치도", "jeju"), ALL("전지역", "all");
 
     private String name;
     private String englishName;
