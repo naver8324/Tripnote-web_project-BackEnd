@@ -2,12 +2,10 @@ package com.elice.tripnote.domain.spot.entity;
 
 import com.elice.tripnote.domain.spot.constant.Region;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "spot", uniqueConstraints = {@UniqueConstraint(columnNames = {"region", "location"})})
