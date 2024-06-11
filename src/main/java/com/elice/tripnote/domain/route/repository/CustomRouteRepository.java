@@ -15,6 +15,7 @@ public interface CustomRouteRepository {
     int getIntegratedRouteLikeCounts(Long integratedRouteId);
     Route getMinRouteByIntegratedId(Long integratedId);
     Long findPostIdByIntegratedRouteId(Long integratedId);
+    boolean findHashtagIdIdCity(Long hashtagId);
 
 
 }

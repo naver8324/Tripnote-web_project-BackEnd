@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class RecommendedRouteResponseDTO {
-    private Long routeId;
+    private Long integratedRouteId;
     private Long postId;
     private List<Spot> spots; //순서 정리된 채로, (id, region 필요 없음)
     private int likes;

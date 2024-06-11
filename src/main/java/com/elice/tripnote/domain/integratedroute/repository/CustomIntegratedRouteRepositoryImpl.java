@@ -3,6 +3,8 @@ package com.elice.tripnote.domain.integratedroute.repository;
 import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
 import com.elice.tripnote.domain.likebookmarkperiod.entity.QLikeBookmarkPeriod;
 import com.elice.tripnote.domain.link.uuidhashtag.entity.QUUIDHashtag;
+import com.elice.tripnote.domain.route.entity.QRoute;
+import com.elice.tripnote.domain.route.status.RouteStatus;
 import com.elice.tripnote.domain.spot.constant.Region;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -20,6 +22,7 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
     private final QIntegratedRoute ir = new QIntegratedRoute("ir");
     private final QUUIDHashtag uh = new QUUIDHashtag("uh");
     private final QLikeBookmarkPeriod lbp = new QLikeBookmarkPeriod("lbp");
+    private final QRoute r = new QRoute("r");
 
     public List<Long> findTopIntegratedRoutesByRegionAndHashtags(Region region/*, List<Long> hashtags*/) {
         JPQLQuery<LocalDateTime> maxStartAtSubquery = JPAExpressions.select(lbp.startAt.max())
@@ -37,6 +40,7 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
                 .where(ir.region.eq(region)
                         //        .and(uh.hashtag.id.in(hashtags))
                         .and(lbp.startAt.eq(maxStartAtSubquery)) // 최대 startAt 값과 비교
+                        .and(ir.routeStatus.eq(RouteStatus.PUBLIC))
                 )
                 .groupBy(ir.id)
                 //.having(uh.hashtag.id.countDistinct().eq((long) hashtags.size()))
@@ -123,12 +127,35 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
                 .where(
                         ir.id.in(integratedIds)
                                 .and(lbp.startAt.eq(maxStartAtSubquery))
+                                .and(ir.routeStatus.eq(RouteStatus.PUBLIC))
                 )
                 .groupBy(ir.id)
                 .orderBy(lbp.likes.sum().desc())
                 .limit(3)
                 .fetch();
 
+
+    }
+
+    public void deleteIntegratedRoute(Long integratedRouteId){
+        //route 삭제 처리되고, 해당 route의 integrated route에 가서
+        // 연관된 public route가 1개 이상인지 확인
+        // 만약 0개라면 delete 처리하기
+
+        long count = query
+                .select(ir.id)
+                .from(ir)
+                .join(r).on(r.integratedRoute.id.eq(ir.id))
+                .where(ir.id.eq(integratedRouteId)
+                        .and(r.routeStatus.eq(RouteStatus.PUBLIC)))
+                .fetchCount();
+
+        if(count < 1){
+            query.update(ir)
+                    .set(ir.routeStatus, RouteStatus.DELETE)
+                    .where(ir.id.eq(integratedRouteId))
+                    .execute();
+        }
 
     }
 }

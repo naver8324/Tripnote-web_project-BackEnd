@@ -32,17 +32,17 @@ public class RouteController implements SwaggerRouteController {
     }
 
 
-    /**
-     * 경로 공개/비공개
-     *
-     * @return 공개 여부를 변경하려는 경로 id
-     */
-    @Override
-    @MemberRole
-    @PatchMapping("/member/routes/status/{routeId}")
-    public ResponseEntity<Long> setRouteStatus(@PathVariable("routeId") Long routeId) {
-        return ResponseEntity.ok(routeService.setRouteToStatus(routeId));
-    }
+//    /**
+//     * 경로 공개/비공개
+//     *
+//     * @return 공개 여부를 변경하려는 경로 id
+//     */
+//    @Override
+//    @MemberRole
+//    @PatchMapping("/member/routes/status/{routeId}")
+//    public ResponseEntity<Long> setRouteStatus(@PathVariable("routeId") Long routeId) {
+//        return ResponseEntity.ok(routeService.setRouteToStatus(routeId));
+//    }
 
     /**
      * 경로 삭제
@@ -68,7 +68,6 @@ public class RouteController implements SwaggerRouteController {
     @GetMapping("/member/routes/region")
     public ResponseEntity<List<RecommendedRouteResponseDTO>> getRegion(@RequestParam("region") String region/*,
                                                                        @RequestParam(value = "hashtags", required = false) List<Long> hashtags*/) {
-        //TODO: 경로에 해시태그 안붙이기
 //        if (hashtags == null) hashtags = Collections.emptyList();
         Region status = Region.englishToRegion(region);
         return ResponseEntity.ok(routeService.getRegionMember(status));
@@ -155,12 +154,12 @@ public class RouteController implements SwaggerRouteController {
     /**
      * 좋아요 추가/취소
      *
-     * @param integratedId 좋아요하고 싶은 경로 ic
+     * @param integratedRouteId 좋아요하고 싶은 경로 ic
      */
     @MemberRole
-    @PatchMapping("/member/routes/like/{routeId}")
-    public ResponseEntity<Void> addOrRemoveLike(@PathVariable("routeId") Long integratedId) {
-        routeService.addOrRemoveLike(integratedId);
+    @PatchMapping("/member/routes/like/{integratedRouteId}")
+    public ResponseEntity<Void> addOrRemoveLike(@PathVariable("integratedRouteId") Long integratedRouteId) {
+        routeService.addOrRemoveLike(integratedRouteId);
         return ResponseEntity.ok().build();
     }
 
@@ -168,12 +167,12 @@ public class RouteController implements SwaggerRouteController {
     /**
      * 북마크 추가/취소
      *
-     * @param integratedId 북마크하고 싶은 경로 id
+     * @param integratedRouteId 북마크하고 싶은 경로 id
      */
     @MemberRole
     @PatchMapping("/member/routes/bookmark/{routeId}")
-    public ResponseEntity<Void> addOrRemoveBookmark(@PathVariable("routeId") Long integratedId) {
-        routeService.addOrRemoveBookmark(integratedId);
+    public ResponseEntity<Void> addOrRemoveBookmark(@PathVariable("integratedRouteId") Long integratedRouteId) {
+        routeService.addOrRemoveBookmark(integratedRouteId);
         return ResponseEntity.ok().build();
     }
 

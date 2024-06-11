@@ -38,12 +38,6 @@ public class MemberController implements SwaggerMemberController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-//    @Override
-//    @GetMapping
-//    public ResponseEntity<MemberResponseDTO> getMemberByEmail(@RequestParam String email) {
-//        return ResponseEntity.ok().body(memberService.getMemberResponseDTOByEmail(email));
-//    }
-
     // 이메일 중복검사 (이메일이 이미 존재하면 true 반환, 사용가능하면 false 반환)
     @Override
     @GetMapping("/check-email")
@@ -143,8 +137,13 @@ public class MemberController implements SwaggerMemberController {
     @Override
     @MemberRole
     @GetMapping("/kakao/logout")
-    public ResponseEntity<Long> kakaoLogout(@RequestParam String kakaoToken, HttpServletResponse response) throws IOException {
+    public ResponseEntity<Long> kakaoLogout(@RequestParam String kakaoToken, HttpServletResponse response, HttpServletRequest request) throws IOException {
         Long kakaoId = kakaoService.logout(kakaoToken);
+
+        // access token 만료시키기
+        String token = jwtUtil.validateAndReturnToken(request.getHeader("Authorization"));
+        log.info("to = "+token);
+        tokenBlacklistService.addTokenToBlacklist(token);
 
         log.info("로그아웃이 완료되었습니다.");
         return ResponseEntity.ok(kakaoId);

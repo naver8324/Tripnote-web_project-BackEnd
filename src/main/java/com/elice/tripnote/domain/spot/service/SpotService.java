@@ -44,32 +44,59 @@ public class SpotService {
 //        }
 //        return spot;
 //    }
-public List<Spot> getByRegionAndLocation(Region region, String location) {
-    List<SpotDTO> list = searchByLocations(location);
-    List<Spot> spotList = new ArrayList<>();
-    for(SpotDTO spotDTO : list){
-        if(spotDTO.getImageUrl()==null){
+    public List<Spot> getByRegionAndLocation(Region region, String location) {
+        Spot spot = spotRepository.findSpotByRegionAndLocation(region,location);
+        List<Spot> spots = spotRepository.findByRegionAndLocation(region,location);
+        List<Spot> spotList = new ArrayList<>();
+        if(spot !=null){
+            spotList.add(spot);
+        }
+        if(!spotList.isEmpty()){
+            for(Spot s : spots){
+                if(spotList.contains(s))
+                    continue;
+                if (region.equals(s.getRegion())) {
+                    spotList.add(s);
+                }
+            }
+        }
+
+        if(spotList.size() >5){
+            return spotList;
+        }
+        List<SpotDTO> spotDTOs = searchByLocations(location);
+        for (SpotDTO spotDTO : spotDTOs) {
+            if(spotList.size() >5)
+                break;
+            if (spotDTO.getImageUrl() == null) {
+                log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
+                throw new CustomException(ErrorCode.NO_LANDMARK);
+            }
+            if (!region.equals(spotDTO.getRegion())) {
+                continue; // Skip this Spot and move to the next one
+            }
+            Spot newSpot = dtoToEntity(spotDTO);
+            Spot existingSpot = spotRepository.findByLocation(newSpot.getLocation()).orElse(null);
+            if (existingSpot == null) {
+                Spot temp = spotRepository.save(newSpot);
+                spotList.add(temp);
+            } else {
+                if(spotList.contains(existingSpot))
+                    continue;
+                spotList.add(existingSpot);
+            }
+        }
+        if (spotList.isEmpty()) {
             log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
             throw new CustomException(ErrorCode.NO_LANDMARK);
         }
-        if(!region.equals(spotDTO.getRegion())){
-            continue; // Skip this Spot and move to the next one
+        List<Spot> result = new ArrayList<>();
+        for(Spot s : spotList){
+            if(s.getRegion().equals(region))
+                result.add(s);
         }
-        Spot newSpot = dtoToEntity(spotDTO);
-        Spot existingSpot = spotRepository.findByLocation(newSpot.getLocation()).orElse(null);
-        if(existingSpot == null){
-            Spot temp = spotRepository.save(newSpot);
-            spotList.add(temp);
-        } else {
-            spotList.add(existingSpot);
-        }
+        return result;
     }
-    if(spotList.isEmpty()){
-        log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
-        throw new CustomException(ErrorCode.NO_LANDMARK);
-    }
-    return spotList;
-}
 
     public List<Spot> getByRegion(Region region) {
         //Region validRegion = Region.fromString(region);
@@ -156,12 +183,13 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
     @Transactional
     public SpotDTO search(String query) {
         var searchLocalReq = new SearchLocalReq();
-        searchLocalReq.setQuery(query);
+        //searchLocalReq.setQuery(query);
+        searchLocalReq.setNewQuery(query);
         var searchLocalRes = naverClient.searchLocal(searchLocalReq);
 
         if (searchLocalRes.getTotal() > 0) {
             var localItemOptional = searchLocalRes.getItems().stream()
-                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명"))
+                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류"))
                     .findFirst();
             if(!localItemOptional.isPresent()){
                 throw new CustomException(ErrorCode.NO_LANDMARK);
@@ -176,9 +204,11 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
                 var imageItem = searchImageRes.getItems().stream().findFirst().get();
 
                 var result = new SpotDTO();
-                var location = localItem.getTitle().replaceAll("<b>","");
-                location = location.replaceAll("</b>","");
+                var location = localItem.getTitle();
+               // location = localItem.getTitle().replaceAll("<b>","");
+               // location = location.replaceAll("</b>","");
                 //result.setLocation(localItem.getTitle());
+                location=location.trim();
                 result.setLocation(location);
                 result.setImageUrl(imageItem.getLink());
                 result.setRegion(Region.fromString(localItem.getAddress().split(" ")[0])); // 변경
@@ -216,12 +246,13 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
     @Transactional
     public List<SpotDTO> searchByLocations(String query) {
         var searchLocalReq = new SearchLocalReq();
-        searchLocalReq.setQuery(query);
+        //searchLocalReq.setQuery(query);
+        searchLocalReq.setNewQuery(query);
         var searchLocalRes = naverClient.searchLocal(searchLocalReq);
 
         if (searchLocalRes.getTotal() > 0) {
             var filteredItems = searchLocalRes.getItems().stream()
-                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명"))
+                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류"))
                     .limit(5)
                     .collect(Collectors.toList());
 
@@ -243,6 +274,7 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
                         }
                         var location = localItem.getTitle().replaceAll("<b>", "");
                         location = location.replaceAll("</b>", "");
+                        location=location.trim();
                         return new SpotDTO(
                                 location,
                                 imageUrl,
@@ -256,122 +288,5 @@ public List<Spot> getByRegionAndLocation(Region region, String location) {
         }
         return List.of();
     }
-
-//    @Transactional
-//    public Spot add(SpotRequestDTO spotRequestDTO) {
-//        Region region = Region.fromString(spotRequestDTO.getRegion());
-//        Spot spot = Spot.builder()
-//                .location(spotRequestDTO.getLocation())
-//                .imageUrl(spotRequestDTO.getImageUrl())
-//                .region(region)
-//                .address(spotRequestDTO.getAddress())
-//                .lat(spotRequestDTO.getLat())
-//                .lng(spotRequestDTO.getLng())
-//                .build();
-//        return spotRepository.save(spot);
-//    }
-
-//    @Transactional
-//    public List<SpotDTO> searchByLocations(String query) {
-//        var searchLocalReq = new SearchLocalReq();
-//        searchLocalReq.setQuery(query);
-//        var searchLocalRes = naverClient.searchLocal(searchLocalReq);
-//        if (searchLocalRes.getTotal() > 0) {
-//            return searchLocalRes.getItems().stream()
-//                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명"))
-//                    .limit(5)
-//                    .map(localItem -> {
-//                        var imageQuery = localItem.getTitle().replaceAll("<[^>]*>", "");
-//                        var searchImageReq = new SearchImageReq();
-//                        searchImageReq.setQuery(imageQuery);
-//                        var searchImageRes = naverClient.searchImage(searchImageReq);
-//
-//                        String imageUrl = null;
-//                        if (searchImageRes.getTotal() > 0) {
-//                            var imageItem = searchImageRes.getItems().stream().findFirst().get();
-//                            imageUrl = imageItem.getLink();
-//                        }
-//                        var location = localItem.getTitle().replaceAll("<b>","");
-//                        location = location.replaceAll("</b>","");
-//                        return new SpotDTO(
-//                                location,
-//                                imageUrl,
-//                                Region.fromString(localItem.getAddress().split(" ")[0]), // 변경
-//                                localItem.getAddress(),
-//                                localItem.getMapy()/ 1E7,
-//                                localItem.getMapx()/ 1E7
-//
-//                        );
-//                    })
-//                    .collect(Collectors.toList());
-//        }
-//        return List.of();
-//    }
-
-
-
-
-//    @Transactional
-//    public Spot searchByLocation(String location) {
-//        return spotRepository.findByLocation(location).orElse(null);
-//    }
-
-//    @Transactional
-//    public ResponseEntity<String> getAddressByCoordinates(double lat, double lng) {
-//        ReverseGeocodeRes res = naverClient.reverseGeocode(lat, lng);
-//        if (res != null && !res.getResults().isEmpty()) {
-//            ReverseGeocodeRes.Result result = res.getResults().get(0);
-//            String address = result.getRegion().getArea1().getName() + " " +
-//                    result.getRegion().getArea2().getName() + " " +
-//                    result.getRegion().getArea3().getName();
-//
-//            if (result.getLand() != null) {
-//                address += " " + result.getLand().getNumber1();
-//                if (result.getLand().getNumber2() != null && !result.getLand().getNumber2().isEmpty()) {
-//                    address += "-" + result.getLand().getNumber2();
-//                }
-//            }
-//
-//            return new ResponseEntity<>(address, HttpStatus.OK);
-//        } else {
-//            return new ResponseEntity<>("Address not found", HttpStatus.NOT_FOUND);
-//        }
-//    }
-//
-//    @Transactional
-//    public List<Spot> getSpotsByLocation(String location, int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        if (location == null || location.isEmpty()) {
-//            return spotRepository.findAll(pageable).getContent();
-//        } else {
-//            return spotRepository.findByLocation(location, pageable).getContent(); // 변경
-//        }
-//    }
-
-
-
-//    public ResponseEntity<Spot> getByLocation(String location) {
-//        if (searchByLocation(location) != null) {
-//            return ResponseEntity.ok().body(searchByLocation(location));
-//        }
-//        SpotDTO result = search(location);
-//        if (result == null) {
-//            throw new LandmarkNotFoundException();
-//        }
-//        Spot spot = dtoToEntity(result);
-//        return ResponseEntity.ok().body(spot);
-//    }
-
-//    public ResponseEntity<List<Spot>> getSpotsByLocations(String location) {
-//        if (searchByLocations(location).isEmpty()) {
-//            return ResponseEntity.notFound().build();
-//        }
-//        List<SpotDTO> temp = searchByLocations(location);
-//        List<Spot> list = new ArrayList<>();
-//        for (SpotDTO s : temp)
-//            list.add(dtoToEntity(s));
-//        return ResponseEntity.ok().body(list);
-//    }
 
 }

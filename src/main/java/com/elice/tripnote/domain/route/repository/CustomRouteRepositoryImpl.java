@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.route.repository;
 
+import com.elice.tripnote.domain.hashtag.entity.QHashtag;
 import com.elice.tripnote.domain.integratedroute.entity.QIntegratedRoute;
 import com.elice.tripnote.domain.link.bookmark.entity.QBookmark;
 import com.elice.tripnote.domain.link.likePost.entity.QLikePost;
@@ -34,6 +35,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     private final QBookmark bookmark = new QBookmark("b");
     private final QIntegratedRoute integratedRoute = new QIntegratedRoute("ir");
     private final QPost post = new QPost("p");
+    private final QHashtag hashtag = new QHashtag("h");
 
     public List<Long> findIntegratedRouteIdsBySpots(List<Long> spots) {
         /*
@@ -95,10 +97,12 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 ))
                 .from(route)
                 .join(bookmark).on(bookmark.route.id.eq(route.id))
-                .where(bookmark.member.id.eq(memberId))
+                .where(bookmark.member.id.eq(memberId)
+                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
                 .orderBy(orderSpecifier)
                 .offset(pageRequest.getOffset())
                 .limit(pageRequest.getPageSize())
+                .orderBy(route.id.desc())
                 .fetchResults();
 
         return new PageImpl<>(queryResults.getResults(), pageRequest, queryResults.getTotal());
@@ -124,10 +128,11 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                         route.name
                 ))
                 .from(route)
-                .where(route.member.id.eq(memberId))
+                .where(route.member.id.eq(memberId)
+                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
                 .offset(pageRequest.getOffset())
                 .limit(pageRequest.getPageSize())
-                .orderBy(orderSpecifier)
+                .orderBy(route.id.desc())
                 .fetchResults();
 
         return new PageImpl<>(results.getResults(), pageRequest, results.getTotal());
@@ -186,11 +191,22 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
 
     }
 
+
     //이후 정렬 조건이 필요하다면 추가하세요!
     private OrderSpecifier<?> getOrderSpecifier(String order, boolean asc) {   //정렬 방식 정하기
 
         // 기본값 설정
         return asc ? route.id.asc() : route.id.desc();  //order에 값이 없을 경우 id를 기준으로 정렬
+    }
+
+    public boolean findHashtagIdIdCity(Long hashtagId){
+
+        return query
+                .select(hashtag.isCity)
+                .from(hashtag)
+                .where(hashtag.id.eq(hashtagId))
+                .fetchOne();
+
     }
 
 }

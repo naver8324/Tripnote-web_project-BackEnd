@@ -61,12 +61,10 @@ public class KakaoService {
 
         // 리다이렉트 URL 생성
         URI redirectUrl = uriBuilder.build().toUri();
-        //System.out.println("------------------------- kakao api IN2 -------------------------");
 
         //// 302 리다이렉트 응답 생성
         //HttpHeaders httpHeaders = new HttpHeaders();
         //httpHeaders.setLocation(redirectUrl);
-        //System.out.println("------------------------- kakao api IN3 -------------------------");
         return redirectUrl.toString();
     }
 
