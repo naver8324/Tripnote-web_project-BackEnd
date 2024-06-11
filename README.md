@@ -129,12 +129,6 @@ $ npm run dev
 
 ---
 
-## 와이어프레임
-  <img alt ="wireFrame" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/figma.jpg">
-
----
-
-
 
 
 
