@@ -83,7 +83,7 @@ public class RouteService {
                 });
 
         if (region != Region.MIXED_REGION) {
-            Long regionHashtagId = (long) region.getIndex();
+            Long regionHashtagId = (long) region.getIndex() + 1;
             log.info("지역 해시태그 아이디: {}", regionHashtagId);
             if (routeRepository.findHashtagIdIdCity(regionHashtagId)) requestDto.getHashtagIds().add(regionHashtagId);
         }
