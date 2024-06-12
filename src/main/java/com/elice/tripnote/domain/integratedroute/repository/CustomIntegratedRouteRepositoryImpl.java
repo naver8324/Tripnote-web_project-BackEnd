@@ -25,16 +25,17 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
     private final QRoute r = new QRoute("r");
 
     public List<Long> findTopIntegratedRoutesByRegionAndHashtags(Region region) {
-        JPQLQuery<LocalDateTime> maxStartAtSubquery = JPAExpressions.select(lbp.startAt.max())
-                .from(lbp)
-                .where(lbp.integratedRoute.id.eq(ir.id));
+        //할거면 해당 integrated route id의 가장 최근 statAt 값을 구해야함. 리스트로
+//        JPQLQuery<LocalDateTime> maxStartAtSubquery = JPAExpressions.select(lbp.startAt.max())
+//                .from(lbp)
+//                .where(lbp.integratedRoute.id.eq(ir.id));
 
         return query
                 .select(ir.id)
                 .from(ir)
                 .join(lbp).on(ir.id.eq(lbp.integratedRoute.id))
                 .where(ir.region.eq(region)
-                        .and(lbp.startAt.eq(maxStartAtSubquery)) // 최대 startAt 값과 비교
+//                        .and(lbp.startAt.eq(maxStartAtSubquery)) // 최대 startAt 값과 비교
                         .and(ir.routeStatus.eq(RouteStatus.PUBLIC))
                 )
                 .groupBy(ir.id)
