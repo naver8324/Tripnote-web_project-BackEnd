@@ -275,6 +275,7 @@ public class RouteService {
 
     private List<RecommendedRouteResponseDTO> getRegion(Region region, boolean isMember, Member member) {
         List<Long> integratedIds = integratedRouteRepository.findTopIntegratedRoutesByRegionAndHashtags(region);
+        log.info("리턴되는 통합 경로 id: {}", integratedIds);
         return getRecommendRoutesByIntegratedRoutes(integratedIds, isMember, member);
     }
 
@@ -379,6 +380,7 @@ public class RouteService {
 //        log.info("최종적인 통합 경로 id들: {}", integratedIds)
 //       ;
         List<Long> integratedIds = routeRepository.findIntegratedRouteIdsBySpotsAndLikes(spots);
+        log.info("리턴되는 통합 경로 id: {}", integratedIds);
 
         return getRecommendRoutesByIntegratedRoutes(integratedIds, isMember, member);
     }
@@ -432,7 +434,7 @@ public class RouteService {
         //member랑 route 조인해서 검색 후, 없다면 아래 로직 있다면 없애기
         if (routeRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedId, false)) {
             log.info("통합경로 {}번 경로의 북마크를 취소하겠습니다.", integratedId);
-            likeBookmarkPeriod.updateLike(likeBookmarkPeriod.getBookmark() - 1);
+            likeBookmarkPeriod.updateBookmark(likeBookmarkPeriod.getBookmark() - 1);
             routeRepository.deleteByMemberIdAndIntegratedRouteId(member.getId(), integratedId, false);
             return;
         }
@@ -448,7 +450,7 @@ public class RouteService {
                 .build();
         bookmarkRepository.save(bookmark);
 
-        likeBookmarkPeriod.updateLike(likeBookmarkPeriod.getBookmark() + 1);
+        likeBookmarkPeriod.updateBookmark(likeBookmarkPeriod.getBookmark() + 1);
         likeBookPeriodRepository.save(likeBookmarkPeriod);
     }
 

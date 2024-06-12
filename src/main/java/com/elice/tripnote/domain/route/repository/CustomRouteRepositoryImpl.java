@@ -15,7 +15,6 @@ import com.elice.tripnote.global.entity.PageRequestDTO;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -25,11 +24,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
 
 @Repository
 @RequiredArgsConstructor
@@ -252,9 +251,6 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     }
 
     public List<RecommendedRouteResponseDTO> getRecommendedRoutes(List<Long> integratedRouteIds, Long memberId, boolean isMember) {
-//        System.out.println("매개변수로 들어오는 integratedRouteIds" + integratedRouteIds);
-        // 필요한 데이터를 한 번의 쿼리로 가져오기
-        NumberPath<Long> likesPath = Expressions.numberPath(Long.class, "likes");
 
         List<Tuple> results = query
                 .select(
@@ -300,8 +296,6 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .leftJoin(spot).on(routeSpot.spot.id.eq(spot.id))
                 .where(integratedRoute.id.in(integratedRouteIds))
                 .groupBy(integratedRoute.id, post.id, spot.id, spot.location, spot.imageUrl, spot.region, spot.address, spot.lat, spot.lng)
-//                .orderBy(post.id.count().desc())
-                .orderBy(likesPath.desc())
                 .fetch();
 
 
@@ -335,7 +329,11 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                         })
                 ));
 
-        return new ArrayList<>(resultMap.values());
+        // integratedRouteIds 순서에 맞춰 정렬된 List 생성
+        return integratedRouteIds.stream()
+                .filter(resultMap::containsKey)  // 매핑된 값만 필터링
+                .map(resultMap::get)  // 순서대로 매핑된 값 가져오기
+                .collect(Collectors.toList());
     }
 
     public List<Long> findIntegratedRouteIdsBySpotsAndLikes(List<Long> spots) {
