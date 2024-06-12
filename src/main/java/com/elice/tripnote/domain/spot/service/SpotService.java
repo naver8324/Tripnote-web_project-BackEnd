@@ -66,12 +66,12 @@ public class SpotService {
             }
         }
 
-        if(spotList.size() >5){
+        if(spotList.size() >10){
             return spotList;
         }
         List<SpotDTO> spotDTOs = searchByLocations(location);
         for (SpotDTO spotDTO : spotDTOs) {
-            if(spotList.size() >5)
+            if(spotList.size() >10)
                 break;
             if (spotDTO.getImageUrl() == null) {
                 log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
@@ -247,7 +247,7 @@ public class SpotService {
 
         if (searchLocalRes.getTotal() > 0) {
             var localItemOptional = searchLocalRes.getItems().stream()
-                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류") || localItem.getCategory().contains("문화,예술") || localItem.getCategory().contains("쇼핑,유통"))
+                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류") || localItem.getCategory().contains("문화,예술") ||  localItem.getCategory().contains("쇼핑,유통") || localItem.getCategory().contains("카페,디저트") || localItem.getCategory().contains("가구,인테리어") || localItem.getCategory().contains("숙박"))
                     .findFirst();
             if(!localItemOptional.isPresent()){
                 throw new CustomException(ErrorCode.NO_LANDMARK);
@@ -304,14 +304,14 @@ public class SpotService {
     @Transactional
     public List<SpotDTO> searchByLocations(String query) {
         var searchLocalReq = new SearchLocalReq();
-        //searchLocalReq.setQuery(query);
-        searchLocalReq.setNewQuery(query);
+        searchLocalReq.setQuery(query);
+        //searchLocalReq.setNewQuery(query);
         var searchLocalRes = naverClient.searchLocal(searchLocalReq);
 
         if (searchLocalRes.getTotal() > 0) {
             var filteredItems = searchLocalRes.getItems().stream()
-                    .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류") || localItem.getCategory().contains("문화,예술") ||  localItem.getCategory().contains("쇼핑,유통"))
-                    .limit(5)
+                   // .filter(localItem -> localItem.getCategory().contains("여행,명소") || localItem.getCategory().contains("음식점") || localItem.getCategory().contains("한식") || localItem.getCategory().contains("술집") || localItem.getCategory().contains("지명") || localItem.getCategory().contains("육류") || localItem.getCategory().contains("문화,예술") ||  localItem.getCategory().contains("쇼핑,유통") || localItem.getCategory().contains("카페,디저트") || localItem.getCategory().contains("가구,인테리어") || localItem.getCategory().contains("숙박"))
+                    .limit(10)
                     .collect(Collectors.toList());
 
             if (filteredItems.isEmpty()) {
