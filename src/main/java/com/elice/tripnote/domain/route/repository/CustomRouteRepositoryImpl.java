@@ -87,11 +87,13 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
         if(isBookmark){
             routes = query
                     .select(Projections.constructor(RouteIdNameResponseDTO.class,
+                            post.id,
                             route.id,
                             route.name
                     ))
                     .from(route)
                     .join(bookmark).on(bookmark.route.id.eq(route.id))
+                    .leftJoin(post).on(post.route.id.eq(route.id))
                     .where(bookmark.member.id.eq(memberId)
                             .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
                     .offset(pageRequest.getOffset())
@@ -101,10 +103,12 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
         } else{
             routes = query
                     .select(Projections.constructor(RouteIdNameResponseDTO.class,
+                            post.id,
                             route.id,
                             route.name
                     ))
                     .from(route)
+                    .leftJoin(post).on(post.route.id.eq(route.id))
                     .where(route.member.id.eq(memberId)
                             .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
                     .offset(pageRequest.getOffset())
@@ -112,19 +116,6 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                     .orderBy(route.id.asc())
                     .fetch();
         }
-        //먼저 멤버 id로 자신이 쓴 경로 아이디 알아내기
-//        List<RouteIdNameResponseDTO> routes = query
-//                .select(Projections.constructor(RouteIdNameResponseDTO.class,
-//                        route.id,
-//                        route.name
-//                ))
-//                .from(route)
-//                .where(route.member.id.eq(memberId)
-//                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
-//                .offset(pageable.getOffset())
-//                .limit(pageable.getPageSize())
-//                .orderBy(route.id.asc())
-//                .fetch();
 
         // 그 중 경로 id만 리스트로 추출
         List<Long> routeIds = routes.stream()
@@ -155,6 +146,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
         List<RouteDetailResponseDTO> routeDetails = routes.stream()
                 .map(routeDto -> new RouteDetailResponseDTO(
                         routeDto.getRouteId(),
+                        routeDto.getPostId(),
                         routeDto.getName(),
                         routeIdToSpotsMap.getOrDefault(routeDto.getRouteId(), List.of())
                                 .stream()
