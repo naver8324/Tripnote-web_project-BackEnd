@@ -332,6 +332,7 @@ public class SpotService {
                         }
                         var location = localItem.getTitle().replaceAll("<b>", "");
                         location = location.replaceAll("</b>", "");
+                        location = location.replaceAll("&amp;", "&");
                         location=location.trim();
                         return new SpotDTO(
                                 location,
