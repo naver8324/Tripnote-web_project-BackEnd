@@ -15,6 +15,7 @@ import com.elice.tripnote.global.entity.PageRequestDTO;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -253,6 +254,8 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     public List<RecommendedRouteResponseDTO> getRecommendedRoutes(List<Long> integratedRouteIds, Long memberId, boolean isMember) {
 //        System.out.println("매개변수로 들어오는 integratedRouteIds" + integratedRouteIds);
         // 필요한 데이터를 한 번의 쿼리로 가져오기
+        NumberPath<Long> likesPath = Expressions.numberPath(Long.class, "likes");
+
         List<Tuple> results = query
                 .select(
                         integratedRoute.id,
@@ -297,7 +300,8 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .leftJoin(spot).on(routeSpot.spot.id.eq(spot.id))
                 .where(integratedRoute.id.in(integratedRouteIds))
                 .groupBy(integratedRoute.id, post.id, spot.id, spot.location, spot.imageUrl, spot.region, spot.address, spot.lat, spot.lng)
-                .orderBy(post.id.count().desc())
+//                .orderBy(post.id.count().desc())
+                .orderBy(likesPath.desc())
                 .fetch();
 
 
@@ -343,10 +347,10 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .groupBy(route.id, route.integratedRoute.id)
                 .having(routeSpot.spot.id.countDistinct().eq((long) spots.size()));
 
-        JPQLQuery<LocalDateTime> maxStartAtSubquery = JPAExpressions.select(lbp.startAt.max())
-                .from(lbp)
-                .where(lbp.integratedRoute.id.eq(integratedRoute.id))
-                .groupBy(lbp.integratedRoute.id);
+//        JPQLQuery<LocalDateTime> maxStartAtSubquery = JPAExpressions.select(lbp.startAt.max())
+//                .from(lbp)
+//                .where(lbp.integratedRoute.id.eq(integratedRoute.id))
+//                .groupBy(lbp.integratedRoute.id);
 
 
         return query
@@ -355,7 +359,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .join(lbp).on(integratedRoute.id.eq(lbp.integratedRoute.id))
                 .where(
                         integratedRoute.id.in(integratedRouteQuery)
-                                .and(lbp.startAt.eq(maxStartAtSubquery))
+//                                .and(lbp.startAt.eq(maxStartAtSubquery))
                                 .and(integratedRoute.routeStatus.eq(RouteStatus.PUBLIC))
                 )
                 .groupBy(integratedRoute.id)
