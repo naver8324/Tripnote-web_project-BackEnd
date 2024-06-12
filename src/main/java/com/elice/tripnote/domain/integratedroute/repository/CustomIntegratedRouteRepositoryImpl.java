@@ -43,31 +43,6 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
                 .fetch();
     }
 
-
-
-    public List<Long> findIntegratedRoute(List<Long> integratedIds) {
-        JPQLQuery<LocalDateTime> maxStartAtSubquery = JPAExpressions.select(lbp.startAt.max())
-                .from(lbp)
-                .where(lbp.integratedRoute.id.eq(ir.id))
-                .groupBy(lbp.integratedRoute.id);
-
-        return query
-                .select(ir.id)
-                .from(ir)
-                .join(lbp).on(ir.id.eq(lbp.integratedRoute.id))
-                .where(
-                        ir.id.in(integratedIds)
-                                .and(lbp.startAt.eq(maxStartAtSubquery))
-                                .and(ir.routeStatus.eq(RouteStatus.PUBLIC))
-                )
-                .groupBy(ir.id)
-                .orderBy(lbp.likes.sum().desc())
-                .limit(3)
-                .fetch();
-
-
-    }
-
     public void deleteIntegratedRoute(Long integratedRouteId){
         //route 삭제 처리되고, 해당 route의 integrated route에 가서
         // 연관된 public route가 1개 이상인지 확인
