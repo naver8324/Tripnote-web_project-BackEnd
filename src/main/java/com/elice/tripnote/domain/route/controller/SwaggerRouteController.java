@@ -71,8 +71,8 @@ public interface SwaggerRouteController {
             @ApiResponse(responseCode = "404", description = "해당 member ID가 존재하지 않습니다."),
     })
     @Parameters(value = {
-            @Parameter(name = "region", required = true, description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 'mix'라는 값을 넣으면 된다.\n" +
-                    "특별시/광역시 - seoul(서울), incheon(인천), busan(부산), daegu(대구), ulsan(울산), gwangju(광주), daejeon(대전), sejong(세종시)\n" +
+            @Parameter(name = "region", required = true, description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 'mix'라는 값을 넣으면 된다." + "\n" +
+                    "특별시/광역시 - seoul(서울), incheon(인천), busan(부산), daegu(대구), ulsan(울산), gwangju(광주), daejeon(대전), sejong(세종시)" + "\n" +
                     "도단위 - gyeonggi(경기도), gangwon(강원도), chungbuk(충청북도), chungnam(충청남도), gyeongbuk(경상북도), gyeongnam(경상남도), jeonbuk(전라북도), jeonnam(전라남도), jeju(제주도)"
             ),
     })
@@ -83,8 +83,8 @@ public interface SwaggerRouteController {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
     })
     @Parameters(value = {
-            @Parameter(name = "region", required = true, description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 'mix'라는 값을 넣으면 된다.\n" +
-                    "특별시/광역시 - seoul(서울), incheon(인천), busan(부산), daegu(대구), ulsan(울산), gwangju(광주), daejeon(대전), sejong(세종시)\n" +
+            @Parameter(name = "region", required = true, description = "지역\n만약, 여러 지역에 걸쳐있는 경로를 찾고 싶다면 'mix'라는 값을 넣으면 된다." + "\n" +
+                    "특별시/광역시 - seoul(서울), incheon(인천), busan(부산), daegu(대구), ulsan(울산), gwangju(광주), daejeon(대전), sejong(세종시)" + "\n" +
                     "도단위 - gyeonggi(경기도), gangwon(강원도), chungbuk(충청북도), chungnam(충청남도), gyeongbuk(경상북도), gyeongnam(경상남도), jeonbuk(전라북도), jeonnam(전라남도), jeju(제주도)"
             ),
     })
@@ -119,7 +119,8 @@ public interface SwaggerRouteController {
     })
     ResponseEntity<List<SpotResponseDTO>> getSpots(Long routeId);
 
-    @Operation(summary = "좋아요 추가/취소", description = "좋아요가 눌리지 않은 상태에서 이 api를 호출하면 -> 좋아요 추가\n좋아요가 눌린 상태에서 이 api 호출 -> 좋아요 취소")
+    @Operation(summary = "좋아요 추가/취소", description = "좋아요가 눌리지 않은 상태에서 이 api를 호출하면 -> 좋아요 추가" + "\n" +
+            "좋아요가 눌린 상태에서 이 api 호출 -> 좋아요 취소")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당 member ID 또는 입력된 경로 id와 연결된 like_bookmark_period 객체가 존재하지 않습니다."),
@@ -128,7 +129,9 @@ public interface SwaggerRouteController {
             @Parameter(name = "integratedRouteId", required = true, description = "좋아요를 누르고 싶은 경로 id"),
     })
     ResponseEntity<Void> addOrRemoveLike(Long integratedRouteId);
-    @Operation(summary = "북마크 추가/취소", description = "북마크가 눌리지 않은 상태에서 이 api를 호출하면 -> 북마크 추가\n북마크가 눌린 상태에서 이 api 호출 -> 북마크 취소")
+
+    @Operation(summary = "북마크 추가/취소", description = "북마크가 눌리지 않은 상태에서 이 api를 호출하면 -> 북마크 추가" + "\n" +
+            "북마크가 눌린 상태에서 이 api 호출 -> 북마크 취소")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당 member ID 또는 입력된 경로 id와 연결된 like_bookmark_period 객체가 존재하지 않습니다."),
@@ -137,7 +140,10 @@ public interface SwaggerRouteController {
             @Parameter(name = "integratedRouteId", required = true, description = "북마크를 누르고 싶은 경로 id"),
     })
     ResponseEntity<Void> addOrRemoveBookmark(Long integratedRouteId);
-    @Operation(summary = "내가 북마크 누른 경로 리스트", description = "자신이 누른 북마크 경로를 반환합니다.")
+
+    @Operation(summary = "내가 북마크 누른 경로 리스트", description = "자신이 누른 북마크 경로를 반환합니다." + "\n" +
+            " query string으로 size=3 값 넣어주셔야 3개씩 나옵니다!" + "\n" +
+            "page=1이 가장 첫페이지입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당 member ID가 존재하지 않습니다."),
@@ -146,14 +152,14 @@ public interface SwaggerRouteController {
 //            @Parameter(name = "page", required = false, description = "원하는 page, 첫번째 페이지를 보고 싶다면 0을 입력하면 된다.\n값을 넣지 않는다면 기본값으로 0이 들어간다"),
 //    })
     ResponseEntity<Page<RouteDetailResponseDTO>> findBookmark(PageRequestDTO pageRequestDTO);
-    @Operation(summary = "내가 생성한 경로 리스트", description = "자신이 만든 경로를 반환합니다.")
+
+    @Operation(summary = "내가 생성한 경로 리스트", description = "자신이 만든 경로를 반환합니다." + "\n" +
+            " query string으로 size=3 값 넣어주셔야 3개씩 나옵니다!" + "\n" +
+            "page=1이 가장 첫페이지입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "해당 member ID가 존재하지 않습니다."),
     })
-//    @Parameters(value = {
-//            @Parameter(name = "page", required = false, description = "원하는 page, 첫번째 페이지를 보고 싶다면 0을 입력하면 된다.\n값을 넣지 않는다면 기본값으로 0이 들어간다"),
-//    })
     ResponseEntity<Page<RouteDetailResponseDTO>> findMyRoute(PageRequestDTO pageRequestDTO);
 
     @Operation(summary = "경로 이름 수정", description = "경로의 이름을 수정합니다.")
