@@ -13,7 +13,6 @@ import com.elice.tripnote.domain.spot.entity.QSpot;
 import com.elice.tripnote.domain.spot.entity.Spot;
 import com.elice.tripnote.global.entity.PageRequestDTO;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -23,12 +22,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,44 +44,25 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
     private final QHashtag hashtag = new QHashtag("h");
     private final QLikeBookmarkPeriod lbp = new QLikeBookmarkPeriod("lbp");
 
-    public List<Long> findIntegratedRouteIdsBySpots(List<Long> spots) {
-        /*
-        select distinct r.integrated_route_id
-        from route r
-        join route_spot rs on rs.route_id = r.id
-        where rs.spot_id in :spots  -- spot_id가 spots 중에 하나일 때만 통과
-        group by r.id, r.integrated_route_id    -- 같은 통합 경로 id 그룹 안에 각 경로 id끼리 그룹
-        having count(distinct rs.spot_id) = :spots.size()   -- route id 기준으로 묶었을 때, 겹치지 않는 spot_id가 spots.size개인 row만
-                                                               (spot_id가 spots 중에 하나일 때만 통과이므로 spot_id가 spots의 크기라면 모든 spots가 있음)
-         */
-        return query
-                .selectDistinct(route.integratedRoute.id)
-                .from(route)
-                .join(routeSpot).on(routeSpot.route.id.eq(route.id))
-                .where(routeSpot.spot.id.in(spots))
-                .groupBy(route.id, route.integratedRoute.id)
-                .having(routeSpot.spot.id.countDistinct().eq((long) spots.size()))
-                .fetch();
-    }
 
-    public List<RouteIdNameResponseDTO> findLikedRoutesByMemberId(Long memberId) {
-        return query
-                .select(Projections.constructor(RouteIdNameResponseDTO.class,
-                        route.id,
-                        route.name
-                ))
-                .from(route)
-                .join(likePost).on(likePost.route.id.eq(route.id))
-                .where(likePost.member.id.eq(memberId))
-                .fetch();
-    }
+//    public List<RouteIdNameResponseDTO> findLikedRoutesByMemberId(Long memberId) {
+//        return query
+//                .select(Projections.constructor(RouteIdNameResponseDTO.class,
+//                        route.id,
+//                        route.name
+//                ))
+//                .from(route)
+//                .join(likePost).on(likePost.route.id.eq(route.id))
+//                .where(likePost.member.id.eq(memberId))
+//                .fetch();
+//    }
 
     public Page<RouteDetailResponseDTO> findRouteDetailsByMemberId(Long memberId, PageRequestDTO pageRequestDTO, boolean isBookmark) {
-        PageRequest pageRequest = PageRequest.of(pageRequestDTO.getPage()-1, pageRequestDTO.getSize());
+        PageRequest pageRequest = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize());
 //        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(pageRequestDTO.getOrder(), pageRequestDTO.isAsc());
 
         List<RouteIdNameResponseDTO> routes;
-        if(isBookmark){
+        if (isBookmark) {
             routes = query
                     .select(Projections.constructor(RouteIdNameResponseDTO.class,
                             post.id,
@@ -100,7 +78,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                     .limit(pageRequest.getPageSize())
                     .orderBy(route.id.asc())
                     .fetch();
-        } else{
+        } else {
             routes = query
                     .select(Projections.constructor(RouteIdNameResponseDTO.class,
                             post.id,
@@ -196,23 +174,23 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
         return likeCount != null ? likeCount : 0;
     }
 
-    public Map<Long, Integer> getIntegratedRouteLikeCounts(List<Long> integratedIds) {
-        //특정 통합 경로의 좋아요 개수 구하기
-        List<Tuple> results = query
-                .select(integratedRoute.id, likePost.id.count().intValue())
-                .from(route)
-                .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
-                .join(likePost).on(likePost.route.id.eq(route.id))
-                .where(integratedRoute.id.in(integratedIds))
-                .groupBy(integratedRoute.id)
-                .fetch();
-
-        return results.stream()
-                .collect(Collectors.toMap(
-                        tuple -> tuple.get(integratedRoute.id),
-                        tuple -> tuple.get(likePost.id.count().intValue())
-                ));
-    }
+//    public Map<Long, Integer> getIntegratedRouteLikeCounts(List<Long> integratedIds) {
+//        //특정 통합 경로의 좋아요 개수 구하기
+//        List<Tuple> results = query
+//                .select(integratedRoute.id, likePost.id.count().intValue())
+//                .from(route)
+//                .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
+//                .join(likePost).on(likePost.route.id.eq(route.id))
+//                .where(integratedRoute.id.in(integratedIds))
+//                .groupBy(integratedRoute.id)
+//                .fetch();
+//
+//        return results.stream()
+//                .collect(Collectors.toMap(
+//                        tuple -> tuple.get(integratedRoute.id),
+//                        tuple -> tuple.get(likePost.id.count().intValue())
+//                ));
+//    }
 
     public Route getMinRouteByIntegratedId(Long integratedId) {
         JPQLQuery<Long> minRouteId = JPAExpressions
@@ -228,42 +206,42 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .fetchOne();
     }
 
-    public Long findPostIdByIntegratedRouteId(Long integratedId) {
-        JPQLQuery<Long> minRouteId = JPAExpressions
-                .select(route.id.min())
-                .from(route)
-                .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
-                .where(integratedRoute.id.eq(integratedId)
-                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)));
+//    public Long findPostIdByIntegratedRouteId(Long integratedId) {
+//        JPQLQuery<Long> minRouteId = JPAExpressions
+//                .select(route.id.min())
+//                .from(route)
+//                .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
+//                .where(integratedRoute.id.eq(integratedId)
+//                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)));
+//
+//        return query
+//                .select(post.id)
+//                .from(post)
+//                .join(route).on(post.route.id.eq(route.id))
+//                .where(route.id.eq(minRouteId))
+//                .fetchOne();
+//
+//    }
 
-        return query
-                .select(post.id)
-                .from(post)
-                .join(route).on(post.route.id.eq(route.id))
-                .where(route.id.eq(minRouteId))
-                .fetchOne();
+//    public Map<Long, Long> findPostIdsByIntegratedRouteIds(List<Long> integratedIds) {
+//        List<Tuple> results = query
+//                .select(post.route.integratedRoute.id, post.id, likePost.id.count().as("likeCount"))
+//                .from(post)
+//                .join(likePost).on(likePost.post.id.eq(post.id))
+//                .where(post.route.integratedRoute.id.in(integratedIds)
+//                        .and(post.route.routeStatus.eq(RouteStatus.PUBLIC)))
+//                .groupBy(post.route.integratedRoute.id, post.id)
+//                .orderBy(post.route.integratedRoute.id.asc(), likePost.id.count().desc())
+//                .fetch();
+//
+//        Map<Long, Long> resultMap = new LinkedHashMap<>(); // 순서가 유지되도록 LinkedHashMap 사용
+//
+//        results.forEach(tuple -> resultMap.put(tuple.get(post.route.integratedRoute.id), tuple.get(post.id)));
+//
+//        return resultMap;
+//    }
 
-    }
-
-    public Map<Long, Long> findPostIdsByIntegratedRouteIds(List<Long> integratedIds) {
-        List<Tuple> results = query
-                .select(post.route.integratedRoute.id, post.id, likePost.id.count().as("likeCount"))
-                .from(post)
-                .join(likePost).on(likePost.post.id.eq(post.id))
-                .where(post.route.integratedRoute.id.in(integratedIds)
-                        .and(post.route.routeStatus.eq(RouteStatus.PUBLIC)))
-                .groupBy(post.route.integratedRoute.id, post.id)
-                .orderBy(post.route.integratedRoute.id.asc(), likePost.id.count().desc())
-                .fetch();
-
-        Map<Long, Long> resultMap = new LinkedHashMap<>(); // 순서가 유지되도록 LinkedHashMap 사용
-
-        results.forEach(tuple -> resultMap.put(tuple.get(post.route.integratedRoute.id), tuple.get(post.id)));
-
-        return resultMap;
-    }
-
-    public boolean findHashtagIdIdCity(Long hashtagId){
+    public boolean findHashtagIdIdCity(Long hashtagId) {
 
         return query
                 .select(hashtag.isCity)
@@ -272,7 +250,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .fetchOne();
     }
 
-    public List<RecommendedRouteResponseDTO> getRecommendedRoutes(List<Long> integratedRouteIds, Long memberId, boolean isMember){
+    public List<RecommendedRouteResponseDTO> getRecommendedRoutes(List<Long> integratedRouteIds, Long memberId, boolean isMember) {
 //        System.out.println("매개변수로 들어오는 integratedRouteIds" + integratedRouteIds);
         // 필요한 데이터를 한 번의 쿼리로 가져오기
         List<Tuple> results = query
@@ -384,6 +362,53 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 .orderBy(lbp.likes.sum().desc())
                 .limit(3)
                 .fetch();
+    }
+
+    public boolean existsByMemberIdAndIntegratedRouteId(Long memberId, Long integratedId, boolean isLike) {
+        JPQLQuery<Long> minRouteId = JPAExpressions
+                .select(route.id.min())
+                .from(route)
+//                .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
+                .where(route.integratedRoute.id.eq(integratedId));
+
+        if (isLike) {
+            return query
+                    .select(likePost.id)
+                    .from(likePost)
+//                .join(route).on(likePost.route.id.eq(route.id))
+                    .where(likePost.route.id.eq(minRouteId).and(likePost.member.id.eq(memberId)))
+                    .fetchCount() > 0;
+        } else {
+            return query
+                    .select(bookmark.id)
+                    .from(bookmark)
+//                    .join(route).on(bookmark.route.id.eq(route.id))
+                    .where(bookmark.route.id.eq(minRouteId).and(bookmark.member.id.eq(memberId)))
+                    .fetchCount() > 0;
+        }
+
+
+    }
+
+    public void deleteByMemberIdAndIntegratedRouteId(Long memberId, Long integratedId, boolean isLike) {
+
+        JPQLQuery<Long> minRouteId = JPAExpressions
+                .select(route.id.min())
+                .from(route)
+                .join(integratedRoute).on(integratedRoute.id.eq(route.integratedRoute.id))
+                .where(integratedRoute.id.eq(integratedId));
+
+        if (isLike) {
+            query.delete(likePost)
+                    .where(likePost.route.id.eq(minRouteId)
+                            .and(likePost.member.id.eq(memberId)))
+                    .execute();
+        } else {
+            query.delete(bookmark)
+                    .where(bookmark.route.id.eq(minRouteId)
+                            .and(bookmark.member.id.eq(memberId)))
+                    .execute();
+        }
     }
 
 

@@ -259,8 +259,8 @@ public class RouteService {
                 )
                 .spots(spotRepository.findSpotsByIntegratedRouteIdInOrder(integratedRouteId)) // 해당 route에 맞는 spots구하기
                 .likes(routeRepository.getIntegratedRouteLikeCounts(integratedRouteId)) // 해당 경로의 좋아요 수
-                .likedAt(likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedRouteId)) // 자신이 이 경로에 좋아요를 눌렀는지
-                .markedAt(bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedRouteId)) // 자신이 이 경로에 북마크를 눌렀는지
+                .likedAt(routeRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedRouteId, true)) // 자신이 이 경로에 좋아요를 눌렀는지
+                .markedAt(routeRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedRouteId, false)) // 자신이 이 경로에 북마크를 눌렀는지
                 .build();
     }
 
@@ -395,14 +395,16 @@ public class RouteService {
 
         // 해당 통합 경로의 route 중에서 가장 작은 id값을 가진 경로 확인하기
         // 해당 경로랑 member 조인해서 검색 후, 없다면 아래 로직 있다면 없애기
-        if (likePostRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedId)) {
+        if (routeRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedId, true)) {
+            log.info("통합경로 {}번 경로의 좋아요를 취소하겠습니다.", integratedId);
             likeBookmarkPeriod.updateLike(likeBookmarkPeriod.getLikes() - 1);
-            likePostRepository.deleteByMemberIdAndIntegratedRouteId(member.getId(), integratedId);
+            routeRepository.deleteByMemberIdAndIntegratedRouteId(member.getId(), integratedId, true);
             return;
         }
 
         // 없는 경우
         // 해당 통합 경로의 route 중에서 가장 작은 id값을 가진 route에다가 좋아요 추가하기
+        log.info("통합경로 {}번 경로에 좋아요를 추가하겠습니다.", integratedId);
         Route route = routeRepository.getMinRouteByIntegratedId(integratedId);
 
         LikePost likePost = LikePost.builder()
@@ -428,13 +430,15 @@ public class RouteService {
                 });
 
         //member랑 route 조인해서 검색 후, 없다면 아래 로직 있다면 없애기
-        if (bookmarkRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedId)) {
+        if (routeRepository.existsByMemberIdAndIntegratedRouteId(member.getId(), integratedId, false)) {
+            log.info("통합경로 {}번 경로의 북마크를 취소하겠습니다.", integratedId);
             likeBookmarkPeriod.updateLike(likeBookmarkPeriod.getBookmark() - 1);
-            bookmarkRepository.deleteByMemberIdAndIntegratedRouteId(member.getId(), integratedId);
+            routeRepository.deleteByMemberIdAndIntegratedRouteId(member.getId(), integratedId, false);
             return;
         }
 
         // 없는 경우
+        log.info("통합경로 {}번 경로에 북마크를 추가하겠습니다.", integratedId);
         Route route = routeRepository.getMinRouteByIntegratedId(integratedId);
 
         Bookmark bookmark = Bookmark.builder()
