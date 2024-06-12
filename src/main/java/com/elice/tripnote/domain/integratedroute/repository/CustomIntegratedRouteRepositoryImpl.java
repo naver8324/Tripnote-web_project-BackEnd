@@ -43,66 +43,6 @@ public class CustomIntegratedRouteRepositoryImpl implements CustomIntegratedRout
                 .fetch();
     }
 
-
-
-    public List<Long> findIntegratedRoute(List<Long> integratedIds/*, List<Long> hashtags*/) {
-        /*
-
-        SELECT ir.id AS integrated_route_id, SUM(plb.likes) AS total_likes
-        FROM integrated_route ir
-        left JOIN uuid_hashtag uh ON ir.id = uh.integrated_route_id
-        JOIN like_bookmark_period lbp ON ir.id = lbp.integrated_route_id
-        WHERE ir.id in :ids
-          AND uh.hashtag_id IN :hashtags  -- 제시된 해시태그 id 안에 속하는 row만 남김
-        GROUP BY ir.id
-        HAVING COUNT(DISTINCT uh.hashtag_id) = :hashtags.size  -- 그룹별로 묶었을 때, 해당 그룹의 해시태그 id 개수가 hashtags의 개수와 같으면 모든 hashtag가 포함된거?
-            and count(distinct ir.id) = :ids.size
-            and lbp.started_at = max(lbp.started_at) -- 그룹별로 묶었을 때 started_at 값이 가장 큰 row만 남게
-        ORDER BY lbp.likes DESC
-        LIMIT 5;
-         */
-        JPQLQuery<LocalDateTime> maxStartAtSubquery = JPAExpressions.select(lbp.startAt.max())
-                .from(lbp)
-                .where(lbp.integratedRoute.id.eq(ir.id))
-                .groupBy(lbp.integratedRoute.id);
-/*
-        return query
-                .select(Projections.constructor(IntegratedRouteDTO.class,
-                        ir.id,
-                        lbp.likes.sum()
-                ))
-                .from(ir)
-                .leftJoin(uh).on(ir.id.eq(uh.integratedRoute.id))
-                .join(lbp).on(ir.id.eq(lbp.integratedRoute.id))
-                .where(
-                        ir.id.in(integratedIds)
-                                .and(uh.hashtag.id.in(hashtags))
-                                .and(lbp.startAt.eq(maxStartAtSubquery))
-                )
-                .groupBy(ir.id)
-                .having(
-                        uh.hashtag.id.countDistinct().eq((long) hashtags.size())
-                )
-                .orderBy(lbp.likes.sum().desc())
-                .limit(5)
-                .fetch();*/
-        return query
-                .select(ir.id)
-                .from(ir)
-                .join(lbp).on(ir.id.eq(lbp.integratedRoute.id))
-                .where(
-                        ir.id.in(integratedIds)
-                                .and(lbp.startAt.eq(maxStartAtSubquery))
-                                .and(ir.routeStatus.eq(RouteStatus.PUBLIC))
-                )
-                .groupBy(ir.id)
-                .orderBy(lbp.likes.sum().desc())
-                .limit(3)
-                .fetch();
-
-
-    }
-
     public void deleteIntegratedRoute(Long integratedRouteId){
         //route 삭제 처리되고, 해당 route의 integrated route에 가서
         // 연관된 public route가 1개 이상인지 확인

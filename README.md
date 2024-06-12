@@ -136,6 +136,12 @@ $ npm run dev
 
 ---
 
+## API 명세서
+  [swaggerDoc](https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/swaggerDoc.html)
 
+---
 
+## 아키텍쳐
+  <img alt ="Packege Architecture" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/arch.jpg">
 
+---

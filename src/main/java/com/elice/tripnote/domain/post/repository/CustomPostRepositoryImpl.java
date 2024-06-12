@@ -453,14 +453,6 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 
     }
 
-    public int getLikeCount(Long integratedRouteId){
-        return query
-                .select(post.likes.sum())
-                .from(post)
-                .join(route).on(post.route.id.eq(route.id)
-                        .and(route.integratedRoute.id.eq(integratedRouteId)))
-                .fetchOne();
-    }
 
     private OrderSpecifier<?> getOrderSpecifier(String order, boolean asc) {   //정렬 방식 정하기
 

@@ -1,5 +1,6 @@
 package com.elice.tripnote.domain.route.repository;
 
+import com.elice.tripnote.domain.route.entity.RecommendedRouteResponseDTO;
 import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.entity.RouteDetailResponseDTO;
 import com.elice.tripnote.domain.route.entity.RouteIdNameResponseDTO;
@@ -11,20 +12,19 @@ import java.util.List;
 import java.util.Map;
 
 public interface CustomRouteRepository {
-    List<Long> findIntegratedRouteIdsBySpots(List<Long> spots);
-    //    List<RouteIdNameResponseDTO> findLikedRoutesByMemberId(Long memberId);
-//    Page<RouteIdNameResponseDTO> findMarkedRoutesByMemberId(Long memberId, Pageable pageable);
-//    Page<RouteIdNameResponseDTO> findRoutesByMemberId(Long memberId, Pageable pageable);
     int getIntegratedRouteLikeCounts(Long integratedRouteId);
-    Map<Long, Integer> getIntegratedRouteLikeCounts(List<Long> integratedIds);
+//    Map<Long, Integer> getIntegratedRouteLikeCounts(List<Long> integratedIds);
     Route getMinRouteByIntegratedId(Long integratedId);
-    Long findPostIdByIntegratedRouteId(Long integratedId);
-    Map<Long, Long> findPostIdsByIntegratedRouteIds(List<Long> integratedIds);
+//    Long findPostIdByIntegratedRouteId(Long integratedId);
+//    Map<Long, Long> findPostIdsByIntegratedRouteIds(List<Long> integratedIds);
 
     boolean findHashtagIdIdCity(Long hashtagId);
     //    Page<RouteDetailResponseDTO> findRouteDetailsByMemberId(Long memberId, Pageable pageable);
     Page<RouteDetailResponseDTO> findRouteDetailsByMemberId(Long memberId, PageRequestDTO pageRequestDTO, boolean isBookmark);
-
+    List<RecommendedRouteResponseDTO> getRecommendedRoutes(List<Long> integratedRouteIds, Long memberId, boolean isMember);
+    List<Long> findIntegratedRouteIdsBySpotsAndLikes(List<Long> spots);
+    boolean existsByMemberIdAndIntegratedRouteId(Long memberId, Long integratedId, boolean isLike);
+    void deleteByMemberIdAndIntegratedRouteId(Long memberId, Long integratedId, boolean isLike);
 
 
 }

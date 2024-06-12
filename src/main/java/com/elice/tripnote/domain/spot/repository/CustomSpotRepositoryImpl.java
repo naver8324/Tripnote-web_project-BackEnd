@@ -116,6 +116,7 @@ public class CustomSpotRepositoryImpl implements CustomSpotRepository{
                         tuple -> tuple.get(integratedRoute.id),
                         Collectors.mapping(tuple -> tuple.get(routeSpot.spot), Collectors.toList())
                 ));
+
     }
 
 

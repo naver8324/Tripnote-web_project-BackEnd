@@ -27,7 +27,7 @@ public class Bookmark{
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     // route와 post는 둘 중 하나는 null값이 가능하므로 주의를 기울여야 합니다.
