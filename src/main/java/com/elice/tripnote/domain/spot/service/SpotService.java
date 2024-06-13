@@ -223,13 +223,17 @@ public class SpotService {
         Map<SpotDTO, Double> map = new HashMap<>();
         List<RouteSpot> routeSpots = routespotRepository.findBySpotId(id);
         double total = routeSpots.size()*1.0;
+
         for(RouteSpot rs : routeSpots){
             Spot nextSpot = spotRepository.findById(rs.getNextSpotId()).orElse(null);
             if(nextSpot==null){
                 continue;
             }
             SpotDTO nextSpotDTO = convertToDto(nextSpot);
-            map.put(nextSpotDTO, map.getOrDefault(nextSpot,0.0)+1.0);
+
+            //다음 여행지가 있을 경우 1증가 없을 경우 0
+            double count = map.getOrDefault(nextSpotDTO, 0.0) + 1.0;
+            map.put(nextSpotDTO, count);
         }
         if(map.size()<3){
             return null;
@@ -237,6 +241,8 @@ public class SpotService {
         for(SpotDTO  key : map.keySet()){
             map.put(key, map.get(key) / total);
         }
+
+        //확률에 따라 상위 3개의 다음 여행지를 반환
         Map<SpotDTO , Double> top3Map = map.entrySet()
                 .stream()
                 .sorted(Map.Entry.<SpotDTO, Double>comparingByValue().reversed())
