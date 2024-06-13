@@ -374,7 +374,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 )
                 .groupBy(integratedRoute.id)
                 .orderBy(lbp.likes.sum().desc())
-                .limit(3)
+                .limit(5)
                 .fetch();
     }
 
