@@ -283,7 +283,9 @@ public class PostService {
 
         Post post = postOrElseThrowsException(postId);
 
-        commentService.deleteCommentsByPostId(postId);
+        if(!post.isDeleted()){
+            commentService.deleteCommentsByPostId(postId);
+        }
 
         post.delete();
 

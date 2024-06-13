@@ -64,7 +64,7 @@ public class Comment extends BaseTimeEntity {
     }
 
     public void delete(){
-        isDeleted = true;
+        isDeleted = !isDeleted;
     }
 
     public CommentResponseDTO toDTO() {

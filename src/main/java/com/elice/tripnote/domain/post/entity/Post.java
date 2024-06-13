@@ -99,7 +99,7 @@ public class Post extends BaseTimeEntity {
     }
 
     public void delete(){
-        isDeleted = true;
+        isDeleted = !isDeleted;
     }
 
 }
