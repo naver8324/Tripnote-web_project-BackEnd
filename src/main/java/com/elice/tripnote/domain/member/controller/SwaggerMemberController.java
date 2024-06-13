@@ -29,10 +29,10 @@ public interface SwaggerMemberController {
     ResponseEntity<Void> signup(@RequestBody MemberRequestDTO memberRequestDTO);
 
 
-    @Operation(summary = "이메일 중복 확인", description = "입력한 이메일이 이미 등록되어 있는지 확인합니다. (이메일이 이미 존재하면 true 반환, 사용가능하면 false 반환)")
+    @Operation(summary = "이메일 중복 확인", description = "입력한 이메일이 이미 등록되어 있는지 확인합니다. (이메일이 이미 존재하면 'true' 반환, 사용가능하면 'false' 반환, 소셜 이메일이면 'social' 반환)")
     @ApiResponse(responseCode = "200", description = "이메일 중복 확인에 성공하였습니다.")
     @GetMapping("/check-email")
-    ResponseEntity<Boolean> checkEmailDuplicate(@RequestParam @Parameter(description = "이메일 주소", required = true) String email);
+    ResponseEntity<String> checkEmailDuplicate(@RequestParam @Parameter(description = "이메일 주소", required = true) String email);
 
 
     @Operation(summary = "닉네임 중복 확인", description = "입력한 닉네임이 이미 등록되어 있는지 확인합니다. (닉네임이 이미 존재하면 true 반환, 사용가능하면 false 반환)")

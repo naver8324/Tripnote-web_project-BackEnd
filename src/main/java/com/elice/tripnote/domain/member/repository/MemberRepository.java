@@ -33,4 +33,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
     String findPasswordByEmail(@Param("email") String email);
 
     Member getByEmail(String email);
+
+    @Query("SELECT m.oauthId FROM Member m WHERE m.email = :email")
+    Optional<Long> findOauthIdByEmail(@Param("email") String email);
 }

@@ -51,7 +51,7 @@ public class MailSendService {
     public void joinEmail(String toMail) {
         makeRandomNumber();
         String setFrom = "tripnote10@gmail.com";
-        String title = "Tripnote 회원가입 인증코드가 도착했습니다."; // 이메일 제목
+        String title = "Tripnote 인증코드가 도착했습니다."; // 이메일 제목
         String content =
                 "Tripnote를 방문해주셔서 감사합니다." + 	//html 형식으로 작성
                         "<br><br>" +
