@@ -38,11 +38,12 @@ public class MemberController implements SwaggerMemberController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // 이메일 중복검사 (이메일이 이미 존재하면 true 반환, 사용가능하면 false 반환)
+    // 이메일 중복검사 (이메일이 이미 존재하면 "true" 반환, 사용가능하면 "false" 반환, 소셜 계정이면 "social" 반환)
     @Override
     @GetMapping("/check-email")
-    public ResponseEntity<Boolean> checkEmailDuplicate(@RequestParam String email) {
-        return ResponseEntity.ok().body(memberService.checkEmailDuplicate(email));
+    public ResponseEntity<String> checkEmailDuplicate(@RequestParam String email) {
+        String result = memberService.checkEmailStatus(email);
+        return ResponseEntity.ok().body(result);
     }
 
     // 닉네임 중복검사 (닉네임이 이미 존재하면 true 반환, 사용가능하면 false 반환)

@@ -71,11 +71,6 @@ public class MemberInterceptor implements HandlerInterceptor {
     }
 
 
-
-
-
-
-
     private void authenticateUser(String token, HttpServletResponse response) {
 
         String role = jwtUtil.getRole(token);
