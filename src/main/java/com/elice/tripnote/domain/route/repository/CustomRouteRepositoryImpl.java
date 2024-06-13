@@ -61,6 +61,7 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
         PageRequest pageRequest = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize());
 //        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(pageRequestDTO.getOrder(), pageRequestDTO.isAsc());
 
+        long total = 0;
         List<RouteIdNameResponseDTO> routes;
         if (isBookmark) {
             routes = query
@@ -78,6 +79,16 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                     .limit(pageRequest.getPageSize())
                     .orderBy(route.id.asc())
                     .fetch();
+
+            total = query
+                    .select(route.count())
+                    .from(route)
+                    .join(bookmark).on(bookmark.route.id.eq(route.id))
+                    .leftJoin(post).on(post.route.id.eq(route.id))
+                    .where(bookmark.member.id.eq(memberId)
+                            .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+                    .fetchOne();
+
         } else {
             routes = query
                     .select(Projections.constructor(RouteIdNameResponseDTO.class,
@@ -93,6 +104,13 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                     .limit(pageRequest.getPageSize())
                     .orderBy(route.id.asc())
                     .fetch();
+
+            total = query
+                    .select(route.count())
+                    .from(route)
+                    .where(route.member.id.eq(memberId)
+                            .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
+                    .fetchOne();
         }
 
         // 그 중 경로 id만 리스트로 추출
@@ -141,12 +159,6 @@ public class CustomRouteRepositoryImpl implements CustomRouteRepository {
                 ))
                 .collect(Collectors.toList());
 
-        long total = query
-                .select(route.count())
-                .from(route)
-                .where(route.member.id.eq(memberId)
-                        .and(route.routeStatus.eq(RouteStatus.PUBLIC)))
-                .fetchOne();
 
         return new PageImpl<>(routeDetails, pageRequest, total);
     }
