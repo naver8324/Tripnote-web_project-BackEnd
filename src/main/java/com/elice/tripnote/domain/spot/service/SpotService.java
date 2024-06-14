@@ -118,12 +118,12 @@ public class SpotService {
             }
         }
 
-        if(spotList.size() >5){
+        if(spotList.size() >10){
             return spotList;
         }
         List<SpotDTO> spotDTOs = searchByLocations(location);
         for (SpotDTO spotDTO : spotDTOs) {
-            if(spotList.size() >5)
+            if(spotList.size() >10)
                 break;
             if (spotDTO.getImageUrl() == null) {
                 log.error("에러 발생: {}", ErrorCode.NO_LANDMARK);
@@ -153,12 +153,12 @@ public class SpotService {
         if (region == Region.ALL) {
             List<Spot> allSpots = spotRepository.findAll();
             return allSpots.stream()
-                    .limit(5)  // 상위 5개만 가져옴
+                    .limit(10)  // 상위 10개만 가져옴
                     .collect(Collectors.toList());
             //return spotRepository.findTop5ByOrderByLocationAsc();
         }
         //Region validRegion = Region.fromString(region);
-        List<Spot> list = getSpotsByRegion(region, 0, 5);
+        List<Spot> list = getSpotsByRegion(region, 0, 10);
         if (list.isEmpty()){
             log.error("에러 발생: {}", ErrorCode.NO_REGION);
             throw new CustomException(ErrorCode.NO_REGION);
