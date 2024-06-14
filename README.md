@@ -122,7 +122,7 @@ $ npm run dev
 
 ## 서비스 차트
   <img alt ="FlowChart" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/flowchart.jpg">
-  [Figma]( https://www.figma.com/file/cDikAF7eAjtXnYTEZFS1yE?embed_host=notion&kind=file&node-id=0-1&t=4Hoi9O6XgTOaD8vY-0&viewer=1)
+  [Figma](https://www.figma.com/file/cDikAF7eAjtXnYTEZFS1yE?embed_host=notion&kind=file&node-id=0-1&t=4Hoi9O6XgTOaD8vY-0&viewer=1)
 
 
 ---
