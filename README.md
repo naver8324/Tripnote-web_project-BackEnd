@@ -121,6 +121,7 @@ $ npm run dev
 ---
 
 ## 서비스 차트
+  <img alt ="FlowChart" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/flowchart.jpg">
 
 
 ---
