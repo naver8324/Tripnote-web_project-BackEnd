@@ -113,7 +113,15 @@ $ npm run dev
 
 -------
 
-## 화면 구성
+https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/%EB%A9%94%EC%9D%B8+%ED%8E%98%EC%9D%B4%EC%A7%80.jpg
+
+## 화면 구성 
+
+| 메인 페이지  |  후기 페이지  |  
+| :-------------------------------------------: | :------------: |
+|  <img width="329" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/%EB%A9%94%EC%9D%B8+%ED%8E%98%EC%9D%B4%EC%A7%80.jpg"/> |  <img width="329" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/%ED%9B%84%EA%B8%B0.png"/>|  
+| 경로 생성 페이지   |  경로 추천 페이지   |  
+| <img width="400" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/%EC%83%9D%EC%84%B1.jpg"/>   |  <img width="400" src="https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/%EC%B6%94%EC%B2%9C.jpg"/>     |
 
 
 
