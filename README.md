@@ -31,8 +31,8 @@
 | 정유경  | 김수현 | 백지민 | 정주용 | 조부건 |  김도현  | 오성현|
 |:----:|:---:|:------------:|:------------:|:------------:|:-----:|:------------:|
 | 백엔드  | 백엔드 | 백엔드 | 백엔드 | 백엔드 | 프론트엔드 | 프론트엔드|
-| 한 일들 | 한 일들 | 한 일들 | 한 일들 | 한 일들 | 한 일들 | 한 일들|
-
+| 관리자/해시태그 API | 여행지 API  | 경로 API | 회원/메일 API Spring Security 설정 | 후기/댓글 API | 경로 생성 경로 추천 | 후기 마이페이지 |
+| 서버 배포 관리자 페이지 구현 | 네이버 검색 API 활용 | 카카오 로그인/로그아웃 | 관리자 JWT access token 관리 | 관리자 페이지 구현 문서화 작업 | 경로 생성 경로 추천 로그인/로그아웃 | 메인페이지|
 ## 프로젝트 소개
 
 ------------
@@ -112,8 +112,6 @@ $ npm run dev
   <img src="https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white">
 
 -------
-
-https://s3.ap-northeast-2.amazonaws.com/tripnote.s3/%EB%A9%94%EC%9D%B8+%ED%8E%98%EC%9D%B4%EC%A7%80.jpg
 
 ## 화면 구성 
 
