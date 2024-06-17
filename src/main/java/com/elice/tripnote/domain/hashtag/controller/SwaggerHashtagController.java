@@ -3,18 +3,15 @@ package com.elice.tripnote.domain.hashtag.controller;
 import com.elice.tripnote.domain.hashtag.entity.HashtagDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagRequestDTO;
 import com.elice.tripnote.domain.hashtag.entity.HashtagResponseDTO;
+import com.elice.tripnote.global.entity.PageRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -23,12 +20,7 @@ public interface SwaggerHashtagController {
 
     @Operation(summary = "해시태그 전체 조회", description = "해시태그의 모든 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공")
-    @Parameters(value = {
-            @Parameter(name="page", description = "페이지", example = "1"),
-            @Parameter(name="size", description = "페이지 별로 보여줄 리스트 개수", example = "10"),
-            @Parameter(name="sort", description = "정렬방법", example = "id")
-    })
-    ResponseEntity<Page<HashtagDTO>> getHashtags(int page, int size, String sort);
+    ResponseEntity<Page<HashtagDTO>> getHashtags(PageRequestDTO pageRequestDTO);
 
     @Operation(summary = "해시태그 조회", description = "도시 또는 도시가 아닌 해시태그를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공")

@@ -75,10 +75,16 @@ public class MemberService implements UserDetailsService {
     }
 
 
-    // 이메일 중복 체크 서비스
+    // 이메일 중복 체크 & 소셜 이메일인지 확인하는 서비스
     @Transactional(readOnly = true)
-    public boolean checkEmailDuplicate(String email) {
-        return memberRepository.existsByEmail(email);
+    public String checkEmailStatus(String email) {
+        Optional<Long> oauthId = memberRepository.findOauthIdByEmail(email);
+        if (oauthId.isPresent() && oauthId.get() != null) {
+            return "social";
+        } else if (memberRepository.existsByEmail(email)) {
+            return "true";
+        }
+        return "false";
     }
 
 
@@ -176,10 +182,10 @@ public class MemberService implements UserDetailsService {
     }
 
     // 전체 멤버 조회 서비스
-    public Page<MemberResponseDTO> findMembers(Pageable pageable) {
-        Page<Member> members = memberRepository.findAll(pageable);
-        return members.map(Member::toDto);
-    }
+    //public Page<MemberResponseDTO> findMembers(Pageable pageable) {
+    //    Page<Member> members = memberRepository.findAll(pageable);
+    //    return members.map(Member::toDto);
+    //}
 
 
     // 로그인중인 멤버 정보 조회 서비스

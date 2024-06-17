@@ -10,6 +10,7 @@ import com.elice.tripnote.domain.member.entity.Member;
 import com.elice.tripnote.domain.member.repository.MemberRepository;
 import com.elice.tripnote.domain.post.entity.Post;
 import com.elice.tripnote.domain.post.repository.PostRepository;
+import com.elice.tripnote.global.entity.PageRequestDTO;
 import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -42,13 +43,13 @@ public class CommentService {
 
     }
 
-    public Page<CommentResponseDTO> getCommentsByPostId(Long postId, int page, int size){
+    public Page<CommentResponseDTO> getCommentsByPostId(Long postId, PageRequestDTO pageRequestDTO){
 
 
         Post post = postOrElseThrowsException(postId);
 
 
-        return commentRepository.customFindNotDeletedCommentsByPostId(postId, page, size);
+        return commentRepository.customFindNotDeletedCommentsByPostId(postId, pageRequestDTO);
 
 
     }
@@ -57,14 +58,24 @@ public class CommentService {
 
 
     // 관리자가 모든 댓글을 불러올 때 사용하는 메서드. 삭제된 댓글도 불러옵니다.
-    public Page<CommentResponseDTO> getCommentsAll(Long memberId, int page, int size){
+    public Page<CommentResponseDTO> getCommentsAll(Long commentId, PageRequestDTO pageRequestDTO){
 
 
 
-        return commentRepository.customFindComments(memberId, page, size);
+        return commentRepository.customFindComments(commentId, pageRequestDTO);
 
 
     }
+
+    public Page<CommentResponseDTO> getCommentsAll(String nickname, PageRequestDTO pageRequestDTO){
+
+
+
+        return commentRepository.customFindComments(nickname, pageRequestDTO);
+
+
+    }
+
 
 
 
@@ -158,6 +169,7 @@ public class CommentService {
         }
 
         comment.delete();
+        commentRepository.save(comment);
 
     }
 
@@ -169,6 +181,8 @@ public class CommentService {
 
         Comment comment = commentOrElseThrowsException(commentId);
         comment.delete();
+
+        commentRepository.save(comment);
 
     }
 

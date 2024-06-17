@@ -30,4 +30,8 @@ public class SearchLocalReq {
         return map;
 
     }
+
+    public void setNewQuery(String query) {
+        this.query = "%" + query + "%"; // Adding wildcards for LIKE query
+    }
 }

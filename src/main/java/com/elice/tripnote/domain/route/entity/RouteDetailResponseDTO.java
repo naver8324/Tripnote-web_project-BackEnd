@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 public class RouteDetailResponseDTO {
     private Long routeId;
+    private Long postId;
     private String name;
     private List<Spot> spots; // 순서대로
 }

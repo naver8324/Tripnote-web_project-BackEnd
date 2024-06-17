@@ -18,6 +18,7 @@ import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.route.entity.Route;
 import com.elice.tripnote.domain.route.repository.RouteRepository;
 import com.elice.tripnote.domain.post.repository.PostRepository;
+import com.elice.tripnote.global.entity.PageRequestDTO;
 import com.elice.tripnote.global.exception.CustomException;
 import com.elice.tripnote.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -49,57 +50,65 @@ public class PostService {
 
     // 전체 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getPosts(String order, int page, int size){
+    public Page<PostResponseDTO> getPosts(PageRequestDTO pageRequestDTO){
 
-        return postRepository.customFindNotDeletedPosts(order, page, size);
+        return postRepository.customFindNotDeletedPosts(pageRequestDTO);
     }
 
-    public Page<PostResponseDTO> getPostsByHashtag(List<HashtagRequestDTO> hashtagRequestDTOList, String order, int page, int size){
+    public Page<PostResponseDTO> getPostsByHashtag(List<HashtagRequestDTO> hashtagRequestDTOList, PageRequestDTO pageRequestDTO){
 
-        return postRepository.customFindByHashtagNotDeletedPosts(hashtagRequestDTOList, order, page, size);
+        return postRepository.customFindByHashtagNotDeletedPosts(hashtagRequestDTOList, pageRequestDTO);
     }
 
 
     // 한 유저가 쓴 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getPostsByMemberId(int page, int size){
+    public Page<PostResponseDTO> getPostsByMemberId(PageRequestDTO pageRequestDTO){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
-        return postRepository.customFindNotDeletedPostsByMemberId(member.getId(), page, size);
+        return postRepository.customFindNotDeletedPostsByMemberId(member.getId(), pageRequestDTO);
 
 
     }
 
     // 한 유저가 좋아요 한 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getPostsByMemberWithLikes(int page, int size){
+    public Page<PostResponseDTO> getPostsByMemberWithLikes(PageRequestDTO pageRequestDTO){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
 
-        return postRepository.customFindNotDeletedPostsWithLikesByMemberId(member.getId(), page, size);
+        return postRepository.customFindNotDeletedPostsWithLikesByMemberId(member.getId(), pageRequestDTO);
 
 
     }
 
     // 한 유저가 북마크 한 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제되지 않은 게시글만 불러옵니다.
 
-    public Page<PostResponseDTO> getPostsByMemberWithMark(int page, int size){
+    public Page<PostResponseDTO> getPostsByMemberWithMark(PageRequestDTO pageRequestDTO){
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberOrElseThrowsException(email);
 
-        return postRepository.customFindNotDeletedPostsWithMarkByMemberId(member.getId(), page, size);
+        return postRepository.customFindNotDeletedPostsWithMarkByMemberId(member.getId(), pageRequestDTO);
 
 
     }
 
     //  전체 게시글을 페이지 형태로 불러올 때 사용하는 메서드. 삭제된 게시글도 불러오며 관리자만 사용할 수 있습니다.
 
-    public Page<PostResponseDTO> getPostsAll(Long memberId, int page, int size){
+    public Page<PostResponseDTO> getPostsAll(Long postId, PageRequestDTO pageRequestDTO){
 
-        return postRepository.customFindPosts(memberId, page, size);
+        return postRepository.customFindPosts(postId, pageRequestDTO);
+
+
+    }
+
+
+    public Page<PostResponseDTO> getPostsAll(String nickname, PageRequestDTO pageRequestDTO){
+
+        return postRepository.customFindPosts(nickname, pageRequestDTO);
 
 
     }
@@ -274,7 +283,9 @@ public class PostService {
 
         Post post = postOrElseThrowsException(postId);
 
-        commentService.deleteCommentsByPostId(postId);
+        if(!post.isDeleted()){
+            commentService.deleteCommentsByPostId(postId);
+        }
 
         post.delete();
 

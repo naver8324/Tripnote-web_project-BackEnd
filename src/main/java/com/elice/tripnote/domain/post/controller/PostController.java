@@ -8,8 +8,12 @@ import com.elice.tripnote.domain.post.entity.PostResponseDTO;
 import com.elice.tripnote.domain.post.service.PostService;
 import com.elice.tripnote.global.annotation.AdminRole;
 import com.elice.tripnote.global.annotation.MemberRole;
+import com.elice.tripnote.global.entity.PageRequestDTO;
+import com.elice.tripnote.global.exception.CustomException;
+import com.elice.tripnote.global.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,65 +24,74 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Slf4j
 public class PostController implements SwaggerPostController {
 
     private final PostService postService;
 
     @Override
     @GetMapping("/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPosts(@RequestParam(name="order", required = false, defaultValue = "") String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getPosts(order, page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPosts(@Valid PageRequestDTO pageRequestDTO) {
+        return ResponseEntity.ok().body(postService.getPosts(pageRequestDTO));
     }
 
-    @Override
+    //@Override
     @PostMapping("/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@Valid @RequestBody List<HashtagRequestDTO> hashtagRequestDTOList, @RequestParam(name="order", required = false, defaultValue = "") String order, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByHashtag(@Valid @RequestBody List<HashtagRequestDTO> hashtagRequestDTOList,
+                                                                   PageRequestDTO pageRequestDTO) {
 
         if(hashtagRequestDTOList == null){
-            return ResponseEntity.ok().body(postService.getPosts(order, page, size));
+            return ResponseEntity.ok().body(postService.getPosts(pageRequestDTO));
 
         }
         if(hashtagRequestDTOList.isEmpty()){
-            return ResponseEntity.ok().body(postService.getPosts(order, page, size));
+            return ResponseEntity.ok().body(postService.getPosts(pageRequestDTO));
         }
         for (HashtagRequestDTO hashtagRequestDTO : hashtagRequestDTOList) {
             if(hashtagRequestDTO.getName().equals("전체")){
-                return ResponseEntity.ok().body(postService.getPosts(order, page, size));
+                return ResponseEntity.ok().body(postService.getPosts(pageRequestDTO));
 
             }
         }
-
-        return ResponseEntity.ok().body(postService.getPostsByHashtag(hashtagRequestDTOList, order, page, size));
+        return ResponseEntity.ok().body(postService.getPostsByHashtag(hashtagRequestDTOList, pageRequestDTO));
     }
 
 
     @Override
     @MemberRole
     @GetMapping("/member/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberId(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getPostsByMemberId(page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberId(@Valid PageRequestDTO pageRequestDTO) {
+        return ResponseEntity.ok().body(postService.getPostsByMemberId(pageRequestDTO));
     }
 
 
     @Override
     @MemberRole
     @GetMapping("/member/posts/likes")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithLikes(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getPostsByMemberWithLikes(page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithLikes(@Valid PageRequestDTO pageRequestDTO) {
+        return ResponseEntity.ok().body(postService.getPostsByMemberWithLikes(pageRequestDTO));
     }
 
     @Override
     @MemberRole
     @GetMapping("/member/posts/mark")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithMark(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getPostsByMemberWithMark(page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPostsByMemberWithMark(@Valid PageRequestDTO pageRequestDTO) {
+        return ResponseEntity.ok().body(postService.getPostsByMemberWithMark(pageRequestDTO));
     }
 
     @Override
     @AdminRole
     @GetMapping("/admin/posts")
-    public ResponseEntity<Page<PostResponseDTO>> getPostsAll(@RequestParam(name="memberId", required = false) Long memberId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(postService.getPostsAll(memberId, page, size));
+    public ResponseEntity<Page<PostResponseDTO>> getPostsAll(@RequestParam(name="postId", required = false) Long postId,
+                                                             @RequestParam(name="nickname", required = false) String nickname,
+                                                             @Valid PageRequestDTO pageRequestDTO) {
+        if( postId != null && nickname != null){
+            throw new CustomException(ErrorCode.TOO_MANY_ARGUMENT);
+        }
+        if(nickname != null){
+            return ResponseEntity.ok().body(postService.getPostsAll(nickname, pageRequestDTO));
+        }
+        return ResponseEntity.ok().body(postService.getPostsAll(postId, pageRequestDTO));
     }
 
     @Override

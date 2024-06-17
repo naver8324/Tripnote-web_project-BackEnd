@@ -6,6 +6,9 @@ import com.elice.tripnote.domain.comment.entity.CommentResponseDTO;
 import com.elice.tripnote.domain.comment.service.CommentService;
 import com.elice.tripnote.global.annotation.AdminRole;
 import com.elice.tripnote.global.annotation.MemberRole;
+import com.elice.tripnote.global.entity.PageRequestDTO;
+import com.elice.tripnote.global.exception.CustomException;
+import com.elice.tripnote.global.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,15 +26,25 @@ public class CommentController implements SwaggerCommentController {
     @Override
     @MemberRole
     @GetMapping("/member/comments")
-    public ResponseEntity<Page<CommentResponseDTO>> getCommentsByPostId(@RequestParam(name="postId") Long postId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(commentService.getCommentsByPostId(postId, page, size));
+    public ResponseEntity<Page<CommentResponseDTO>> getCommentsByPostId(@RequestParam(name="postId") Long postId,
+                                                                        @Valid PageRequestDTO pageRequestDTO) {
+        return ResponseEntity.ok().body(commentService.getCommentsByPostId(postId, pageRequestDTO));
     }
 
     @Override
     @AdminRole
     @GetMapping("/admin/comments")
-    public ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(@RequestParam(name="memberId", required = false) Long memberId, @RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="size", defaultValue = "30") int size) {
-        return ResponseEntity.ok().body(commentService.getCommentsAll(memberId, page, size));
+    public ResponseEntity<Page<CommentResponseDTO>> getCommentsAll(@RequestParam(name="commentId", required = false) Long commentId,
+                                                                   @RequestParam(name="nickname", required = false) String nickname,
+                                                                   @Valid PageRequestDTO pageRequestDTO) {
+        if( commentId != null && nickname != null){
+            throw new CustomException(ErrorCode.TOO_MANY_ARGUMENT);
+        }
+        if(nickname != null){
+            return ResponseEntity.ok().body(commentService.getCommentsAll(nickname, pageRequestDTO));
+        }
+
+        return ResponseEntity.ok().body(commentService.getCommentsAll(commentId,pageRequestDTO));
     }
 
 

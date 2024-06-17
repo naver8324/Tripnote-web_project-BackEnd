@@ -75,7 +75,7 @@ public class MemberInterceptor implements HandlerInterceptor {
 
         String role = jwtUtil.getRole(token);
 
-        if (Objects.equals(role, "ROLE_MEMBER")) {
+        if (Objects.equals(role, "ROLE_MEMBER") || Objects.equals(role, "ROLE_ADMIN")) {
             String email = jwtUtil.getEmail(token);
             Member member = Member.builder()
                     .email(email)

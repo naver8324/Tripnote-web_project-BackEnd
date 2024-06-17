@@ -48,10 +48,10 @@ public class MailSendService {
     }
 
 
-    public String joinEmail(String toMail) {
+    public void joinEmail(String toMail) {
         makeRandomNumber();
         String setFrom = "tripnote10@gmail.com";
-        String title = "Tripnote 회원가입 인증코드가 도착했습니다."; // 이메일 제목
+        String title = "Tripnote 인증코드가 도착했습니다."; // 이메일 제목
         String content =
                 "Tripnote를 방문해주셔서 감사합니다." + 	//html 형식으로 작성
                         "<br><br>" +
@@ -61,7 +61,6 @@ public class MailSendService {
 
         redisUtil.setDataExpire(String.valueOf(authNumber), toMail, 180); // 유효시간 3분으로 설정
         log.info("인증 코드 : " + authNumber);
-        return Integer.toString(authNumber);
     }
 
     //이메일을 전송합니다.
@@ -83,7 +82,7 @@ public class MailSendService {
 
     // 비밀번호 재설정 로직
     @Transactional
-    public String resetPassword(String email, String authNum) {
+    public void resetPassword(String email, String authNum) {
         // 인증 번호 확인
         if (!CheckAuthNum(email, authNum)) {
             throw new CustomException(ErrorCode.INVALID_AUTH_CODE);
@@ -111,7 +110,6 @@ public class MailSendService {
                         "<br>" +
                         "로그인 후 비밀번호를 변경해 주세요.";
         mailSend(setFrom, email, title, content);
-        return tempPassword;
     }
 
     // 임시 비밀번호 생성 (UUID 사용)

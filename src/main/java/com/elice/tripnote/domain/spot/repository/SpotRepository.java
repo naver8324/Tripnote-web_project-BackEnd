@@ -32,7 +32,22 @@ public interface SpotRepository extends JpaRepository<Spot, Long>, CustomSpotRep
     Spot deleteByLocation(String location);
 
 
-//    @Modifying
+    @Query("SELECT s FROM Spot s WHERE s.location = :location")
+    Spot findSpotAllRegionAndLocation(@Param("location") String location);
+
+    @Query("SELECT s FROM Spot s WHERE s.location LIKE %:location%")
+    List<Spot> findSpotAllRegionAndLocations(@Param("location") String location);
+
+    @Query("SELECT s FROM Spot s WHERE s.region = :region AND s.location LIKE %:location%")
+    List<Spot> findByRegionAndLocation(@Param("region") Region region, @Param("location") String location); // 변경
+
     @Query("SELECT s FROM Spot s WHERE s.region = :region AND s.location = :location")
-    Spot findByRegionAndLocation(@Param("region") Region region, @Param("location") String location); // 변경
+    Spot findSpotByRegionAndLocation(@Param("region") Region region, @Param("location") String location); // 변경
+
+    // 가나다 순서대로 5개를 가져오는 메서드
+    List<Spot> findTop5ByOrderByLocationAsc();
+
+    // 랜덤하게 5개를 가져오는 메서드
+    @Query(value = "SELECT * FROM spot ORDER BY RAND() LIMIT 5", nativeQuery = true)
+    List<Spot> findRandomTop5();
 }

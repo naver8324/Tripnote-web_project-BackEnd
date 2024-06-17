@@ -1,18 +1,11 @@
 package com.elice.tripnote.domain.spot.entity;
 
-import com.elice.tripnote.domain.link.likeSpot.entity.LikeSpot;
 import com.elice.tripnote.domain.spot.constant.Region;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.*;
 
 @Entity
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "spot", uniqueConstraints = {@UniqueConstraint(columnNames = {"region", "location"})})
@@ -25,7 +18,7 @@ public class Spot {
     @Column(nullable = false)
     private String location;
 
-    @Column(nullable = true)
+    @Column(columnDefinition = "varchar(512)",nullable = true)
     private String imageUrl;
 
     @Enumerated(EnumType.STRING) // Enum 타입으로 지정
@@ -41,9 +34,6 @@ public class Spot {
     @Column(nullable = false)
     private double lng;
 
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "spot")
-//    private List<LikeSpot> likespot = new ArrayList<>();
 
     @Builder
     public Spot(String location, String imageUrl, Region region, String address, double lat, double lng){

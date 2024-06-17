@@ -45,6 +45,7 @@ public class Post extends BaseTimeEntity {
     @ColumnDefault("0")
     private int report;
 
+    @Column(columnDefinition = "TINYINT(1)")
     @ColumnDefault("false")
     private boolean isDeleted;
 
@@ -98,7 +99,7 @@ public class Post extends BaseTimeEntity {
     }
 
     public void delete(){
-        isDeleted = true;
+        isDeleted = !isDeleted;
     }
 
 }

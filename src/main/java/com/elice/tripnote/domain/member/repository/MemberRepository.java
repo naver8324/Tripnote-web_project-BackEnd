@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberCustomRepository {
 
     Boolean existsByEmail(String email);
 
@@ -33,4 +33,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     String findPasswordByEmail(@Param("email") String email);
 
     Member getByEmail(String email);
+
+    @Query("SELECT m.oauthId FROM Member m WHERE m.email = :email")
+    Optional<Long> findOauthIdByEmail(@Param("email") String email);
 }

@@ -4,6 +4,8 @@ package com.elice.tripnote.domain.comment.repository;
 import com.elice.tripnote.domain.comment.entity.CommentResponseDTO;
 import com.elice.tripnote.domain.comment.entity.QComment;
 import com.elice.tripnote.domain.member.entity.QMember;
+import com.elice.tripnote.global.entity.PageRequestDTO;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -56,9 +58,11 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
 
 
-    public Page<CommentResponseDTO> customFindNotDeletedCommentsByPostId(Long postId, int page, int size) {
+    public Page<CommentResponseDTO> customFindNotDeletedCommentsByPostId(Long postId, PageRequestDTO pageRequestDTO) {
 
-        page = page > 0 ? page - 1 : 0;
+        PageRequest pageRequest = PageRequest.of(pageRequestDTO.getPage()-1, pageRequestDTO.getSize());
+        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(pageRequestDTO.getOrder(), pageRequestDTO.isAsc());
+
 
         Long totalCount = query
                 .select(comment.count())
@@ -81,24 +85,27 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
                 .join(comment.member, member)
                 .where(comment.post.id.eq(postId)
                         .and(comment.isDeleted.isFalse()))
-                .orderBy(comment.id.asc())
-                .offset(page * size)
-                .limit(size)
+                .orderBy(orderSpecifier)
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
                 .fetch();
-
-        PageRequest pageRequest = PageRequest.of(page, size);
 
         return new PageImpl<>(commentResponseDTOs, pageRequest, totalCount);
     }
 
 
-    public Page<CommentResponseDTO> customFindComments(Long memberId,int page, int size){
+    public Page<CommentResponseDTO> customFindComments(Long commentId, PageRequestDTO pageRequestDTO){
 
-        page = page > 0 ? page - 1 : 0;
+        PageRequest pageRequest = PageRequest.of(pageRequestDTO.getPage()-1, pageRequestDTO.getSize());
+        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(pageRequestDTO.getOrder(), pageRequestDTO.isAsc());
+
+
+        Long memberId = commentId != null? query.select(member.id).from(member).join(member.comments, comment).where(comment.id.eq(commentId)).fetchFirst() : null;
 
         Long totalCount =query
                 .select(comment.count())
                 .from(comment)
+                .join(comment.member, member)
                 .where(memberId != null ? member.id.eq(memberId) : null)
                 .fetchFirst();
 
@@ -115,16 +122,53 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
                 .from(comment)
                 .join(comment.member, member)
                 .where(memberId != null ? member.id.eq(memberId) : null)
-                .orderBy(comment.id.desc())
-                .offset(page * size)
-                .limit(size)
+                .orderBy(orderSpecifier)
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
                 .fetch();
-
-        PageRequest pageRequest = PageRequest.of(page, size);
 
         return new PageImpl<>(commentResponseDTOs, pageRequest, totalCount);
     }
 
+    public Page<CommentResponseDTO> customFindComments(String nickname, PageRequestDTO pageRequestDTO){
+
+        PageRequest pageRequest = PageRequest.of(pageRequestDTO.getPage()-1, pageRequestDTO.getSize());
+        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(pageRequestDTO.getOrder(), pageRequestDTO.isAsc());
+
+
+        Long memberId = query.select(member.id).from(member).where(member.nickname.eq(nickname)).fetchFirst();
+
+        if(memberId == null){
+            memberId = -1L;
+        }
+
+        Long totalCount =query
+                .select(comment.count())
+                .from(comment)
+                .join(comment.member, member)
+                .where(member.id.eq(memberId))
+                .fetchFirst();
+
+
+        List<CommentResponseDTO> commentResponseDTOs = query
+                .select(Projections.constructor(CommentResponseDTO.class,
+                        comment.id,
+                        member.nickname,
+                        comment.content,
+                        comment.createdAt,
+                        comment.report,
+                        comment.isDeleted
+                ))
+                .from(comment)
+                .join(comment.member, member)
+                .where(member.id.eq(memberId))
+                .orderBy(orderSpecifier)
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
+                .fetch();
+
+        return new PageImpl<>(commentResponseDTOs, pageRequest, totalCount);
+    }
 
 
     public void customDeleteCommentsByPostId(Long postId){
@@ -141,6 +185,11 @@ public class CustomCommentRepositoryImpl implements CustomCommentRepository{
 
     }
 
+    private OrderSpecifier<?> getOrderSpecifier(String order, boolean asc) {   //정렬 방식 정하기
+
+        // 기본값 설정
+        return asc ? comment.id.asc() : comment.id.desc();  //order에 값이 없을 경우 id를 기준으로 정렬
+    }
 
 
 }

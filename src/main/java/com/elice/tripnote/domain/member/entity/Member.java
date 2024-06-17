@@ -3,7 +3,6 @@ package com.elice.tripnote.domain.member.entity;
 import com.elice.tripnote.domain.link.bookmark.entity.Bookmark;
 import com.elice.tripnote.domain.comment.entity.Comment;
 import com.elice.tripnote.domain.link.likePost.entity.LikePost;
-import com.elice.tripnote.domain.link.likeSpot.entity.LikeSpot;
 import com.elice.tripnote.domain.post.entity.Post;
 import com.elice.tripnote.domain.route.entity.Route;
 import jakarta.persistence.*;
@@ -68,10 +67,6 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<Route> routes = new ArrayList<>();
 
-    @Builder.Default
-    @OneToMany(mappedBy = "member")
-    private List<LikeSpot> likeSpots = new ArrayList<>();
-
 
     @PrePersist
     private void prePersist() {
@@ -94,10 +89,6 @@ public class Member {
     public void restoreByAdmin() {
         this.deletedAt = null;
         this.status = Status.ACTIVE;
-    }
-
-    public void updateStatusACTIVE(){
-        this.status=Status.ACTIVE;
     }
 
     // 닉네임 업데이트 메서드

@@ -61,12 +61,10 @@ public class KakaoService {
 
         // 리다이렉트 URL 생성
         URI redirectUrl = uriBuilder.build().toUri();
-        //System.out.println("------------------------- kakao api IN2 -------------------------");
 
         //// 302 리다이렉트 응답 생성
         //HttpHeaders httpHeaders = new HttpHeaders();
         //httpHeaders.setLocation(redirectUrl);
-        //System.out.println("------------------------- kakao api IN3 -------------------------");
         return redirectUrl.toString();
     }
 
@@ -170,7 +168,7 @@ public class KakaoService {
         }
         if (member.getStatus() != Status.ACTIVE) { //탈퇴한 경우
             log.info("유저가 탈퇴한 상태입니다.");
-            member.updateStatusACTIVE();
+            member.restoreByAdmin();
             memberRepository.save(member);
 //            throw new CustomException(NO_MEMBER);
         }
